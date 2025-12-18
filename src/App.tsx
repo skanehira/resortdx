@@ -38,7 +38,7 @@ import {
 	mockStaffMessages,
 	roomAmenitiesMap,
 	roomEquipmentMap,
-} from "./data/mockData";
+} from "./data/mock";
 import {
 	DashboardIcon,
 	TemplateIcon,

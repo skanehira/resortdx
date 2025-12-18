@@ -6,7 +6,7 @@ import type {
 	ShuttleMessageType,
 } from "../../types";
 import { SHUTTLE_STATUS_GUEST_LABELS } from "../../types";
-import { getShuttleTaskById, getVehicleById } from "../../data/mockData";
+import { getShuttleTaskById, getVehicleById } from "../../data/mock";
 import {
 	ShuttleIcon,
 	LocationIcon,
