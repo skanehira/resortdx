@@ -471,3 +471,74 @@ tr:hover td {
     padding: 0 16px;
   }
 }
+
+/* === Task Step Indicators === */
+.task-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all var(--transition-normal);
+}
+
+.task-step--pending {
+  background: var(--shironeri-warm);
+  color: var(--nezumi);
+  border: 2px solid var(--nezumi-light);
+}
+
+.task-step--current {
+  background: var(--ai);
+  color: white;
+  border: 2px solid var(--ai);
+  box-shadow: 0 0 0 4px rgba(27, 73, 101, 0.15);
+}
+
+.task-step--completed {
+  background: var(--aotake);
+  color: white;
+  border: 2px solid var(--aotake);
+}
+
+.task-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--nezumi-light);
+  margin: 0 8px;
+}
+
+.task-step-line--active {
+  background: var(--aotake);
+}
+
+/* === Task Completion Animation === */
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(93, 174, 139, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(93, 174, 139, 0);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* === Shimmer Animation === */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
