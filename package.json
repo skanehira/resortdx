@@ -7,7 +7,9 @@
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
-		"lint": "oxlint --deny-warnings"
+		"lint": "oxlint --deny-warnings",
+		"fmt": "oxfmt --write src",
+		"check": "oxfmt --write src && oxlint --deny-warnings && tsc -b"
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.1.18",
@@ -21,6 +23,7 @@
 		"@types/react": "^19.2.5",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.1",
+		"oxfmt": "^0.18.0",
 		"oxlint": "^1.33.0",
 		"typescript": "~5.9.3",
 		"vite": "^7.2.4"
