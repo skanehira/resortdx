@@ -27,6 +27,7 @@ import { MobileMessages } from "./components/staff/MobileMessages";
 import { StaffChat } from "./components/staff/StaffChat";
 import { GuestShuttleStatus } from "./components/guest/GuestShuttleStatus";
 import { GuestMealStatus } from "./components/guest/GuestMealStatus";
+import { GuestPortal } from "./components/guest/GuestPortal";
 import {
   mockStaff,
   mockUnifiedTasks,
@@ -668,6 +669,7 @@ function App() {
         <Route path="/staff/*" element={<StaffPages />} />
         <Route path="/guest/shuttle" element={<GuestShuttlePage />} />
         <Route path="/guest/meal" element={<GuestMealPage />} />
+        <Route path="/guest/portal" element={<GuestPortal />} />
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </HashRouter>
