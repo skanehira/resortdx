@@ -113,7 +113,7 @@ const Sidebar = ({
 						<div>
 							<h1 className="text-xl font-display font-semibold">Resort DX</h1>
 							<p className="text-xs text-[rgba(255,255,255,0.6)] mt-1">
-								タスク管理システム
+								リゾート業務管理システム
 							</p>
 						</div>
 						<button onClick={onClose} className="lg:hidden p-1">
@@ -427,6 +427,43 @@ const StaffPages = () => {
 		[],
 	);
 
+	// 送迎メッセージ送信
+	const handleSendShuttleMessage = useCallback(
+		(
+			taskId: string,
+			content: string,
+			messageType: "normal" | "arrival" | "delay" | "sos",
+		) => {
+			setUnifiedTasks((prev) =>
+				prev.map((task) => {
+					if (task.id !== taskId || !task.shuttle) return task;
+					const newMessage = {
+						id: `MSG-${Date.now()}`,
+						shuttleTaskId: taskId,
+						senderType: "staff" as const,
+						senderId: currentStaff?.id || "unknown",
+						senderName: currentStaff?.name || "スタッフ",
+						content,
+						messageType,
+						sentAt: new Date().toISOString(),
+						readAt: null,
+						isQuickMessage: messageType !== "normal",
+					};
+					return {
+						...task,
+						shuttle: {
+							...task.shuttle,
+							messages: [...(task.shuttle.messages || []), newMessage],
+							lastMessageAt: newMessage.sentAt,
+							hasUnreadGuestMessages: true,
+						},
+					};
+				}),
+			);
+		},
+		[currentStaff?.id, currentStaff?.name],
+	);
+
 	// お祝いアイテムトグル
 	const handleToggleCelebrationItem = useCallback(
 		(taskId: string, item: CelebrationItemCheck["item"]) => {
@@ -612,6 +649,7 @@ const StaffPages = () => {
 							onToggleCleaningItem={handleToggleCleaningItem}
 							onMealStatusChange={handleMealStatusChange}
 							onShuttleStatusChange={handleShuttleStatusChange}
+							onSendShuttleMessage={handleSendShuttleMessage}
 							onToggleCelebrationItem={handleToggleCelebrationItem}
 							onCelebrationReport={handleCelebrationReport}
 							onAcceptHelp={handleAcceptHelp}

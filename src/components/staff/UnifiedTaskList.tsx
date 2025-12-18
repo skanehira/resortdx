@@ -4,6 +4,7 @@ import type {
 	UnifiedTaskStatus,
 	Staff,
 	ShuttleStatus,
+	ShuttleMessageType,
 	MealStatus,
 	CelebrationItemCheck,
 	CleaningChecklistItemType,
@@ -184,6 +185,11 @@ interface UnifiedTaskListProps {
 		taskId: string,
 		newShuttleStatus: ShuttleStatus,
 	) => void;
+	onSendShuttleMessage?: (
+		taskId: string,
+		content: string,
+		messageType: ShuttleMessageType,
+	) => void;
 	onToggleCelebrationItem?: (
 		taskId: string,
 		item: CelebrationItemCheck["item"],
@@ -213,6 +219,7 @@ export const UnifiedTaskList = ({
 	onToggleCleaningItem,
 	onMealStatusChange,
 	onShuttleStatusChange,
+	onSendShuttleMessage,
 	onToggleCelebrationItem,
 	onCelebrationReport,
 	onAcceptHelp,
@@ -405,8 +412,11 @@ export const UnifiedTaskList = ({
 					<ShuttleCard
 						key={task.id}
 						task={task}
+						currentStaffId={currentStaff.id}
+						currentStaffName={currentStaff.name}
 						onStatusChange={onStatusChange}
 						onShuttleStatusChange={onShuttleStatusChange}
+						onSendShuttleMessage={onSendShuttleMessage}
 					/>
 				);
 			case "celebration":

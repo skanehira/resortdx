@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
-import type { UnifiedTask, ShuttleStatus } from "../../../types";
+import type {
+	UnifiedTask,
+	ShuttleStatus,
+	ShuttleMessageType,
+} from "../../../types";
 import { SHUTTLE_STATUS_LABELS } from "../../../types";
 import {
 	LocationIcon,
 	UserIcon,
 	ArrowRightIcon,
 	CarIcon,
+	MessageIcon,
 } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
+import { ShuttleMessagePanel } from "../../shuttle/ShuttleMessagePanel";
+import { ShuttleQuickMessages } from "../../shuttle/ShuttleQuickMessages";
 
 // 送迎ステータスの進捗表示（5段階）
 const ShuttleProgressIndicator = ({ status }: { status: ShuttleStatus }) => {
@@ -51,19 +58,30 @@ const ShuttleProgressIndicator = ({ status }: { status: ShuttleStatus }) => {
 
 interface ShuttleCardProps {
 	task: UnifiedTask;
+	currentStaffId: string;
+	currentStaffName: string;
 	onStatusChange: (taskId: string, newStatus: UnifiedTask["status"]) => void;
 	onShuttleStatusChange?: (
 		taskId: string,
 		newShuttleStatus: ShuttleStatus,
 	) => void;
+	onSendShuttleMessage?: (
+		taskId: string,
+		content: string,
+		messageType: ShuttleMessageType,
+	) => void;
 }
 
 export const ShuttleCard = ({
 	task,
+	currentStaffId,
+	currentStaffName,
 	onStatusChange,
 	onShuttleStatusChange,
+	onSendShuttleMessage,
 }: ShuttleCardProps) => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [showMessages, setShowMessages] = useState(false);
 	const shuttle = task.shuttle;
 
 	// 完了時にアコーディオンを閉じる
@@ -176,6 +194,55 @@ export const ShuttleCard = ({
 						<p className="text-sm text-[var(--ai)] font-medium">
 							ゲストに通知済み
 						</p>
+					</div>
+				)}
+
+				{/* Messaging Section */}
+				{shuttle.shuttleStatus !== "completed" && (
+					<div className="space-y-3">
+						{/* Toggle messages button */}
+						<button
+							onClick={() => setShowMessages(!showMessages)}
+							className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+								showMessages
+									? "bg-[var(--ai)]/10 text-[var(--ai)]"
+									: "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+							}`}
+						>
+							<div className="flex items-center gap-2">
+								<MessageIcon size={18} />
+								<span className="font-medium">ゲストとメッセージ</span>
+							</div>
+							{shuttle.hasUnreadStaffMessages && (
+								<span className="w-2.5 h-2.5 bg-[var(--shu)] rounded-full" />
+							)}
+							<span className="text-sm">{shuttle.messages?.length || 0}件</span>
+						</button>
+
+						{/* Messages panel */}
+						{showMessages && (
+							<div className="space-y-3 animate-fade-in">
+								{/* Quick messages */}
+								<ShuttleQuickMessages
+									userType="staff"
+									onSendQuickMessage={(content, messageType) =>
+										onSendShuttleMessage?.(task.id, content, messageType)
+									}
+								/>
+
+								{/* Message panel */}
+								<ShuttleMessagePanel
+									messages={shuttle.messages || []}
+									currentSenderType="staff"
+									currentSenderId={currentStaffId}
+									currentSenderName={currentStaffName}
+									onSendMessage={(content, messageType) =>
+										onSendShuttleMessage?.(task.id, content, messageType)
+									}
+									maxHeight="180px"
+								/>
+							</div>
+						)}
 					</div>
 				)}
 

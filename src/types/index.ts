@@ -695,6 +695,11 @@ export interface ShuttleData {
 	assignedVehicleId: string | null;
 	guestArrivalNotified: boolean;
 	notes?: string | null;
+	// メッセージング機能用
+	messages?: ShuttleMessage[];
+	lastMessageAt?: string | null;
+	hasUnreadStaffMessages?: boolean; // スタッフ側で未読があるか
+	hasUnreadGuestMessages?: boolean; // ゲスト側で未読があるか
 }
 
 // お祝いデータ
@@ -776,3 +781,66 @@ export interface StaffMessage {
 		repliedBy: string;
 	} | null;
 }
+
+// === Shuttle Message Types (送迎メッセージング) ===
+
+// 送迎メッセージタイプ（緊急度識別用）
+export type ShuttleMessageType = "normal" | "arrival" | "delay" | "sos";
+
+export const SHUTTLE_MESSAGE_TYPE_LABELS: Record<ShuttleMessageType, string> = {
+	normal: "通常",
+	arrival: "到着連絡",
+	delay: "遅延連絡",
+	sos: "緊急連絡",
+};
+
+// 送迎メッセージインターフェース
+export interface ShuttleMessage {
+	id: string;
+	shuttleTaskId: string;
+	senderType: "staff" | "guest";
+	senderId: string;
+	senderName: string;
+	content: string;
+	messageType: ShuttleMessageType;
+	sentAt: string;
+	readAt: string | null;
+	isQuickMessage: boolean; // プリセットメッセージかどうか
+}
+
+// スタッフ用クイックメッセージ
+export const STAFF_QUICK_MESSAGES = [
+	{ id: "staff_5min", content: "あと5分で到着します", type: "normal" as const },
+	{ id: "staff_arrived", content: "到着しました", type: "arrival" as const },
+	{
+		id: "staff_where",
+		content: "お待ちの場所を教えてください",
+		type: "normal" as const,
+	},
+	{
+		id: "staff_wait",
+		content: "少々お待ちください",
+		type: "normal" as const,
+	},
+] as const;
+
+// ゲスト用クイックメッセージ
+export const GUEST_QUICK_MESSAGES = [
+	{
+		id: "guest_arrived",
+		content: "今、指定場所に到着しました",
+		type: "arrival" as const,
+	},
+	{
+		id: "guest_delay",
+		content: "少し遅れそうです",
+		type: "delay" as const,
+	},
+] as const;
+
+// ゲスト用SOS/緊急メッセージ
+export const GUEST_SOS_MESSAGE = {
+	id: "guest_sos",
+	content: "場所がわかりません、助けてください",
+	type: "sos" as const,
+} as const;
