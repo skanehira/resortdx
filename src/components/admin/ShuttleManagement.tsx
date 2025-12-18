@@ -21,6 +21,7 @@ import {
 	ArrowRightIcon,
 	WrenchIcon,
 	UserIcon,
+	PlusIcon,
 } from "../ui/Icons";
 
 // Filter type for shuttle tasks
@@ -741,6 +742,388 @@ const TaskDetailModal = ({
 	);
 };
 
+// Create shuttle modal
+const CreateShuttleModal = ({
+	onClose,
+	onCreate,
+	vehicles,
+	drivers,
+}: {
+	onClose: () => void;
+	onCreate: (task: ShuttleTask) => void;
+	vehicles: Vehicle[];
+	drivers: Staff[];
+}) => {
+	const [formData, setFormData] = useState({
+		guestName: "",
+		guestNameKana: "",
+		numberOfGuests: 1,
+		direction: "pickup" as "pickup" | "dropoff",
+		pickupLocation: "",
+		dropoffLocation: "",
+		scheduledTime: "",
+		estimatedDuration: 15,
+		assignedVehicleId: "",
+		assignedDriverId: "",
+		priority: "normal" as "normal" | "high" | "urgent",
+		notes: "",
+	});
+
+	const availableVehicles = vehicles.filter((v) => v.status === "available");
+	const availableDrivers = drivers.filter(
+		(d) => d.role === "driver" && d.isOnDuty && !d.currentTaskId,
+	);
+
+	const handleDirectionChange = (direction: "pickup" | "dropoff") => {
+		setFormData({
+			...formData,
+			direction,
+			pickupLocation: direction === "pickup" ? "" : "旅館",
+			dropoffLocation: direction === "pickup" ? "旅館" : "",
+		});
+	};
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (
+			!formData.guestName ||
+			!formData.pickupLocation ||
+			!formData.dropoffLocation ||
+			!formData.scheduledTime
+		) {
+			return;
+		}
+
+		const newTask: ShuttleTask = {
+			id: `SHT${Date.now()}`,
+			reservationId: `RES${Date.now()}`,
+			guestName: formData.guestName,
+			guestNameKana: formData.guestNameKana,
+			numberOfGuests: formData.numberOfGuests,
+			pickupLocation: formData.pickupLocation,
+			dropoffLocation: formData.dropoffLocation,
+			direction: formData.direction,
+			scheduledTime: formData.scheduledTime,
+			estimatedDuration: formData.estimatedDuration,
+			shuttleStatus: "not_departed",
+			assignedVehicleId: formData.assignedVehicleId || null,
+			assignedDriverId: formData.assignedDriverId || null,
+			priority: formData.priority,
+			guestArrivalNotified: false,
+			notes: formData.notes || undefined,
+			createdAt: new Date().toISOString(),
+		};
+
+		onCreate(newTask);
+		onClose();
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div className="absolute inset-0 bg-black/30" onClick={onClose} />
+			<div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+				<div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
+					<h3 className="font-display font-semibold text-lg text-[var(--sumi)]">
+						送迎を追加
+					</h3>
+					<button
+						onClick={onClose}
+						className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
+					>
+						<CloseIcon size={20} />
+					</button>
+				</div>
+
+				<form onSubmit={handleSubmit} className="p-4 space-y-4">
+					{/* Direction */}
+					<div className="shoji-panel p-4">
+						<label className="block text-sm text-[var(--nezumi)] mb-2">
+							送迎種別 <span className="text-[var(--shu)]">*</span>
+						</label>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={() => handleDirectionChange("pickup")}
+								className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+									formData.direction === "pickup"
+										? "bg-[var(--ai)] text-white"
+										: "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+								}`}
+							>
+								迎車（お迎え）
+							</button>
+							<button
+								type="button"
+								onClick={() => handleDirectionChange("dropoff")}
+								className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+									formData.direction === "dropoff"
+										? "bg-[var(--ai)] text-white"
+										: "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+								}`}
+							>
+								送車（お送り）
+							</button>
+						</div>
+					</div>
+
+					{/* Guest Info */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<PassengerIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								ゲスト情報
+							</span>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									お名前 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="text"
+									value={formData.guestName}
+									onChange={(e) =>
+										setFormData({ ...formData, guestName: e.target.value })
+									}
+									placeholder="例: 山田"
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									人数 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="number"
+									min="1"
+									max="10"
+									value={formData.numberOfGuests}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											numberOfGuests: parseInt(e.target.value) || 1,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								フリガナ
+							</label>
+							<input
+								type="text"
+								value={formData.guestNameKana}
+								onChange={(e) =>
+									setFormData({ ...formData, guestNameKana: e.target.value })
+								}
+								placeholder="例: ヤマダ"
+								className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+							/>
+						</div>
+					</div>
+
+					{/* Route */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<LocationIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								ルート
+							</span>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									出発地 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="text"
+									value={formData.pickupLocation}
+									onChange={(e) =>
+										setFormData({ ...formData, pickupLocation: e.target.value })
+									}
+									placeholder={
+										formData.direction === "pickup" ? "例: 鳥羽駅" : "旅館"
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									目的地 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="text"
+									value={formData.dropoffLocation}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											dropoffLocation: e.target.value,
+										})
+									}
+									placeholder={
+										formData.direction === "pickup" ? "旅館" : "例: 鳥羽駅"
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+						</div>
+					</div>
+
+					{/* Schedule */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<ClockIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								スケジュール
+							</span>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									出発時刻 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="time"
+									value={formData.scheduledTime}
+									onChange={(e) =>
+										setFormData({ ...formData, scheduledTime: e.target.value })
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									所要時間（分）
+								</label>
+								<input
+									type="number"
+									min="5"
+									max="120"
+									value={formData.estimatedDuration}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											estimatedDuration: parseInt(e.target.value) || 15,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								/>
+							</div>
+						</div>
+					</div>
+
+					{/* Assignment */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<CarIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								割当
+							</span>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									車両
+								</label>
+								<select
+									value={formData.assignedVehicleId}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											assignedVehicleId: e.target.value,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									<option value="">未割当</option>
+									{availableVehicles.map((vehicle) => (
+										<option key={vehicle.id} value={vehicle.id}>
+											{vehicle.name} (定員{vehicle.capacity}名)
+										</option>
+									))}
+								</select>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									ドライバー
+								</label>
+								<select
+									value={formData.assignedDriverId}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											assignedDriverId: e.target.value,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									<option value="">未割当</option>
+									{availableDrivers.map((driver) => (
+										<option key={driver.id} value={driver.id}>
+											{driver.name}
+										</option>
+									))}
+								</select>
+							</div>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								優先度
+							</label>
+							<select
+								value={formData.priority}
+								onChange={(e) =>
+									setFormData({
+										...formData,
+										priority: e.target.value as "normal" | "high" | "urgent",
+									})
+								}
+								className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+							>
+								<option value="normal">通常</option>
+								<option value="high">優先</option>
+								<option value="urgent">緊急</option>
+							</select>
+						</div>
+					</div>
+
+					{/* Notes */}
+					<div>
+						<label className="block text-sm text-[var(--nezumi)] mb-1">
+							備考
+						</label>
+						<textarea
+							value={formData.notes}
+							onChange={(e) =>
+								setFormData({ ...formData, notes: e.target.value })
+							}
+							placeholder="特記事項があれば入力..."
+							className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+							rows={3}
+						/>
+					</div>
+
+					{/* Submit button */}
+					<button
+						type="submit"
+						className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+					>
+						送迎を追加
+					</button>
+				</form>
+			</div>
+		</div>
+	);
+};
+
 // Main component
 export const ShuttleManagement = () => {
 	const [shuttleTasks, setShuttleTasks] =
@@ -752,6 +1135,7 @@ export const ShuttleManagement = () => {
 		null,
 	);
 	const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+	const [showCreateModal, setShowCreateModal] = useState(false);
 
 	// Computed stats
 	const stats = useMemo(() => {
@@ -848,19 +1232,32 @@ export const ShuttleManagement = () => {
 		setShowAssignmentModal(false);
 	};
 
+	const handleCreateTask = (newTask: ShuttleTask) => {
+		setShuttleTasks((prev) => [...prev, newTask]);
+	};
+
 	// Drivers list
 	const drivers = mockStaff.filter((s) => s.role === "driver");
 
 	return (
 		<div className="space-y-6 animate-slide-up">
 			{/* Header */}
-			<div>
-				<h1 className="text-2xl font-display font-bold text-[var(--sumi)]">
-					送迎管理
-				</h1>
-				<p className="text-sm text-[var(--nezumi)] mt-1">
-					本日の送迎スケジュールと車両状況を管理
-				</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-2xl font-display font-bold text-[var(--sumi)]">
+						送迎管理
+					</h1>
+					<p className="text-sm text-[var(--nezumi)] mt-1">
+						本日の送迎スケジュールと車両状況を管理
+					</p>
+				</div>
+				<button
+					onClick={() => setShowCreateModal(true)}
+					className="flex items-center gap-2 px-4 py-2 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+				>
+					<PlusIcon size={18} />
+					新規作成
+				</button>
 			</div>
 
 			{/* Summary stats */}
@@ -995,6 +1392,16 @@ export const ShuttleManagement = () => {
 					drivers={mockStaff}
 					onClose={() => setShowAssignmentModal(false)}
 					onAssign={handleAssign}
+				/>
+			)}
+
+			{/* Create modal */}
+			{showCreateModal && (
+				<CreateShuttleModal
+					onClose={() => setShowCreateModal(false)}
+					onCreate={handleCreateTask}
+					vehicles={vehicles}
+					drivers={mockStaff}
 				/>
 			)}
 		</div>

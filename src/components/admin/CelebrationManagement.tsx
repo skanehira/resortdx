@@ -1,5 +1,11 @@
 import { useState, useMemo } from "react";
-import type { CelebrationTask, TaskStatus, CelebrationItem } from "../../types";
+import type {
+	CelebrationTask,
+	TaskStatus,
+	CelebrationItem,
+	CelebrationType,
+	CelebrationItemCheck,
+} from "../../types";
 import { CELEBRATION_TYPE_LABELS, CELEBRATION_ITEM_LABELS } from "../../types";
 import {
 	mockCelebrationTasks,
@@ -19,6 +25,7 @@ import {
 	ChampagneIcon,
 	DecorationIcon,
 	MessageCardIcon,
+	PlusIcon,
 } from "../ui/Icons";
 
 // Filter type for celebration tasks
@@ -566,12 +573,342 @@ const TaskDetailModal = ({
 	);
 };
 
+// Create celebration modal
+const CreateCelebrationModal = ({
+	onClose,
+	onCreate,
+}: {
+	onClose: () => void;
+	onCreate: (task: CelebrationTask) => void;
+}) => {
+	const [formData, setFormData] = useState({
+		guestName: "",
+		guestNameKana: "",
+		roomNumber: "",
+		celebrationType: "birthday" as CelebrationType,
+		celebrationDescription: "",
+		executionTime: "18:00",
+		assignedStaffId: "",
+		priority: "normal" as "normal" | "high" | "urgent",
+		notes: "",
+	});
+
+	const [selectedItems, setSelectedItems] = useState<CelebrationItem[]>([
+		"cake",
+	]);
+
+	const allItems: CelebrationItem[] = [
+		"cake",
+		"flowers",
+		"champagne",
+		"decoration",
+		"message_card",
+		"other",
+	];
+
+	const toggleItem = (item: CelebrationItem) => {
+		setSelectedItems((prev) =>
+			prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
+		);
+	};
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (
+			!formData.guestName ||
+			!formData.roomNumber ||
+			!formData.executionTime
+		) {
+			return;
+		}
+
+		const items: CelebrationItemCheck[] = selectedItems.map((item) => ({
+			item,
+			isChecked: false,
+		}));
+
+		const newTask: CelebrationTask = {
+			id: `CELEB${Date.now()}`,
+			reservationId: `RES${Date.now()}`,
+			guestName: formData.guestName,
+			guestNameKana: formData.guestNameKana,
+			roomNumber: formData.roomNumber,
+			celebrationType: formData.celebrationType,
+			celebrationDescription: formData.celebrationDescription,
+			items,
+			executionTime: formData.executionTime,
+			status: "pending",
+			assignedStaffId: formData.assignedStaffId || null,
+			priority: formData.priority,
+			notes: formData.notes || null,
+			completionReport: null,
+			completedAt: null,
+			createdAt: new Date().toISOString(),
+		};
+
+		onCreate(newTask);
+		onClose();
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div className="absolute inset-0 bg-black/30" onClick={onClose} />
+			<div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+				<div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
+					<h3 className="font-display font-semibold text-lg text-[var(--sumi)]">
+						お祝い対応を追加
+					</h3>
+					<button
+						onClick={onClose}
+						className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
+					>
+						<CloseIcon size={20} />
+					</button>
+				</div>
+
+				<form onSubmit={handleSubmit} className="p-4 space-y-4">
+					{/* Guest Info */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<UserIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								ゲスト情報
+							</span>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									部屋番号 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="text"
+									value={formData.roomNumber}
+									onChange={(e) =>
+										setFormData({ ...formData, roomNumber: e.target.value })
+									}
+									placeholder="例: 201"
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									お名前 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<input
+									type="text"
+									value={formData.guestName}
+									onChange={(e) =>
+										setFormData({ ...formData, guestName: e.target.value })
+									}
+									placeholder="例: 山田"
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									required
+								/>
+							</div>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								フリガナ
+							</label>
+							<input
+								type="text"
+								value={formData.guestNameKana}
+								onChange={(e) =>
+									setFormData({ ...formData, guestNameKana: e.target.value })
+								}
+								placeholder="例: ヤマダ"
+								className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+							/>
+						</div>
+					</div>
+
+					{/* Celebration Type */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<CelebrationIcon size={18} className="text-[var(--kincha)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								お祝い内容
+							</span>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								種類 <span className="text-[var(--shu)]">*</span>
+							</label>
+							<div className="flex flex-wrap gap-2">
+								{(
+									Object.entries(CELEBRATION_TYPE_LABELS) as [
+										CelebrationType,
+										string,
+									][]
+								).map(([type, label]) => (
+									<button
+										key={type}
+										type="button"
+										onClick={() =>
+											setFormData({ ...formData, celebrationType: type })
+										}
+										className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+											formData.celebrationType === type
+												? "bg-[var(--kincha)] text-white"
+												: "bg-[var(--shironeri-warm)] text-[var(--sumi)] hover:bg-[var(--kincha)]/10"
+										}`}
+									>
+										{label}
+									</button>
+								))}
+							</div>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								詳細 <span className="text-[var(--shu)]">*</span>
+							</label>
+							<input
+								type="text"
+								value={formData.celebrationDescription}
+								onChange={(e) =>
+									setFormData({
+										...formData,
+										celebrationDescription: e.target.value,
+									})
+								}
+								placeholder="例: 結婚10周年のお祝い"
+								className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								required
+							/>
+						</div>
+					</div>
+
+					{/* Items */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<CheckIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								準備アイテム
+							</span>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							{allItems.map((item) => (
+								<button
+									key={item}
+									type="button"
+									onClick={() => toggleItem(item)}
+									className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+										selectedItems.includes(item)
+											? "bg-[var(--aotake)] text-white"
+											: "bg-[var(--shironeri-warm)] text-[var(--sumi)] hover:bg-[var(--aotake)]/10"
+									}`}
+								>
+									{getItemIcon(item, 16)}
+									{CELEBRATION_ITEM_LABELS[item]}
+								</button>
+							))}
+						</div>
+					</div>
+
+					{/* Schedule */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="flex items-center gap-2 mb-2">
+							<ClockIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								実施時刻
+							</span>
+						</div>
+						<input
+							type="time"
+							value={formData.executionTime}
+							onChange={(e) =>
+								setFormData({ ...formData, executionTime: e.target.value })
+							}
+							className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+							required
+						/>
+					</div>
+
+					{/* Assignment */}
+					<div className="shoji-panel p-4 space-y-3">
+						<div className="grid grid-cols-2 gap-3">
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									担当スタッフ
+								</label>
+								<select
+									value={formData.assignedStaffId}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											assignedStaffId: e.target.value,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									<option value="">未割当</option>
+									{mockStaff.map((staff) => (
+										<option key={staff.id} value={staff.id}>
+											{staff.name}
+										</option>
+									))}
+								</select>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									優先度
+								</label>
+								<select
+									value={formData.priority}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											priority: e.target.value as "normal" | "high" | "urgent",
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									<option value="normal">通常</option>
+									<option value="high">優先</option>
+									<option value="urgent">緊急</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					{/* Notes */}
+					<div>
+						<label className="block text-sm text-[var(--nezumi)] mb-1">
+							備考
+						</label>
+						<textarea
+							value={formData.notes}
+							onChange={(e) =>
+								setFormData({ ...formData, notes: e.target.value })
+							}
+							placeholder="特記事項があれば入力..."
+							className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+							rows={3}
+						/>
+					</div>
+
+					{/* Submit button */}
+					<button
+						type="submit"
+						className="w-full py-3 bg-[var(--kincha)] text-white rounded-lg font-display font-medium hover:bg-[var(--kincha-deep)] transition-colors"
+					>
+						お祝い対応を追加
+					</button>
+				</form>
+			</div>
+		</div>
+	);
+};
+
 // Main component
 export const CelebrationManagement = () => {
 	const [celebrationTasks, setCelebrationTasks] =
 		useState<CelebrationTask[]>(mockCelebrationTasks);
 	const [filter, setFilter] = useState<FilterType>("all");
 	const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+	const [showCreateModal, setShowCreateModal] = useState(false);
 
 	// Computed stats
 	const stats = useMemo(() => {
@@ -705,16 +1042,29 @@ export const CelebrationManagement = () => {
 		);
 	};
 
+	const handleCreateTask = (newTask: CelebrationTask) => {
+		setCelebrationTasks((prev) => [...prev, newTask]);
+	};
+
 	return (
 		<div className="space-y-6 animate-slide-up">
 			{/* Header */}
-			<div>
-				<h1 className="text-2xl font-display font-bold text-[var(--sumi)]">
-					記念日・お祝い管理
-				</h1>
-				<p className="text-sm text-[var(--nezumi)] mt-1">
-					本日のお祝い対応と準備状況を管理
-				</p>
+			<div className="flex items-start justify-between">
+				<div>
+					<h1 className="text-2xl font-display font-bold text-[var(--sumi)]">
+						記念日・お祝い管理
+					</h1>
+					<p className="text-sm text-[var(--nezumi)] mt-1">
+						本日のお祝い対応と準備状況を管理
+					</p>
+				</div>
+				<button
+					onClick={() => setShowCreateModal(true)}
+					className="flex items-center gap-2 px-4 py-2 bg-[var(--kincha)] text-white rounded-lg font-display font-medium hover:bg-[var(--kincha-deep)] transition-colors"
+				>
+					<PlusIcon size={18} />
+					新規作成
+				</button>
 			</div>
 
 			{/* Summary stats */}
@@ -830,6 +1180,14 @@ export const CelebrationManagement = () => {
 					onStatusChange={handleStatusChange}
 					onItemToggle={handleItemToggle}
 					onCompletionReportChange={handleCompletionReportChange}
+				/>
+			)}
+
+			{/* Create celebration modal */}
+			{showCreateModal && (
+				<CreateCelebrationModal
+					onClose={() => setShowCreateModal(false)}
+					onCreate={handleCreateTask}
 				/>
 			)}
 		</div>

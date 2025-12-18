@@ -17,6 +17,8 @@ import {
 	type RoomEquipment,
 	type StockLevel,
 	type EquipmentStatusType,
+	type AmenityType,
+	type EquipmentType,
 } from "../../types";
 import {
 	RoomIcon,
@@ -26,6 +28,8 @@ import {
 	WrenchIcon,
 	CheckIcon,
 	PackageIcon,
+	PlusIcon,
+	CloseIcon,
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 
@@ -608,6 +612,306 @@ const UpdateEquipmentModal = ({
 	);
 };
 
+// Create Item Modal
+const CreateItemModal = ({
+	onClose,
+	onCreateAmenity,
+	onCreateEquipment,
+	roomNumbers,
+}: {
+	onClose: () => void;
+	onCreateAmenity: (amenity: RoomAmenity) => void;
+	onCreateEquipment: (equipment: RoomEquipment) => void;
+	roomNumbers: string[];
+}) => {
+	const [itemType, setItemType] = useState<"amenity" | "equipment">("amenity");
+	const [formData, setFormData] = useState({
+		roomNumber: roomNumbers[0] || "",
+		amenityType: "toothbrush" as AmenityType,
+		equipmentType: "air_conditioner" as EquipmentType,
+		stockLevel: "full" as StockLevel,
+		threshold: "low" as StockLevel,
+		status: "working" as EquipmentStatusType,
+		notes: "",
+	});
+
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (!formData.roomNumber) return;
+
+		if (itemType === "amenity") {
+			const newAmenity: RoomAmenity = {
+				id: `AMN${Date.now()}`,
+				roomNumber: formData.roomNumber,
+				type: formData.amenityType,
+				stockLevel: formData.stockLevel,
+				threshold: formData.threshold,
+				lastCheckedAt: new Date().toLocaleTimeString("ja-JP", {
+					hour: "2-digit",
+					minute: "2-digit",
+				}),
+				lastCheckedBy: null,
+			};
+			onCreateAmenity(newAmenity);
+		} else {
+			const newEquipment: RoomEquipment = {
+				id: `EQP${Date.now()}`,
+				roomNumber: formData.roomNumber,
+				type: formData.equipmentType,
+				status: formData.status,
+				lastMaintenanceAt:
+					formData.status === "working"
+						? new Date().toISOString().split("T")[0]
+						: null,
+				notes: formData.notes || null,
+			};
+			onCreateEquipment(newEquipment);
+		}
+		onClose();
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+			<div className="absolute inset-0 bg-black/30" onClick={onClose} />
+			<div className="relative bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+				<div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
+					<h3 className="font-display font-semibold text-lg text-[var(--sumi)]">
+						備品・設備を追加
+					</h3>
+					<button
+						onClick={onClose}
+						className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
+					>
+						<CloseIcon size={20} />
+					</button>
+				</div>
+
+				<form onSubmit={handleSubmit} className="p-4 space-y-4">
+					{/* Item Type Selection */}
+					<div className="shoji-panel p-4">
+						<label className="block text-sm text-[var(--nezumi)] mb-2">
+							種別 <span className="text-[var(--shu)]">*</span>
+						</label>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={() => setItemType("amenity")}
+								className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+									itemType === "amenity"
+										? "bg-[var(--ai)] text-white"
+										: "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+								}`}
+							>
+								<AmenityIcon size={18} />
+								アメニティ
+							</button>
+							<button
+								type="button"
+								onClick={() => setItemType("equipment")}
+								className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+									itemType === "equipment"
+										? "bg-[var(--ai)] text-white"
+										: "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+								}`}
+							>
+								<EquipmentIcon size={18} />
+								設備
+							</button>
+						</div>
+					</div>
+
+					{/* Room Selection */}
+					<div className="shoji-panel p-4">
+						<div className="flex items-center gap-2 mb-3">
+							<RoomIcon size={18} className="text-[var(--ai)]" />
+							<span className="font-display font-semibold text-[var(--sumi)]">
+								設置先
+							</span>
+						</div>
+						<div>
+							<label className="block text-sm text-[var(--nezumi)] mb-1">
+								部屋番号 <span className="text-[var(--shu)]">*</span>
+							</label>
+							<select
+								value={formData.roomNumber}
+								onChange={(e) =>
+									setFormData({ ...formData, roomNumber: e.target.value })
+								}
+								className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								required
+							>
+								{roomNumbers.map((room) => (
+									<option key={room} value={room}>
+										{room}号室
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+
+					{/* Amenity Options */}
+					{itemType === "amenity" && (
+						<div className="shoji-panel p-4 space-y-3">
+							<div className="flex items-center gap-2 mb-2">
+								<AmenityIcon size={18} className="text-[var(--ai)]" />
+								<span className="font-display font-semibold text-[var(--sumi)]">
+									アメニティ詳細
+								</span>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									種類 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<select
+									value={formData.amenityType}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											amenityType: e.target.value as AmenityType,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									{Object.entries(AMENITY_TYPE_LABELS).map(([key, label]) => (
+										<option key={key} value={key}>
+											{label}
+										</option>
+									))}
+								</select>
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								<div>
+									<label className="block text-sm text-[var(--nezumi)] mb-1">
+										現在の残量
+									</label>
+									<select
+										value={formData.stockLevel}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												stockLevel: e.target.value as StockLevel,
+											})
+										}
+										className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									>
+										{Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
+											<option key={key} value={key}>
+												{label}
+											</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label className="block text-sm text-[var(--nezumi)] mb-1">
+										補充閾値
+									</label>
+									<select
+										value={formData.threshold}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												threshold: e.target.value as StockLevel,
+											})
+										}
+										className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+									>
+										{Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
+											<option key={key} value={key}>
+												{label}
+											</option>
+										))}
+									</select>
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* Equipment Options */}
+					{itemType === "equipment" && (
+						<div className="shoji-panel p-4 space-y-3">
+							<div className="flex items-center gap-2 mb-2">
+								<EquipmentIcon size={18} className="text-[var(--ai)]" />
+								<span className="font-display font-semibold text-[var(--sumi)]">
+									設備詳細
+								</span>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									種類 <span className="text-[var(--shu)]">*</span>
+								</label>
+								<select
+									value={formData.equipmentType}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											equipmentType: e.target.value as EquipmentType,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									{Object.entries(EQUIPMENT_TYPE_LABELS).map(([key, label]) => (
+										<option key={key} value={key}>
+											{label}
+										</option>
+									))}
+								</select>
+							</div>
+							<div>
+								<label className="block text-sm text-[var(--nezumi)] mb-1">
+									状態
+								</label>
+								<select
+									value={formData.status}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											status: e.target.value as EquipmentStatusType,
+										})
+									}
+									className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+								>
+									{Object.entries(EQUIPMENT_STATUS_LABELS).map(
+										([key, label]) => (
+											<option key={key} value={key}>
+												{label}
+											</option>
+										),
+									)}
+								</select>
+							</div>
+							{formData.status !== "working" && (
+								<div>
+									<label className="block text-sm text-[var(--nezumi)] mb-1">
+										備考
+									</label>
+									<textarea
+										value={formData.notes}
+										onChange={(e) =>
+											setFormData({ ...formData, notes: e.target.value })
+										}
+										placeholder="状態の詳細を入力..."
+										className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+										rows={2}
+									/>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Submit button */}
+					<button
+						type="submit"
+						className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+					>
+						追加
+					</button>
+				</form>
+			</div>
+		</div>
+	);
+};
+
 // Main Component
 export const EquipmentManagement = () => {
 	const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
@@ -620,6 +924,7 @@ export const EquipmentManagement = () => {
 	);
 	const [editingEquipment, setEditingEquipment] =
 		useState<RoomEquipment | null>(null);
+	const [showCreateModal, setShowCreateModal] = useState(false);
 
 	// Get unique room numbers
 	const roomNumbers = useMemo(() => {
@@ -715,16 +1020,35 @@ export const EquipmentManagement = () => {
 		);
 	};
 
+	// Handle create amenity
+	const handleCreateAmenity = (newAmenity: RoomAmenity) => {
+		setAmenities((prev) => [...prev, newAmenity]);
+	};
+
+	// Handle create equipment
+	const handleCreateEquipment = (newEquipment: RoomEquipment) => {
+		setEquipment((prev) => [...prev, newEquipment]);
+	};
+
 	return (
 		<div className="space-y-6 animate-fade-in">
 			{/* Header */}
-			<div>
-				<h1 className="text-2xl font-display font-semibold text-[var(--sumi)] ink-stroke inline-block">
-					設備管理
-				</h1>
-				<p className="text-sm text-[var(--nezumi)] mt-2">
-					各部屋の備品・設備の状態を管理します
-				</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-2xl font-display font-semibold text-[var(--sumi)] ink-stroke inline-block">
+						設備管理
+					</h1>
+					<p className="text-sm text-[var(--nezumi)] mt-2">
+						各部屋の備品・設備の状態を管理します
+					</p>
+				</div>
+				<button
+					onClick={() => setShowCreateModal(true)}
+					className="flex items-center gap-2 px-4 py-2 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+				>
+					<PlusIcon size={18} />
+					新規作成
+				</button>
 			</div>
 
 			{/* Summary Stats */}
@@ -828,6 +1152,16 @@ export const EquipmentManagement = () => {
 				onClose={() => setEditingEquipment(null)}
 				onSave={handleEquipmentUpdate}
 			/>
+
+			{/* Create Modal */}
+			{showCreateModal && (
+				<CreateItemModal
+					onClose={() => setShowCreateModal(false)}
+					onCreateAmenity={handleCreateAmenity}
+					onCreateEquipment={handleCreateEquipment}
+					roomNumbers={roomNumbers}
+				/>
+			)}
 		</div>
 	);
 };

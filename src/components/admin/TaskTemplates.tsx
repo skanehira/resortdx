@@ -92,18 +92,26 @@ const TemplateCard = ({ template, onEdit }: TemplateCardProps) => {
 						<CategoryIcon category={template.category} />
 					</div>
 					<div>
-						<h3 className="font-display font-medium text-[var(--sumi)]">{template.name}</h3>
+						<h3 className="font-display font-medium text-[var(--sumi)]">
+							{template.name}
+						</h3>
 						<span className="text-xs text-[var(--nezumi)]">
 							{TASK_CATEGORY_LABELS[template.category]}
 						</span>
 					</div>
 				</div>
-				<button onClick={onEdit} className="btn btn-ghost p-2" aria-label="編集">
+				<button
+					onClick={onEdit}
+					className="btn btn-ghost p-2"
+					aria-label="編集"
+				>
 					<EditIcon size={16} />
 				</button>
 			</div>
 
-			<p className="text-sm text-[var(--sumi-light)] mb-4">{template.description}</p>
+			<p className="text-sm text-[var(--sumi-light)] mb-4">
+				{template.description}
+			</p>
 
 			{/* Details */}
 			<div className="space-y-3 text-sm">
@@ -118,7 +126,10 @@ const TemplateCard = ({ template, onEdit }: TemplateCardProps) => {
 					<span className="text-[var(--nezumi)]">対象部屋</span>
 					<div className="flex flex-wrap gap-1 justify-end">
 						{template.applicableRoomTypes.map((type) => (
-							<span key={type} className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded">
+							<span
+								key={type}
+								className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded"
+							>
 								{ROOM_TYPE_LABELS[type]}
 							</span>
 						))}
@@ -211,11 +222,18 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
 		},
 	);
 
-	const roomTypes: RoomType[] = ["standard", "deluxe", "suite", "premium_suite"];
+	const roomTypes: RoomType[] = [
+		"standard",
+		"deluxe",
+		"suite",
+		"premium_suite",
+	];
 
 	const handleRoomTypeToggle = (type: RoomType) => {
 		const current = formData.applicableRoomTypes || [];
-		const updated = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
+		const updated = current.includes(type)
+			? current.filter((t) => t !== type)
+			: [...current, type];
 		setFormData({ ...formData, applicableRoomTypes: updated });
 	};
 
@@ -238,7 +256,9 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
 							type="text"
 							className="input"
 							value={formData.name || ""}
-							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+							onChange={(e) =>
+								setFormData({ ...formData, name: e.target.value })
+							}
 							placeholder="例: 客室清掃（スタンダード）"
 						/>
 					</div>
@@ -268,11 +288,15 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
 
 					{/* Description */}
 					<div>
-						<label className="block text-sm font-display text-[var(--sumi-light)] mb-2">説明</label>
+						<label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+							説明
+						</label>
 						<textarea
 							className="input min-h-[80px] resize-none"
 							value={formData.description || ""}
-							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+							onChange={(e) =>
+								setFormData({ ...formData, description: e.target.value })
+							}
 							placeholder="タスクの詳細説明"
 						/>
 					</div>
@@ -363,7 +387,9 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
 							}
 							step="30"
 						/>
-						<p className="text-xs text-[var(--nezumi)] mt-1">例: -120 = 2時間前、180 = 3時間後</p>
+						<p className="text-xs text-[var(--nezumi)] mt-1">
+							例: -120 = 2時間前、180 = 3時間後
+						</p>
 					</div>
 				</div>
 
@@ -390,16 +416,30 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
 
 // Main Task Templates Component
 export const TaskTemplates = () => {
-	const [templates] = useState<TaskTemplate[]>(mockTaskTemplates);
-	const [categoryFilter, setCategoryFilter] = useState<TaskCategory | "all">("all");
-	const [editingTemplate, setEditingTemplate] = useState<TaskTemplate | null>(null);
+	const [templates, setTemplates] = useState<TaskTemplate[]>(mockTaskTemplates);
+	const [categoryFilter, setCategoryFilter] = useState<TaskCategory | "all">(
+		"all",
+	);
+	const [editingTemplate, setEditingTemplate] = useState<TaskTemplate | null>(
+		null,
+	);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 
 	const filteredTemplates =
-		categoryFilter === "all" ? templates : templates.filter((t) => t.category === categoryFilter);
+		categoryFilter === "all"
+			? templates
+			: templates.filter((t) => t.category === categoryFilter);
 
 	const handleSave = (template: TaskTemplate) => {
-		console.log("Saving template:", template);
+		if (editingTemplate) {
+			// Update existing template
+			setTemplates((prev) =>
+				prev.map((t) => (t.id === template.id ? template : t)),
+			);
+		} else {
+			// Add new template
+			setTemplates((prev) => [...prev, template]);
+		}
 		setEditingTemplate(null);
 		setShowCreateForm(false);
 	};
@@ -416,7 +456,10 @@ export const TaskTemplates = () => {
 						予約登録時に自動生成されるタスクのテンプレートを管理します
 					</p>
 				</div>
-				<button onClick={() => setShowCreateForm(true)} className="btn btn-primary">
+				<button
+					onClick={() => setShowCreateForm(true)}
+					className="btn btn-primary"
+				>
 					<PlusIcon size={18} />
 					新規作成
 				</button>
@@ -424,22 +467,33 @@ export const TaskTemplates = () => {
 
 			{/* Category Filter */}
 			<div className="shoji-panel p-4">
-				<CategoryFilter selected={categoryFilter} onChange={setCategoryFilter} />
+				<CategoryFilter
+					selected={categoryFilter}
+					onChange={setCategoryFilter}
+				/>
 			</div>
 
 			{/* Templates Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 				{filteredTemplates.map((template, index) => (
 					<div key={template.id} className={`stagger-${(index % 5) + 1}`}>
-						<TemplateCard template={template} onEdit={() => setEditingTemplate(template)} />
+						<TemplateCard
+							template={template}
+							onEdit={() => setEditingTemplate(template)}
+						/>
 					</div>
 				))}
 			</div>
 
 			{filteredTemplates.length === 0 && (
 				<div className="shoji-panel p-12 text-center">
-					<TemplateIcon size={48} className="mx-auto text-[var(--nezumi-light)] mb-4" />
-					<p className="text-[var(--nezumi)]">該当するテンプレートがありません</p>
+					<TemplateIcon
+						size={48}
+						className="mx-auto text-[var(--nezumi-light)] mb-4"
+					/>
+					<p className="text-[var(--nezumi)]">
+						該当するテンプレートがありません
+					</p>
 				</div>
 			)}
 
@@ -482,7 +536,10 @@ export const TaskTemplates = () => {
 
 			{/* Create Modal */}
 			{showCreateForm && (
-				<TemplateForm onClose={() => setShowCreateForm(false)} onSave={handleSave} />
+				<TemplateForm
+					onClose={() => setShowCreateForm(false)}
+					onSave={handleSave}
+				/>
 			)}
 		</div>
 	);
