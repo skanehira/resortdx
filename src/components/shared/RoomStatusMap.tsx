@@ -1,18 +1,18 @@
 import { useState } from "react";
 import type { RoomCleaningStatus, Task, Staff } from "../../types";
 import { ROOM_CLEANING_STATUS_LABELS } from "../../types";
+import { getRoomName } from "../../data/mock";
 import { RoomIcon, ClockIcon, CloseIcon } from "../ui/Icons";
 
-// フロア別部屋配置
+// フロア別部屋配置 (roomId based)
 const FLOOR_LAYOUT: Record<string, string[]> = {
-  "4F": ["401"],
-  "3F": ["305"],
-  "2F": ["201", "203"],
-  "1F": ["102"],
+  "3F": ["ROOM-005", "ROOM-006"],
+  "2F": ["ROOM-003", "ROOM-004"],
+  "1F": ["ROOM-001", "ROOM-002"],
 };
 
 export interface RoomStatusInfo {
-  roomNumber: string;
+  roomId: string;
   status: RoomCleaningStatus;
   cleaningTask: Task | null;
   assignedStaff: Staff | null;
@@ -21,7 +21,7 @@ export interface RoomStatusInfo {
 interface RoomStatusMapProps {
   roomStatuses: RoomStatusInfo[];
   currentStaffId?: string;
-  onRoomClick?: (roomNumber: string) => void;
+  onRoomClick?: (roomId: string) => void;
 }
 
 // ステータス別の色設定
@@ -50,32 +50,33 @@ const STATUS_COLORS: Record<RoomCleaningStatus, { bg: string; border: string; te
 
 // 部屋カード
 const RoomCard = ({
-  roomNumber,
+  roomId,
   status,
   assignedStaff,
   isMyRoom,
   onClick,
 }: {
-  roomNumber: string;
+  roomId: string;
   status: RoomCleaningStatus;
   assignedStaff: Staff | null;
   isMyRoom: boolean;
   onClick: () => void;
 }) => {
   const colors = STATUS_COLORS[status];
+  const roomName = getRoomName(roomId);
 
   return (
     <button
       onClick={onClick}
       className={`
-        relative p-3 rounded-lg border-2 transition-all
+        relative p-3 rounded-lg border-2 transition-all min-w-[100px]
         ${colors.bg} ${colors.border}
         ${isMyRoom ? "ring-2 ring-offset-2 ring-[var(--ai)]" : ""}
         hover:scale-105 active:scale-95
       `}
     >
-      {/* 部屋番号 */}
-      <div className="text-lg font-display font-bold text-[var(--sumi)]">{roomNumber}</div>
+      {/* 部屋名 */}
+      <div className="text-sm font-display font-bold text-[var(--sumi)] truncate">{roomName}</div>
 
       {/* ステータス */}
       <div className={`text-xs font-medium ${colors.text}`}>
@@ -105,6 +106,7 @@ const RoomCard = ({
 // 詳細モーダル
 const RoomDetailModal = ({ room, onClose }: { room: RoomStatusInfo; onClose: () => void }) => {
   const colors = STATUS_COLORS[room.status];
+  const roomName = getRoomName(room.roomId);
 
   return (
     <div
@@ -122,9 +124,7 @@ const RoomDetailModal = ({ room, onClose }: { room: RoomStatusInfo; onClose: () 
               <RoomIcon size={24} className={colors.text} />
             </div>
             <div>
-              <h3 className="text-xl font-display font-bold text-[var(--sumi)]">
-                {room.roomNumber}号室
-              </h3>
+              <h3 className="text-xl font-display font-bold text-[var(--sumi)]">{roomName}</h3>
               <span className={`text-sm font-medium ${colors.text}`}>
                 {ROOM_CLEANING_STATUS_LABELS[room.status]}
               </span>
@@ -205,15 +205,15 @@ export const RoomStatusMap = ({
 }: RoomStatusMapProps) => {
   const [selectedRoom, setSelectedRoom] = useState<RoomStatusInfo | null>(null);
 
-  const getRoomStatus = (roomNumber: string): RoomStatusInfo | undefined => {
-    return roomStatuses.find((r) => r.roomNumber === roomNumber);
+  const getRoomStatus = (roomId: string): RoomStatusInfo | undefined => {
+    return roomStatuses.find((r) => r.roomId === roomId);
   };
 
-  const handleRoomClick = (roomNumber: string) => {
-    const room = getRoomStatus(roomNumber);
+  const handleRoomClick = (roomId: string) => {
+    const room = getRoomStatus(roomId);
     if (room) {
       setSelectedRoom(room);
-      onRoomClick?.(roomNumber);
+      onRoomClick?.(roomId);
     }
   };
 
@@ -235,15 +235,15 @@ export const RoomStatusMap = ({
 
               {/* 部屋グリッド */}
               <div className="flex gap-3 flex-wrap">
-                {rooms.map((roomNumber) => {
-                  const room = getRoomStatus(roomNumber);
+                {rooms.map((roomId) => {
+                  const room = getRoomStatus(roomId);
                   if (!room) {
                     return (
                       <div
-                        key={roomNumber}
-                        className="w-20 h-16 rounded-lg border-2 border-dashed border-[var(--nezumi-light)] flex items-center justify-center text-[var(--nezumi-light)]"
+                        key={roomId}
+                        className="min-w-[100px] h-16 rounded-lg border-2 border-dashed border-[var(--nezumi-light)] flex items-center justify-center text-[var(--nezumi-light)] text-sm"
                       >
-                        {roomNumber}
+                        {getRoomName(roomId)}
                       </div>
                     );
                   }
@@ -254,12 +254,12 @@ export const RoomStatusMap = ({
 
                   return (
                     <RoomCard
-                      key={roomNumber}
-                      roomNumber={roomNumber}
+                      key={roomId}
+                      roomId={roomId}
                       status={room.status}
                       assignedStaff={room.assignedStaff}
                       isMyRoom={isMyRoom}
-                      onClick={() => handleRoomClick(roomNumber)}
+                      onClick={() => handleRoomClick(roomId)}
                     />
                   );
                 })}
