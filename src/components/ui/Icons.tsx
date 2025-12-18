@@ -807,3 +807,214 @@ export const BellIcon = ({ size = 20, className = "" }: IconProps) => (
 		<path d="M13.73 21a2 2 0 0 1-3.46 0" />
 	</svg>
 );
+
+// === Meal & Celebration Icons ===
+
+export const CakeIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Birthday cake */}
+		<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8" />
+		<path d="M4 16h16" />
+		<path d="M2 21h20" />
+		<path d="M7 8v3" />
+		<path d="M12 8v3" />
+		<path d="M17 8v3" />
+		<path d="M7 4h.01" />
+		<path d="M12 4h.01" />
+		<path d="M17 4h.01" />
+	</svg>
+);
+
+export const FlowerIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Flower bouquet */}
+		<path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m7.5 0a4.5 4.5 0 1 1-4.5 4.5m4.5-4.5H15m-3 4.5V15" />
+		<circle cx="12" cy="12" r="3" />
+		<path d="M12 22v-7.5" />
+	</svg>
+);
+
+export const ChampagneIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Champagne glass */}
+		<path d="M8 22h8" />
+		<path d="M12 11v11" />
+		<path d="M19 5c0 3.5-3.13 6-7 6s-7-2.5-7-6V2h14z" />
+		<path d="M5 5h14" />
+	</svg>
+);
+
+export const AllergyIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Allergy warning - circle with slash */}
+		<circle cx="12" cy="12" r="10" />
+		<path d="M4.93 4.93l14.14 14.14" />
+		<path d="M12 8v4" />
+		<path d="M12 16h.01" />
+	</svg>
+);
+
+export const NotificationBadgeIcon = ({
+	size = 20,
+	className = "",
+}: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Bell with badge */}
+		<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+		<path d="M13.73 21a2 2 0 0 1-3.46 0" />
+		<circle cx="18" cy="5" r="3" fill="currentColor" />
+	</svg>
+);
+
+export const DecorationIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Party decoration / balloon */}
+		<path d="M12 2c3.5 0 6 2.5 6 6s-2.5 7-6 7-6-3.5-6-7 2.5-6 6-6z" />
+		<path d="M12 15v7" />
+		<path d="M9 22h6" />
+		<path d="M9 6c0-1.5 1.5-3 3-3" />
+	</svg>
+);
+
+export const MessageCardIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Card with message */}
+		<rect x="3" y="4" width="18" height="16" rx="2" />
+		<path d="M7 8h10" />
+		<path d="M7 12h6" />
+		<path d="M7 16h4" />
+	</svg>
+);
+
+export const DiningIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Dining/restaurant icon - plate with cutlery */}
+		<circle cx="12" cy="12" r="8" />
+		<path d="M3 12h2" />
+		<path d="M19 12h2" />
+		<path d="M12 3v2" />
+		<path d="M12 19v2" />
+	</svg>
+);
+
+export const DrinkIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Drink glass */}
+		<path d="M8 22h8" />
+		<path d="M12 15v7" />
+		<path d="M17 2l-3.5 7h-3L7 2h10z" />
+		<path d="M6.5 9h11l-2 6H8.5l-2-6z" />
+	</svg>
+);
+
+export const TimerIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Timer/schedule icon */}
+		<circle cx="12" cy="13" r="8" />
+		<path d="M12 9v4l2 2" />
+		<path d="M5 3L2 6" />
+		<path d="M22 6l-3-3" />
+		<path d="M12 5V3" />
+		<path d="M10 2h4" />
+	</svg>
+);

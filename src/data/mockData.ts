@@ -8,6 +8,10 @@ import type {
 	RoomEquipment,
 	Vehicle,
 	ShuttleTask,
+	MealTask,
+	MealOrderNotification,
+	CelebrationTask,
+	MealStatus,
 } from "../types";
 import { STOCK_LEVEL_VALUES } from "../types";
 
@@ -1437,3 +1441,397 @@ export const getAvailableDrivers = (): Staff[] =>
 
 export const getShuttleTaskById = (id: string): ShuttleTask | undefined =>
 	mockShuttleTasks.find((t) => t.id === id);
+
+// === Mock Meal Tasks ===
+export const mockMealTasks: MealTask[] = [
+	{
+		id: "MEAL001",
+		reservationId: "RSV001",
+		guestName: "山田 太郎",
+		guestNameKana: "ヤマダ タロウ",
+		roomNumber: "201",
+		mealType: "dinner",
+		courseType: "kaiseki",
+		scheduledTime: "18:30",
+		guestCount: 2,
+		dietaryRestrictions: ["shellfish"],
+		dietaryNotes: "甲殻類アレルギー：エビ・カニ完全除去",
+		mealStatus: "preparing",
+		needsCheck: false,
+		assignedStaffId: "STF002",
+		priority: "high",
+		isAnniversaryRelated: true,
+		notes: "結婚記念日のお客様。デザートにメッセージプレート",
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL002",
+		reservationId: "RSV002",
+		guestName: "佐藤 花子",
+		guestNameKana: "サトウ ハナコ",
+		roomNumber: "305",
+		mealType: "dinner",
+		courseType: "premium",
+		scheduledTime: "18:00",
+		guestCount: 3,
+		dietaryRestrictions: [],
+		dietaryNotes: null,
+		mealStatus: "serving",
+		needsCheck: false,
+		assignedStaffId: "STF002",
+		priority: "normal",
+		isAnniversaryRelated: false,
+		notes: "お子様1名含む。お子様メニュー対応",
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL003",
+		reservationId: "RSV003",
+		guestName: "鈴木 一郎",
+		guestNameKana: "スズキ イチロウ",
+		roomNumber: "102",
+		mealType: "dinner",
+		courseType: "standard",
+		scheduledTime: "19:00",
+		guestCount: 1,
+		dietaryRestrictions: [],
+		dietaryNotes: null,
+		mealStatus: "preparing",
+		needsCheck: false,
+		assignedStaffId: "STF006",
+		priority: "normal",
+		isAnniversaryRelated: false,
+		notes: null,
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL004",
+		reservationId: "RSV004",
+		guestName: "田中 美咲",
+		guestNameKana: "タナカ ミサキ",
+		roomNumber: "401",
+		mealType: "room_service",
+		courseType: "kaiseki",
+		scheduledTime: "19:00",
+		guestCount: 2,
+		dietaryRestrictions: ["dairy", "wheat"],
+		dietaryNotes: "乳製品・小麦アレルギー対応",
+		mealStatus: "preparing",
+		needsCheck: false,
+		assignedStaffId: "STF002",
+		priority: "urgent",
+		isAnniversaryRelated: true,
+		notes: "誕生日のお客様。部屋食対応。特別演出あり",
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL005",
+		reservationId: "RSV005",
+		guestName: "高橋 健二",
+		guestNameKana: "タカハシ ケンジ",
+		roomNumber: "203",
+		mealType: "dinner",
+		courseType: "standard",
+		scheduledTime: "19:30",
+		guestCount: 4,
+		dietaryRestrictions: [],
+		dietaryNotes: null,
+		mealStatus: "preparing",
+		needsCheck: false,
+		assignedStaffId: "STF006",
+		priority: "normal",
+		isAnniversaryRelated: false,
+		notes: "団体様4名分",
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL006",
+		reservationId: "RSV001",
+		guestName: "山田 太郎",
+		guestNameKana: "ヤマダ タロウ",
+		roomNumber: "201",
+		mealType: "breakfast",
+		courseType: "standard",
+		scheduledTime: "08:00",
+		guestCount: 2,
+		dietaryRestrictions: ["shellfish"],
+		dietaryNotes: "甲殻類アレルギー",
+		mealStatus: "completed",
+		needsCheck: false,
+		assignedStaffId: "STF002",
+		priority: "normal",
+		isAnniversaryRelated: false,
+		notes: null,
+		completedAt: "08:45",
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL007",
+		reservationId: "RSV002",
+		guestName: "佐藤 花子",
+		guestNameKana: "サトウ ハナコ",
+		roomNumber: "305",
+		mealType: "breakfast",
+		courseType: "standard",
+		scheduledTime: "07:30",
+		guestCount: 3,
+		dietaryRestrictions: [],
+		dietaryNotes: null,
+		mealStatus: "completed",
+		needsCheck: true,
+		assignedStaffId: "STF006",
+		priority: "normal",
+		isAnniversaryRelated: false,
+		notes: "お味噌汁のおかわり希望あり",
+		completedAt: "08:15",
+		createdAt: getToday() + "T06:00:00",
+	},
+	{
+		id: "MEAL008",
+		reservationId: "RSV004",
+		guestName: "田中 美咲",
+		guestNameKana: "タナカ ミサキ",
+		roomNumber: "401",
+		mealType: "special",
+		courseType: "kaiseki",
+		scheduledTime: "20:30",
+		guestCount: 2,
+		dietaryRestrictions: ["dairy", "wheat"],
+		dietaryNotes: "乳製品・小麦アレルギー対応",
+		mealStatus: "preparing",
+		needsCheck: false,
+		assignedStaffId: "STF002",
+		priority: "urgent",
+		isAnniversaryRelated: true,
+		notes: "誕生日ケーキ提供（アレルギー対応版）",
+		completedAt: null,
+		createdAt: getToday() + "T06:00:00",
+	},
+];
+
+// === Mock Meal Order Notifications ===
+export const mockMealOrderNotifications: MealOrderNotification[] = [
+	{
+		id: "ORD001",
+		reservationId: "RSV001",
+		roomNumber: "201",
+		guestName: "山田 太郎",
+		orderType: "drink",
+		content: "日本酒（熱燗）2合追加",
+		isRead: false,
+		createdAt: getToday() + "T18:45:00",
+	},
+	{
+		id: "ORD002",
+		reservationId: "RSV002",
+		roomNumber: "305",
+		guestName: "佐藤 花子",
+		orderType: "drink",
+		content: "お子様用ジュース追加",
+		isRead: false,
+		createdAt: getToday() + "T18:20:00",
+	},
+	{
+		id: "ORD003",
+		reservationId: "RSV004",
+		roomNumber: "401",
+		guestName: "田中 美咲",
+		orderType: "timing_change",
+		content: "夕食開始を19:30に変更希望",
+		isRead: true,
+		createdAt: getToday() + "T17:30:00",
+	},
+	{
+		id: "ORD004",
+		reservationId: "RSV005",
+		roomNumber: "203",
+		guestName: "高橋 健二",
+		orderType: "menu_change",
+		content: "1名分をベジタリアンメニューに変更",
+		isRead: false,
+		createdAt: getToday() + "T18:50:00",
+	},
+	{
+		id: "ORD005",
+		reservationId: "RSV001",
+		roomNumber: "201",
+		guestName: "山田 太郎",
+		orderType: "other",
+		content: "デザートを少し遅めに提供希望",
+		isRead: true,
+		createdAt: getToday() + "T19:15:00",
+	},
+];
+
+// === Mock Celebration Tasks ===
+export const mockCelebrationTasks: CelebrationTask[] = [
+	{
+		id: "CLB001",
+		reservationId: "RSV001",
+		guestName: "山田 太郎",
+		guestNameKana: "ヤマダ タロウ",
+		roomNumber: "201",
+		celebrationType: "wedding_anniversary",
+		celebrationDescription: "結婚10周年記念",
+		items: [
+			{ item: "cake", isChecked: true, notes: "チョコレートケーキ" },
+			{ item: "flowers", isChecked: true, notes: "バラの花束" },
+			{ item: "champagne", isChecked: false, notes: "モエ・エ・シャンドン" },
+			{
+				item: "message_card",
+				isChecked: true,
+				notes: "手書きメッセージカード",
+			},
+		],
+		executionTime: "19:30",
+		status: "in_progress",
+		assignedStaffId: "STF005",
+		priority: "high",
+		notes: "夕食のデザート時にサプライズ演出",
+		completionReport: null,
+		completedAt: null,
+		createdAt: getToday() + "T08:00:00",
+	},
+	{
+		id: "CLB002",
+		reservationId: "RSV004",
+		guestName: "田中 美咲",
+		guestNameKana: "タナカ ミサキ",
+		roomNumber: "401",
+		celebrationType: "birthday",
+		celebrationDescription: "奥様のお誕生日",
+		items: [
+			{
+				item: "cake",
+				isChecked: false,
+				notes: "アレルギー対応ケーキ（乳・小麦不使用）",
+			},
+			{ item: "flowers", isChecked: false, notes: "ユリの花束" },
+			{
+				item: "champagne",
+				isChecked: false,
+				notes: "ノンアルコールスパークリング",
+			},
+			{ item: "decoration", isChecked: false, notes: "バルーン装飾" },
+			{ item: "message_card", isChecked: false, notes: "旅館オリジナルカード" },
+		],
+		executionTime: "20:00",
+		status: "pending",
+		assignedStaffId: "STF005",
+		priority: "urgent",
+		notes: "部屋食後にサプライズ。ご主人様と事前打ち合わせ済み",
+		completionReport: null,
+		completedAt: null,
+		createdAt: getToday() + "T08:00:00",
+	},
+	{
+		id: "CLB003",
+		reservationId: "RSV002",
+		guestName: "佐藤 花子",
+		guestNameKana: "サトウ ハナコ",
+		roomNumber: "305",
+		celebrationType: "other",
+		celebrationDescription: "還暦のお祝い（おばあ様）",
+		items: [
+			{
+				item: "cake",
+				isChecked: true,
+				notes: "還暦ケーキ（赤いデコレーション）",
+			},
+			{ item: "flowers", isChecked: true, notes: "赤いカーネーション" },
+			{ item: "message_card", isChecked: true, notes: undefined },
+		],
+		executionTime: "18:30",
+		status: "completed",
+		assignedStaffId: "STF005",
+		priority: "normal",
+		notes: "夕食開始時に提供完了",
+		completionReport:
+			"お客様大変喜んでいただけました。記念撮影のお手伝いも実施。",
+		completedAt: "18:45",
+		createdAt: getToday() + "T08:00:00",
+	},
+	{
+		id: "CLB004",
+		reservationId: "RSV005",
+		guestName: "高橋 健二",
+		guestNameKana: "タカハシ ケンジ",
+		roomNumber: "203",
+		celebrationType: "other",
+		celebrationDescription: "退職祝い（団体様）",
+		items: [
+			{
+				item: "champagne",
+				isChecked: false,
+				notes: "スパークリングワイン4人分",
+			},
+			{
+				item: "message_card",
+				isChecked: false,
+				notes: "色紙（お客様持込）への記入依頼",
+			},
+		],
+		executionTime: "20:00",
+		status: "pending",
+		assignedStaffId: "STF002",
+		priority: "normal",
+		notes: "乾杯時にスパークリング提供",
+		completionReport: null,
+		completedAt: null,
+		createdAt: getToday() + "T08:00:00",
+	},
+];
+
+// === Meal Management Helper Functions ===
+export const getMealTaskById = (id: string): MealTask | undefined =>
+	mockMealTasks.find((t) => t.id === id);
+
+export const getMealTasksByStaff = (staffId: string): MealTask[] =>
+	mockMealTasks.filter((t) => t.assignedStaffId === staffId);
+
+export const getMealTasksByStatus = (status: MealStatus): MealTask[] =>
+	mockMealTasks.filter((t) => t.mealStatus === status);
+
+export const getMealTasksByRoom = (roomNumber: string): MealTask[] =>
+	mockMealTasks.filter((t) => t.roomNumber === roomNumber);
+
+export const getPendingMealTasks = (): MealTask[] =>
+	mockMealTasks.filter((t) => t.mealStatus !== "completed");
+
+export const getMealTasksNeedingCheck = (): MealTask[] =>
+	mockMealTasks.filter((t) => t.needsCheck);
+
+export const getUnreadOrderNotifications = (): MealOrderNotification[] =>
+	mockMealOrderNotifications.filter((n) => !n.isRead);
+
+export const getOrderNotificationsByRoom = (
+	roomNumber: string,
+): MealOrderNotification[] =>
+	mockMealOrderNotifications.filter((n) => n.roomNumber === roomNumber);
+
+// === Celebration Management Helper Functions ===
+export const getCelebrationTaskById = (
+	id: string,
+): CelebrationTask | undefined => mockCelebrationTasks.find((t) => t.id === id);
+
+export const getCelebrationTasksByStaff = (
+	staffId: string,
+): CelebrationTask[] =>
+	mockCelebrationTasks.filter((t) => t.assignedStaffId === staffId);
+
+export const getCelebrationTasksByStatus = (
+	status: CelebrationTask["status"],
+): CelebrationTask[] => mockCelebrationTasks.filter((t) => t.status === status);
+
+export const getPendingCelebrationTasks = (): CelebrationTask[] =>
+	mockCelebrationTasks.filter((t) => t.status !== "completed");
+
+export const getCelebrationTasksByRoom = (
+	roomNumber: string,
+): CelebrationTask[] =>
+	mockCelebrationTasks.filter((t) => t.roomNumber === roomNumber);

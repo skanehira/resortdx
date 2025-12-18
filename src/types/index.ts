@@ -146,6 +146,8 @@ export type AdminPage =
 	| "staff_monitor"
 	| "equipment"
 	| "shuttle"
+	| "meal"
+	| "celebration"
 	| "task_history";
 
 export interface FilterState {
@@ -342,5 +344,166 @@ export interface ShuttleTask {
 	guestNotifiedAt?: string;
 	notes?: string;
 	completedAt?: string;
+	createdAt: string;
+}
+
+// === Meal Service Types ===
+
+// 配膳ステータス（4段階）
+export type MealStatus = "preparing" | "serving" | "completed" | "needs_check";
+
+export const MEAL_STATUS_LABELS: Record<MealStatus, string> = {
+	preparing: "準備中",
+	serving: "配膳中",
+	completed: "完了",
+	needs_check: "再確認要",
+};
+
+// 食事タイプ
+export type MealType = "breakfast" | "dinner" | "room_service" | "special";
+
+export const MEAL_TYPE_LABELS: Record<MealType, string> = {
+	breakfast: "朝食",
+	dinner: "夕食",
+	room_service: "部屋食",
+	special: "特別料理",
+};
+
+// コースタイプ
+export type CourseType =
+	| "standard"
+	| "premium"
+	| "kaiseki"
+	| "kids"
+	| "vegetarian";
+
+export const COURSE_TYPE_LABELS: Record<CourseType, string> = {
+	standard: "スタンダード",
+	premium: "プレミアム",
+	kaiseki: "懐石",
+	kids: "お子様",
+	vegetarian: "ベジタリアン",
+};
+
+// アレルギー・食事制限
+export type DietaryRestriction =
+	| "shellfish" // 甲殻類
+	| "egg" // 卵
+	| "dairy" // 乳製品
+	| "wheat" // 小麦
+	| "soba" // そば
+	| "peanut" // 落花生
+	| "fish" // 魚介類
+	| "other"; // その他
+
+export const DIETARY_RESTRICTION_LABELS: Record<DietaryRestriction, string> = {
+	shellfish: "甲殻類",
+	egg: "卵",
+	dairy: "乳製品",
+	wheat: "小麦",
+	soba: "そば",
+	peanut: "落花生",
+	fish: "魚介類",
+	other: "その他",
+};
+
+// 配膳タスクインターフェース
+export interface MealTask {
+	id: string;
+	reservationId: string;
+	guestName: string;
+	guestNameKana: string;
+	roomNumber: string;
+	mealType: MealType;
+	courseType: CourseType;
+	scheduledTime: string;
+	guestCount: number;
+	dietaryRestrictions: DietaryRestriction[];
+	dietaryNotes: string | null;
+	mealStatus: MealStatus;
+	needsCheck: boolean; // 再確認要フラグ
+	assignedStaffId: string | null;
+	priority: "normal" | "high" | "urgent";
+	isAnniversaryRelated: boolean;
+	notes: string | null;
+	completedAt: string | null;
+	createdAt: string;
+}
+
+// QR注文通知タイプ
+export type OrderType = "drink" | "menu_change" | "timing_change" | "other";
+
+export const ORDER_TYPE_LABELS: Record<OrderType, string> = {
+	drink: "追加ドリンク",
+	menu_change: "メニュー変更",
+	timing_change: "時間変更",
+	other: "その他",
+};
+
+// QR注文通知インターフェース
+export interface MealOrderNotification {
+	id: string;
+	reservationId: string;
+	roomNumber: string;
+	guestName: string;
+	orderType: OrderType;
+	content: string;
+	isRead: boolean;
+	createdAt: string;
+}
+
+// === Celebration Types ===
+
+// お祝いタイプ
+export type CelebrationType = "birthday" | "wedding_anniversary" | "other";
+
+export const CELEBRATION_TYPE_LABELS: Record<CelebrationType, string> = {
+	birthday: "誕生日",
+	wedding_anniversary: "結婚記念日",
+	other: "その他",
+};
+
+// お祝いアイテム
+export type CelebrationItem =
+	| "cake"
+	| "flowers"
+	| "champagne"
+	| "decoration"
+	| "message_card"
+	| "other";
+
+export const CELEBRATION_ITEM_LABELS: Record<CelebrationItem, string> = {
+	cake: "ケーキ",
+	flowers: "花束",
+	champagne: "シャンパン",
+	decoration: "装飾",
+	message_card: "メッセージカード",
+	other: "その他",
+};
+
+// お祝いアイテムチェック状態
+export interface CelebrationItemCheck {
+	item: CelebrationItem;
+	isChecked: boolean;
+	notes?: string;
+}
+
+// お祝い対応タスクインターフェース
+export interface CelebrationTask {
+	id: string;
+	reservationId: string;
+	guestName: string;
+	guestNameKana: string;
+	roomNumber: string;
+	celebrationType: CelebrationType;
+	celebrationDescription: string;
+	items: CelebrationItemCheck[];
+	executionTime: string;
+	status: TaskStatus; // 既存の3段階を流用
+	assignedStaffId: string | null;
+	priority: "normal" | "high" | "urgent";
+	notes: string | null;
+	completionReport: string | null;
+	completedAt: string | null;
 	createdAt: string;
 }

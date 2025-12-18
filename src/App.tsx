@@ -13,11 +13,16 @@ import { TaskTemplates } from "./components/admin/TaskTemplates";
 import { StaffMonitor } from "./components/admin/StaffMonitor";
 import { EquipmentManagement } from "./components/admin/EquipmentManagement";
 import { ShuttleManagement } from "./components/admin/ShuttleManagement";
+import { MealManagement } from "./components/admin/MealManagement";
+import { CelebrationManagement } from "./components/admin/CelebrationManagement";
 import { TaskHistory } from "./components/admin/TaskHistory";
 import { MobileTaskList } from "./components/staff/MobileTaskList";
 import { MobileSchedule } from "./components/staff/MobileSchedule";
 import { MobileShuttleList } from "./components/staff/MobileShuttleList";
+import { MobileMealList } from "./components/staff/MobileMealList";
+import { MobileCelebrationList } from "./components/staff/MobileCelebrationList";
 import { GuestShuttleStatus } from "./components/guest/GuestShuttleStatus";
+import { GuestMealStatus } from "./components/guest/GuestMealStatus";
 import {
 	DashboardIcon,
 	TemplateIcon,
@@ -25,11 +30,12 @@ import {
 	EquipmentIcon,
 	HistoryIcon,
 	TaskIcon,
-	TimelineIcon,
 	PhoneIcon,
 	MenuIcon,
 	CloseIcon,
 	ShuttleIcon,
+	DiningIcon,
+	CakeIcon,
 } from "./components/ui/Icons";
 
 // Admin Sidebar Navigation
@@ -59,6 +65,8 @@ const Sidebar = ({
 			{ page: "staff_monitor", label: "スタッフモニタ", icon: <StaffIcon /> },
 			{ page: "equipment", label: "設備管理", icon: <EquipmentIcon /> },
 			{ page: "shuttle", label: "送迎管理", icon: <ShuttleIcon /> },
+			{ page: "meal", label: "配膳管理", icon: <DiningIcon /> },
+			{ page: "celebration", label: "記念日管理", icon: <CakeIcon /> },
 			{
 				page: "task_history",
 				label: "タスク一覧",
@@ -134,9 +142,11 @@ const Sidebar = ({
 };
 
 // Mobile Bottom Navigation for Staff
+type StaffView = "tasks" | "schedule" | "shuttle" | "meal" | "celebration";
+
 interface MobileNavProps {
-	currentView: "tasks" | "schedule" | "shuttle";
-	onViewChange: (view: "tasks" | "schedule" | "shuttle") => void;
+	currentView: StaffView;
+	onViewChange: (view: StaffView) => void;
 	onModeChange: () => void;
 }
 
@@ -157,15 +167,24 @@ const MobileBottomNav = ({
 				<span className="text-xs mt-1 font-display">タスク</span>
 			</button>
 			<button
-				onClick={() => onViewChange("schedule")}
+				onClick={() => onViewChange("meal")}
 				className={`flex-1 flex flex-col items-center py-3 transition-colors ${
-					currentView === "schedule"
-						? "text-[var(--ai)]"
+					currentView === "meal" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
+				}`}
+			>
+				<DiningIcon size={22} />
+				<span className="text-xs mt-1 font-display">配膳</span>
+			</button>
+			<button
+				onClick={() => onViewChange("celebration")}
+				className={`flex-1 flex flex-col items-center py-3 transition-colors ${
+					currentView === "celebration"
+						? "text-[var(--kincha)]"
 						: "text-[var(--nezumi)]"
 				}`}
 			>
-				<TimelineIcon size={22} />
-				<span className="text-xs mt-1 font-display">スケジュール</span>
+				<CakeIcon size={22} />
+				<span className="text-xs mt-1 font-display">お祝い</span>
 			</button>
 			<button
 				onClick={() => onViewChange("shuttle")}
@@ -183,7 +202,7 @@ const MobileBottomNav = ({
 				className="flex-1 flex flex-col items-center py-3 text-[var(--nezumi)]"
 			>
 				<DashboardIcon size={22} />
-				<span className="text-xs mt-1 font-display">管理画面</span>
+				<span className="text-xs mt-1 font-display">管理</span>
 			</button>
 		</div>
 	</nav>
@@ -254,6 +273,8 @@ const AdminPages = () => {
 		if (path.includes("staff_monitor")) return "staff_monitor";
 		if (path.includes("equipment")) return "equipment";
 		if (path.includes("shuttle")) return "shuttle";
+		if (path.includes("meal")) return "meal";
+		if (path.includes("celebration")) return "celebration";
 		if (path.includes("task_history")) return "task_history";
 		return "dashboard";
 	};
@@ -278,6 +299,8 @@ const AdminPages = () => {
 				<Route path="staff_monitor" element={<StaffMonitor />} />
 				<Route path="equipment" element={<EquipmentManagement />} />
 				<Route path="shuttle" element={<ShuttleManagement />} />
+				<Route path="meal" element={<MealManagement />} />
+				<Route path="celebration" element={<CelebrationManagement />} />
 				<Route path="task_history" element={<TaskHistory />} />
 				<Route path="*" element={<Navigate to="dashboard" replace />} />
 			</Routes>
@@ -290,13 +313,15 @@ const StaffPages = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const getCurrentView = (): "tasks" | "schedule" | "shuttle" => {
+	const getCurrentView = (): StaffView => {
 		if (location.pathname.includes("schedule")) return "schedule";
 		if (location.pathname.includes("shuttle")) return "shuttle";
+		if (location.pathname.includes("meal")) return "meal";
+		if (location.pathname.includes("celebration")) return "celebration";
 		return "tasks";
 	};
 
-	const handleViewChange = (view: "tasks" | "schedule" | "shuttle") => {
+	const handleViewChange = (view: StaffView) => {
 		navigate(`/staff/${view}`);
 	};
 
@@ -310,6 +335,8 @@ const StaffPages = () => {
 				<Route path="tasks" element={<MobileTaskList />} />
 				<Route path="schedule" element={<MobileSchedule />} />
 				<Route path="shuttle" element={<MobileShuttleList />} />
+				<Route path="meal" element={<MobileMealList />} />
+				<Route path="celebration" element={<MobileCelebrationList />} />
 				<Route path="*" element={<Navigate to="tasks" replace />} />
 			</Routes>
 			<MobileBottomNav
@@ -330,6 +357,15 @@ const GuestShuttlePage = () => {
 	return <GuestShuttleStatus taskId={taskId} />;
 };
 
+// Guest Meal Status Page Wrapper
+const GuestMealPage = () => {
+	// URLパラメータからtaskIdを取得（実際の実装では認証トークンなども含む）
+	const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
+	const taskId = params.get("id") || undefined;
+
+	return <GuestMealStatus taskId={taskId} />;
+};
+
 // Main App Component
 function App() {
 	return (
@@ -338,6 +374,7 @@ function App() {
 				<Route path="/admin/*" element={<AdminPages />} />
 				<Route path="/staff/*" element={<StaffPages />} />
 				<Route path="/guest/shuttle" element={<GuestShuttlePage />} />
+				<Route path="/guest/meal" element={<GuestMealPage />} />
 				<Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
 			</Routes>
 		</HashRouter>
