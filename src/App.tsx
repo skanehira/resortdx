@@ -1,5 +1,13 @@
 import { useState } from "react";
-import type { AdminPage, ViewMode } from "./types";
+import {
+	HashRouter,
+	Routes,
+	Route,
+	Navigate,
+	useNavigate,
+	useLocation,
+} from "react-router-dom";
+import type { AdminPage } from "./types";
 import { Dashboard } from "./components/admin/Dashboard";
 import { TaskTemplates } from "./components/admin/TaskTemplates";
 import { StaffMonitor } from "./components/admin/StaffMonitor";
@@ -26,22 +34,34 @@ interface SidebarProps {
 	onClose: () => void;
 }
 
-const Sidebar = ({ currentPage, onPageChange, onModeChange, isOpen, onClose }: SidebarProps) => {
-	const navItems: { page: AdminPage; label: string; icon: React.ReactNode }[] = [
-		{ page: "dashboard", label: "ダッシュボード", icon: <DashboardIcon /> },
-		{
-			page: "templates",
-			label: "タスクテンプレート",
-			icon: <TemplateIcon />,
-		},
-		{ page: "staff_monitor", label: "スタッフモニタ", icon: <StaffIcon /> },
-		{ page: "timeline", label: "部屋別タイムライン", icon: <TimelineIcon /> },
-	];
+const Sidebar = ({
+	currentPage,
+	onPageChange,
+	onModeChange,
+	isOpen,
+	onClose,
+}: SidebarProps) => {
+	const navItems: { page: AdminPage; label: string; icon: React.ReactNode }[] =
+		[
+			{ page: "dashboard", label: "ダッシュボード", icon: <DashboardIcon /> },
+			{
+				page: "templates",
+				label: "タスクテンプレート",
+				icon: <TemplateIcon />,
+			},
+			{ page: "staff_monitor", label: "スタッフモニタ", icon: <StaffIcon /> },
+			{ page: "timeline", label: "部屋別タイムライン", icon: <TimelineIcon /> },
+		];
 
 	return (
 		<>
 			{/* Overlay for mobile */}
-			{isOpen && <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={onClose} />}
+			{isOpen && (
+				<div
+					className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+					onClick={onClose}
+				/>
+			)}
 
 			{/* Sidebar */}
 			<aside
@@ -54,7 +74,9 @@ const Sidebar = ({ currentPage, onPageChange, onModeChange, isOpen, onClose }: S
 					<div className="flex items-center justify-between">
 						<div>
 							<h1 className="text-xl font-display font-semibold">Resort DX</h1>
-							<p className="text-xs text-[rgba(255,255,255,0.6)] mt-1">タスク管理システム</p>
+							<p className="text-xs text-[rgba(255,255,255,0.6)] mt-1">
+								タスク管理システム
+							</p>
 						</div>
 						<button onClick={onClose} className="lg:hidden p-1">
 							<CloseIcon size={20} />
@@ -105,7 +127,11 @@ interface MobileNavProps {
 	onModeChange: () => void;
 }
 
-const MobileBottomNav = ({ currentView, onViewChange, onModeChange }: MobileNavProps) => (
+const MobileBottomNav = ({
+	currentView,
+	onViewChange,
+	onModeChange,
+}: MobileNavProps) => (
 	<nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[rgba(45,41,38,0.1)] z-50 safe-area-pb">
 		<div className="flex">
 			<button
@@ -120,7 +146,9 @@ const MobileBottomNav = ({ currentView, onViewChange, onModeChange }: MobileNavP
 			<button
 				onClick={() => onViewChange("schedule")}
 				className={`flex-1 flex flex-col items-center py-3 transition-colors ${
-					currentView === "schedule" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
+					currentView === "schedule"
+						? "text-[var(--ai)]"
+						: "text-[var(--nezumi)]"
 				}`}
 			>
 				<TimelineIcon size={22} />
@@ -145,7 +173,12 @@ interface AdminLayoutProps {
 	onModeChange: () => void;
 }
 
-const AdminLayout = ({ children, currentPage, onPageChange, onModeChange }: AdminLayoutProps) => {
+const AdminLayout = ({
+	children,
+	currentPage,
+	onPageChange,
+	onModeChange,
+}: AdminLayoutProps) => {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 
 	return (
@@ -186,38 +219,87 @@ const AdminLayout = ({ children, currentPage, onPageChange, onModeChange }: Admi
 	);
 };
 
-// Main App Component
-function App() {
-	const [viewMode, setViewMode] = useState<ViewMode>("admin");
-	const [adminPage, setAdminPage] = useState<AdminPage>("dashboard");
-	const [staffView, setStaffView] = useState<"tasks" | "schedule">("tasks");
+// Admin Pages Wrapper
+const AdminPages = () => {
+	const navigate = useNavigate();
+	const location = useLocation();
 
-	const toggleMode = () => {
-		setViewMode((prev) => (prev === "admin" ? "staff" : "admin"));
+	const getCurrentPage = (): AdminPage => {
+		const path = location.pathname;
+		if (path.includes("templates")) return "templates";
+		if (path.includes("staff_monitor")) return "staff_monitor";
+		if (path.includes("timeline")) return "timeline";
+		return "dashboard";
 	};
 
-	// Admin Mode
-	if (viewMode === "admin") {
-		return (
-			<AdminLayout currentPage={adminPage} onPageChange={setAdminPage} onModeChange={toggleMode}>
-				{adminPage === "dashboard" && <Dashboard />}
-				{adminPage === "templates" && <TaskTemplates />}
-				{adminPage === "staff_monitor" && <StaffMonitor />}
-				{adminPage === "timeline" && <RoomTimeline />}
-			</AdminLayout>
-		);
-	}
+	const handlePageChange = (page: AdminPage) => {
+		navigate(`/admin/${page}`);
+	};
 
-	// Staff Mode (Mobile)
+	const handleModeChange = () => {
+		navigate("/staff/tasks");
+	};
+
+	return (
+		<AdminLayout
+			currentPage={getCurrentPage()}
+			onPageChange={handlePageChange}
+			onModeChange={handleModeChange}
+		>
+			<Routes>
+				<Route path="dashboard" element={<Dashboard />} />
+				<Route path="templates" element={<TaskTemplates />} />
+				<Route path="staff_monitor" element={<StaffMonitor />} />
+				<Route path="timeline" element={<RoomTimeline />} />
+				<Route path="*" element={<Navigate to="dashboard" replace />} />
+			</Routes>
+		</AdminLayout>
+	);
+};
+
+// Staff Pages Wrapper
+const StaffPages = () => {
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	const getCurrentView = (): "tasks" | "schedule" => {
+		return location.pathname.includes("schedule") ? "schedule" : "tasks";
+	};
+
+	const handleViewChange = (view: "tasks" | "schedule") => {
+		navigate(`/staff/${view}`);
+	};
+
+	const handleModeChange = () => {
+		navigate("/admin/dashboard");
+	};
+
 	return (
 		<div className="min-h-screen bg-[var(--shironeri)]">
-			{staffView === "tasks" ? <MobileTaskList /> : <MobileSchedule />}
+			<Routes>
+				<Route path="tasks" element={<MobileTaskList />} />
+				<Route path="schedule" element={<MobileSchedule />} />
+				<Route path="*" element={<Navigate to="tasks" replace />} />
+			</Routes>
 			<MobileBottomNav
-				currentView={staffView}
-				onViewChange={setStaffView}
-				onModeChange={toggleMode}
+				currentView={getCurrentView()}
+				onViewChange={handleViewChange}
+				onModeChange={handleModeChange}
 			/>
 		</div>
+	);
+};
+
+// Main App Component
+function App() {
+	return (
+		<HashRouter>
+			<Routes>
+				<Route path="/admin/*" element={<AdminPages />} />
+				<Route path="/staff/*" element={<StaffPages />} />
+				<Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+			</Routes>
+		</HashRouter>
 	);
 }
 

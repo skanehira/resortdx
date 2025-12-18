@@ -1,5 +1,9 @@
 // === Reservation Types ===
-export type ReservationStatus = "confirmed" | "checked_in" | "checked_out" | "cancelled";
+export type ReservationStatus =
+	| "confirmed"
+	| "checked_in"
+	| "checked_out"
+	| "cancelled";
 
 export interface Reservation {
 	id: string;
@@ -135,8 +139,12 @@ export interface RelativeTimeConfig {
 }
 
 // === View State Types ===
-export type ViewMode = "admin" | "staff";
-export type AdminPage = "dashboard" | "reservations" | "templates" | "staff_monitor" | "timeline";
+export type AdminPage =
+	| "dashboard"
+	| "reservations"
+	| "templates"
+	| "staff_monitor"
+	| "timeline";
 
 export interface FilterState {
 	date: string;
