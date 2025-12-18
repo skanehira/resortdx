@@ -12,6 +12,7 @@ import { Dashboard } from "./components/admin/Dashboard";
 import { TaskTemplates } from "./components/admin/TaskTemplates";
 import { StaffMonitor } from "./components/admin/StaffMonitor";
 import { RoomTimeline } from "./components/admin/RoomTimeline";
+import { TaskHistory } from "./components/admin/TaskHistory";
 import { MobileTaskList } from "./components/staff/MobileTaskList";
 import { MobileSchedule } from "./components/staff/MobileSchedule";
 import {
@@ -19,6 +20,7 @@ import {
 	TemplateIcon,
 	StaffIcon,
 	TimelineIcon,
+	HistoryIcon,
 	TaskIcon,
 	PhoneIcon,
 	MenuIcon,
@@ -51,6 +53,11 @@ const Sidebar = ({
 			},
 			{ page: "staff_monitor", label: "スタッフモニタ", icon: <StaffIcon /> },
 			{ page: "timeline", label: "部屋別タイムライン", icon: <TimelineIcon /> },
+			{
+				page: "task_history",
+				label: "タスク一覧",
+				icon: <HistoryIcon />,
+			},
 		];
 
 	return (
@@ -229,6 +236,7 @@ const AdminPages = () => {
 		if (path.includes("templates")) return "templates";
 		if (path.includes("staff_monitor")) return "staff_monitor";
 		if (path.includes("timeline")) return "timeline";
+		if (path.includes("task_history")) return "task_history";
 		return "dashboard";
 	};
 
@@ -251,6 +259,7 @@ const AdminPages = () => {
 				<Route path="templates" element={<TaskTemplates />} />
 				<Route path="staff_monitor" element={<StaffMonitor />} />
 				<Route path="timeline" element={<RoomTimeline />} />
+				<Route path="task_history" element={<TaskHistory />} />
 				<Route path="*" element={<Navigate to="dashboard" replace />} />
 			</Routes>
 		</AdminLayout>

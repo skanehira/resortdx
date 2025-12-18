@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
 	mockReservations,
 	mockTasks,
@@ -18,6 +18,13 @@ import {
 	CheckIcon,
 	ChevronRightIcon,
 } from "../ui/Icons";
+
+// Drag context type
+interface DragInfo {
+	taskId: string;
+	originalTime: string;
+	originalRoom: string;
+}
 
 // Time slot header component
 const TimeSlotHeader = ({ slots }: { slots: string[] }) => (
@@ -75,9 +82,17 @@ interface TaskBlockProps {
 	task: Task;
 	slotWidth: number;
 	startSlotIndex: number;
+	onDragStart: (task: Task) => void;
+	isDragging: boolean;
 }
 
-const TaskBlock = ({ task, slotWidth, startSlotIndex }: TaskBlockProps) => {
+const TaskBlock = ({
+	task,
+	slotWidth,
+	startSlotIndex,
+	onDragStart,
+	isDragging,
+}: TaskBlockProps) => {
 	const staff = task.assignedStaffId
 		? getStaffById(task.assignedStaffId)
 		: null;
@@ -103,11 +118,27 @@ const TaskBlock = ({ task, slotWidth, startSlotIndex }: TaskBlockProps) => {
 	const width = durationSlots * slotWidth - 4;
 	const left = startSlotIndex * slotWidth + 2;
 
+	const handleDragStart = (e: React.DragEvent) => {
+		if (task.status === "completed") {
+			e.preventDefault();
+			return;
+		}
+		e.dataTransfer.setData("taskId", task.id);
+		e.dataTransfer.effectAllowed = "move";
+		onDragStart(task);
+	};
+
 	return (
 		<div
-			className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center px-2 overflow-hidden cursor-pointer transition-all hover:brightness-110 ${categoryColors[task.category]} ${statusStyles[task.status]}`}
+			draggable={task.status !== "completed"}
+			onDragStart={handleDragStart}
+			className={`absolute top-1 bottom-1 rounded text-white text-xs flex items-center px-2 overflow-hidden transition-all hover:brightness-110 ${categoryColors[task.category]} ${statusStyles[task.status]} ${
+				task.status !== "completed"
+					? "cursor-grab active:cursor-grabbing"
+					: "cursor-default"
+			} ${isDragging ? "opacity-50 scale-95" : ""}`}
 			style={{ left: `${left}px`, width: `${width}px` }}
-			title={`${task.title}\n${task.scheduledTime} - ${task.estimatedDuration}分\n担当: ${staff?.name || "未割当"}`}
+			title={`${task.title}\n${task.scheduledTime} - ${task.estimatedDuration}分\n担当: ${staff?.name || "未割当"}${task.status !== "completed" ? "\n\nドラッグして時間を変更" : ""}`}
 		>
 			<div className="truncate flex items-center gap-1">
 				{task.status === "completed" && <CheckIcon size={12} />}
@@ -126,6 +157,12 @@ interface RoomRowProps {
 	slots: string[];
 	onRoomClick: () => void;
 	isSelected: boolean;
+	onDragStart: (task: Task) => void;
+	onDrop: (taskId: string, newTime: string, newRoom: string) => void;
+	draggingTaskId: string | null;
+	isDragOver: boolean;
+	onDragEnter: () => void;
+	onDragLeave: () => void;
 }
 
 const RoomRow = ({
@@ -135,6 +172,12 @@ const RoomRow = ({
 	slots,
 	onRoomClick,
 	isSelected,
+	onDragStart,
+	onDrop,
+	draggingTaskId,
+	isDragOver,
+	onDragEnter,
+	onDragLeave,
 }: RoomRowProps) => {
 	const slotWidth = 80;
 
@@ -145,11 +188,40 @@ const RoomRow = ({
 		return Math.floor((timeInMinutes - startTime) / 30);
 	};
 
+	const getTimeFromPosition = (
+		clientX: number,
+		containerRect: DOMRect,
+	): string => {
+		const relativeX = clientX - containerRect.left;
+		const slotIndex = Math.floor(relativeX / slotWidth);
+		const startMinutes = 6 * 60; // 06:00
+		const targetMinutes = startMinutes + slotIndex * 30;
+		const hours = Math.floor(targetMinutes / 60);
+		const minutes = targetMinutes % 60;
+		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+	};
+
+	const handleDragOver = (e: React.DragEvent) => {
+		e.preventDefault();
+		e.dataTransfer.dropEffect = "move";
+	};
+
+	const handleDrop = (e: React.DragEvent) => {
+		e.preventDefault();
+		const taskId = e.dataTransfer.getData("taskId");
+		if (!taskId) return;
+
+		const container = e.currentTarget as HTMLElement;
+		const rect = container.getBoundingClientRect();
+		const newTime = getTimeFromPosition(e.clientX, rect);
+		onDrop(taskId, newTime, roomNumber);
+	};
+
 	return (
 		<div
 			className={`flex border-b border-[rgba(45,41,38,0.04)] hover:bg-[rgba(45,41,38,0.01)] ${
 				isSelected ? "bg-[rgba(27,73,101,0.03)]" : ""
-			}`}
+			} ${isDragOver ? "bg-[rgba(27,73,101,0.08)]" : ""}`}
 		>
 			{/* Room Info */}
 			<div
@@ -174,9 +246,15 @@ const RoomRow = ({
 			</div>
 
 			{/* Timeline */}
-			<div className="flex-1 relative h-14 overflow-x-auto">
+			<div
+				className="flex-1 relative h-14 overflow-x-auto"
+				onDragOver={handleDragOver}
+				onDrop={handleDrop}
+				onDragEnter={onDragEnter}
+				onDragLeave={onDragLeave}
+			>
 				{/* Grid lines */}
-				<div className="absolute inset-0 flex">
+				<div className="absolute inset-0 flex pointer-events-none">
 					{slots.map((slot) => (
 						<div
 							key={slot}
@@ -184,7 +262,7 @@ const RoomRow = ({
 								slot.endsWith(":00")
 									? "border-[rgba(45,41,38,0.08)]"
 									: "border-[rgba(45,41,38,0.03)]"
-							}`}
+							} ${isDragOver ? "bg-[rgba(27,73,101,0.03)]" : ""}`}
 						/>
 					))}
 				</div>
@@ -198,6 +276,8 @@ const RoomRow = ({
 							task={task}
 							slotWidth={slotWidth}
 							startSlotIndex={slotIndex}
+							onDragStart={onDragStart}
+							isDragging={draggingTaskId === task.id}
 						/>
 					);
 				})}
@@ -376,6 +456,8 @@ const RoomDetail = ({ roomNumber, reservation, tasks }: RoomDetailProps) => {
 // Main Room Timeline Component
 export const RoomTimeline = () => {
 	const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+	const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
+	const [dragOverRoom, setDragOverRoom] = useState<string | null>(null);
 	const timeSlots = useMemo(() => getTimeSlots(), []);
 
 	// Get unique room numbers from reservations
@@ -396,6 +478,34 @@ export const RoomTimeline = () => {
 		? getReservationByRoom(selectedRoom)
 		: null;
 	const selectedTasks = selectedRoom ? getTasksByRoom(selectedRoom) : [];
+
+	// Drag handlers
+	const handleDragStart = useCallback((task: Task) => {
+		setDragInfo({
+			taskId: task.id,
+			originalTime: task.scheduledTime,
+			originalRoom: task.roomNumber,
+		});
+	}, []);
+
+	const handleDrop = useCallback(
+		(taskId: string, newTime: string, newRoom: string) => {
+			if (dragInfo) {
+				console.log(
+					`タスク ${taskId} を ${dragInfo.originalTime} から ${newTime} に、${dragInfo.originalRoom}号室 から ${newRoom}号室 に移動`,
+				);
+				// In a real app, this would update the backend
+			}
+			setDragInfo(null);
+			setDragOverRoom(null);
+		},
+		[dragInfo],
+	);
+
+	const handleDragEnd = useCallback(() => {
+		setDragInfo(null);
+		setDragOverRoom(null);
+	}, []);
 
 	// Stats
 	const completedTasksCount = mockTasks.filter(
@@ -502,7 +612,7 @@ export const RoomTimeline = () => {
 						<TimeSlotHeader slots={timeSlots} />
 
 						{/* Room Rows */}
-						<div className="relative">
+						<div className="relative" onDragEnd={handleDragEnd}>
 							<CurrentTimeIndicator slots={timeSlots} />
 							{rooms.map((roomNumber) => (
 								<RoomRow
@@ -517,6 +627,12 @@ export const RoomTimeline = () => {
 										)
 									}
 									isSelected={selectedRoom === roomNumber}
+									onDragStart={handleDragStart}
+									onDrop={handleDrop}
+									draggingTaskId={dragInfo?.taskId || null}
+									isDragOver={dragOverRoom === roomNumber}
+									onDragEnter={() => setDragOverRoom(roomNumber)}
+									onDragLeave={() => setDragOverRoom(null)}
 								/>
 							))}
 						</div>

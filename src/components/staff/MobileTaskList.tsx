@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { mockTasks, mockStaff, getReservationById } from "../../data/mockData";
 import { type Task, type TaskStatus } from "../../types";
 import {
@@ -9,6 +9,9 @@ import {
 	ChevronRightIcon,
 	AlertIcon,
 } from "../ui/Icons";
+
+// Swipe threshold in pixels
+const SWIPE_THRESHOLD = 80;
 
 // Simulating current logged-in staff (using first staff for demo)
 const CURRENT_STAFF = mockStaff[0];
@@ -43,7 +46,9 @@ const StatusTabs = ({ selected, onChange, counts }: StatusTabsProps) => {
 					{tab.label}
 					<span
 						className={`ml-1.5 text-xs ${
-							selected === tab.key ? "text-[var(--ai)]" : "text-[var(--nezumi-light)]"
+							selected === tab.key
+								? "text-[var(--ai)]"
+								: "text-[var(--nezumi-light)]"
 						}`}
 					>
 						{counts[tab.key]}
@@ -62,7 +67,74 @@ interface TaskCardProps {
 
 const TaskCard = ({ task, onStatusChange }: TaskCardProps) => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [swipeOffset, setSwipeOffset] = useState(0);
+	const [isSwiping, setIsSwiping] = useState(false);
+	const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+	const cardRef = useRef<HTMLDivElement>(null);
 	const reservation = getReservationById(task.reservationId);
+
+	// Swipe handlers
+	const handleTouchStart = useCallback(
+		(e: React.TouchEvent) => {
+			if (task.status === "completed") return;
+			const touch = e.touches[0];
+			touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+			setIsSwiping(true);
+		},
+		[task.status],
+	);
+
+	const handleTouchMove = useCallback(
+		(e: React.TouchEvent) => {
+			if (!touchStartRef.current || task.status === "completed") return;
+			const touch = e.touches[0];
+			const deltaX = touch.clientX - touchStartRef.current.x;
+			const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+
+			// If vertical scroll is dominant, cancel swipe
+			if (deltaY > Math.abs(deltaX) && Math.abs(deltaX) < 10) {
+				touchStartRef.current = null;
+				setSwipeOffset(0);
+				setIsSwiping(false);
+				return;
+			}
+
+			// Limit swipe range
+			const maxSwipe = 120;
+			const clampedOffset = Math.max(-maxSwipe, Math.min(maxSwipe, deltaX));
+			setSwipeOffset(clampedOffset);
+		},
+		[task.status],
+	);
+
+	const handleTouchEnd = useCallback(() => {
+		if (!touchStartRef.current || task.status === "completed") {
+			touchStartRef.current = null;
+			setSwipeOffset(0);
+			setIsSwiping(false);
+			return;
+		}
+
+		// Check if swipe threshold is met
+		if (Math.abs(swipeOffset) >= SWIPE_THRESHOLD) {
+			if (swipeOffset < 0) {
+				// Swipe left: start or complete
+				if (task.status === "pending") {
+					onStatusChange(task.id, "in_progress");
+				} else if (task.status === "in_progress") {
+					onStatusChange(task.id, "completed");
+				}
+			} else if (swipeOffset > 0 && task.status === "in_progress") {
+				// Swipe right: pause (only for in_progress)
+				onStatusChange(task.id, "pending");
+			}
+		}
+
+		// Reset
+		touchStartRef.current = null;
+		setSwipeOffset(0);
+		setIsSwiping(false);
+	}, [swipeOffset, task.status, task.id, onStatusChange]);
 
 	const statusColors: Record<TaskStatus, string> = {
 		pending: "border-l-[var(--nezumi-light)]",
@@ -75,137 +147,198 @@ const TaskCard = ({ task, onStatusChange }: TaskCardProps) => {
 	};
 
 	return (
-		<div
-			className={`shoji-panel border-l-4 ${statusColors[task.status]} overflow-hidden animate-slide-up`}
-		>
-			{/* Main Content - Tappable */}
-			<div
-				className="p-4 cursor-pointer active:bg-[var(--shironeri-warm)]"
-				onClick={() => setIsExpanded(!isExpanded)}
-			>
-				<div className="flex items-start justify-between gap-3">
-					<div className="flex-1 min-w-0">
-						{/* Time and Priority */}
-						<div className="flex items-center gap-2 mb-1">
-							<span className="text-lg font-display font-semibold text-[var(--ai)]">
-								{task.scheduledTime}
-							</span>
-							{task.priority === "urgent" && (
-								<span className="badge badge-urgent">
-									<AlertIcon size={12} />
-									緊急
-								</span>
-							)}
-							{task.priority === "high" && <span className="badge badge-anniversary">優先</span>}
-							{task.isAnniversaryRelated && (
-								<CelebrationIcon size={16} className="text-[var(--kincha)]" />
-							)}
-						</div>
-
-						{/* Task Title */}
-						<h3 className="font-medium text-[var(--sumi)] leading-tight">{task.title}</h3>
-
-						{/* Meta Info */}
-						<div className="flex items-center gap-2 mt-2 text-sm text-[var(--nezumi)]">
-							<div className="flex items-center gap-1">
-								<RoomIcon size={14} />
-								<span>{task.roomNumber}号室</span>
-							</div>
-							<span>・</span>
-							<span>{task.estimatedDuration}分</span>
-						</div>
-					</div>
-
-					{/* Expand Arrow */}
-					<ChevronRightIcon
-						size={20}
-						className={`text-[var(--nezumi-light)] transition-transform ${
-							isExpanded ? "rotate-90" : ""
-						}`}
-					/>
-				</div>
-			</div>
-
-			{/* Expanded Content */}
-			{isExpanded && (
-				<div className="px-4 pb-4 pt-0 border-t border-[rgba(45,41,38,0.06)] mt-0 animate-fade-in">
-					{/* Description */}
-					{task.description && (
-						<div className="py-3 border-b border-[rgba(45,41,38,0.04)]">
-							<p className="text-sm text-[var(--sumi-light)]">{task.description}</p>
-						</div>
-					)}
-
-					{/* Guest Info */}
-					{reservation && (
-						<div className="py-3 border-b border-[rgba(45,41,38,0.04)]">
-							<p className="text-xs text-[var(--nezumi)] mb-1">ゲスト情報</p>
-							<p className="text-sm font-medium">{reservation.guestName}</p>
-							{reservation.anniversary && (
-								<div className="mt-2 p-2 bg-[rgba(184,134,11,0.05)] rounded text-sm">
-									<p className="text-[var(--kincha)] font-medium">
-										{reservation.anniversary.type === "birthday" ? "誕生日" : "結婚記念日"}
-									</p>
-									<p className="text-[var(--sumi-light)] text-xs mt-0.5">
-										{reservation.anniversary.description}
-									</p>
-								</div>
-							)}
-							{reservation.specialRequests.length > 0 && (
-								<div className="mt-2">
-									<p className="text-xs text-[var(--nezumi)] mb-1">特記事項</p>
-									<div className="flex flex-wrap gap-1">
-										{reservation.specialRequests.map((req, idx) => (
-											<span
-												key={idx}
-												className="text-xs px-2 py-1 bg-[var(--shironeri-warm)] rounded"
-											>
-												{req}
-											</span>
-										))}
-									</div>
-								</div>
-							)}
-						</div>
-					)}
-
-					{/* Action Buttons */}
-					<div className="pt-4 space-y-2">
-						{task.status === "pending" && (
-							<button
-								onClick={() => handleStatusChange("in_progress")}
-								className="w-full btn btn-primary py-3 text-base"
-							>
-								<TaskIcon size={18} />
-								作業を開始する
-							</button>
+		<div className="relative overflow-hidden rounded-lg">
+			{/* Swipe Action Background - Left (Complete/Start) */}
+			{task.status !== "completed" && (
+				<div
+					className={`absolute inset-y-0 right-0 w-24 flex items-center justify-center transition-opacity ${
+						swipeOffset < -30 ? "opacity-100" : "opacity-0"
+					} ${task.status === "pending" ? "bg-[var(--ai)]" : "bg-[var(--aotake)]"}`}
+				>
+					<div className="flex flex-col items-center text-white">
+						{task.status === "pending" ? (
+							<TaskIcon size={20} />
+						) : (
+							<CheckIcon size={20} />
 						)}
-						{task.status === "in_progress" && (
-							<>
-								<button
-									onClick={() => handleStatusChange("completed")}
-									className="w-full py-3 text-base rounded bg-[var(--aotake)] text-white font-display font-medium flex items-center justify-center gap-2"
-								>
-									<CheckIcon size={18} />
-									完了にする
-								</button>
-								<button
-									onClick={() => handleStatusChange("pending")}
-									className="w-full btn btn-secondary py-3 text-base"
-								>
-									作業を中断する
-								</button>
-							</>
-						)}
-						{task.status === "completed" && (
-							<div className="flex items-center justify-center gap-2 py-3 text-[var(--aotake)]">
-								<CheckIcon size={18} />
-								<span className="font-display">完了済み</span>
-							</div>
-						)}
+						<span className="text-xs mt-1 font-display">
+							{task.status === "pending" ? "開始" : "完了"}
+						</span>
 					</div>
 				</div>
 			)}
+
+			{/* Swipe Action Background - Right (Pause) */}
+			{task.status === "in_progress" && (
+				<div
+					className={`absolute inset-y-0 left-0 w-24 flex items-center justify-center transition-opacity ${
+						swipeOffset > 30 ? "opacity-100" : "opacity-0"
+					} bg-[var(--nezumi)]`}
+				>
+					<div className="flex flex-col items-center text-white">
+						<AlertIcon size={20} />
+						<span className="text-xs mt-1 font-display">中断</span>
+					</div>
+				</div>
+			)}
+
+			{/* Card Content */}
+			<div
+				ref={cardRef}
+				className={`shoji-panel border-l-4 ${statusColors[task.status]} overflow-hidden animate-slide-up relative bg-white ${
+					isSwiping ? "" : "transition-transform duration-200"
+				}`}
+				style={{ transform: `translateX(${swipeOffset}px)` }}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				onTouchEnd={handleTouchEnd}
+			>
+				{/* Swipe hint for non-completed tasks */}
+				{task.status !== "completed" && !isExpanded && (
+					<div className="absolute top-1/2 right-2 -translate-y-1/2 text-[var(--nezumi-light)] opacity-30 pointer-events-none">
+						<ChevronRightIcon size={16} className="animate-pulse" />
+					</div>
+				)}
+
+				{/* Main Content - Tappable */}
+				<div
+					className="p-4 cursor-pointer active:bg-[var(--shironeri-warm)]"
+					onClick={() => !isSwiping && setIsExpanded(!isExpanded)}
+				>
+					<div className="flex items-start justify-between gap-3">
+						<div className="flex-1 min-w-0">
+							{/* Time and Priority */}
+							<div className="flex items-center gap-2 mb-1">
+								<span className="text-lg font-display font-semibold text-[var(--ai)]">
+									{task.scheduledTime}
+								</span>
+								{task.priority === "urgent" && (
+									<span className="badge badge-urgent">
+										<AlertIcon size={12} />
+										緊急
+									</span>
+								)}
+								{task.priority === "high" && (
+									<span className="badge badge-anniversary">優先</span>
+								)}
+								{task.isAnniversaryRelated && (
+									<CelebrationIcon size={16} className="text-[var(--kincha)]" />
+								)}
+							</div>
+
+							{/* Task Title */}
+							<h3 className="font-medium text-[var(--sumi)] leading-tight">
+								{task.title}
+							</h3>
+
+							{/* Meta Info */}
+							<div className="flex items-center gap-2 mt-2 text-sm text-[var(--nezumi)]">
+								<div className="flex items-center gap-1">
+									<RoomIcon size={14} />
+									<span>{task.roomNumber}号室</span>
+								</div>
+								<span>・</span>
+								<span>{task.estimatedDuration}分</span>
+							</div>
+						</div>
+
+						{/* Expand Arrow */}
+						<ChevronRightIcon
+							size={20}
+							className={`text-[var(--nezumi-light)] transition-transform ${
+								isExpanded ? "rotate-90" : ""
+							}`}
+						/>
+					</div>
+				</div>
+
+				{/* Expanded Content */}
+				{isExpanded && (
+					<div className="px-4 pb-4 pt-0 border-t border-[rgba(45,41,38,0.06)] mt-0 animate-fade-in">
+						{/* Description */}
+						{task.description && (
+							<div className="py-3 border-b border-[rgba(45,41,38,0.04)]">
+								<p className="text-sm text-[var(--sumi-light)]">
+									{task.description}
+								</p>
+							</div>
+						)}
+
+						{/* Guest Info */}
+						{reservation && (
+							<div className="py-3 border-b border-[rgba(45,41,38,0.04)]">
+								<p className="text-xs text-[var(--nezumi)] mb-1">ゲスト情報</p>
+								<p className="text-sm font-medium">{reservation.guestName}</p>
+								{reservation.anniversary && (
+									<div className="mt-2 p-2 bg-[rgba(184,134,11,0.05)] rounded text-sm">
+										<p className="text-[var(--kincha)] font-medium">
+											{reservation.anniversary.type === "birthday"
+												? "誕生日"
+												: "結婚記念日"}
+										</p>
+										<p className="text-[var(--sumi-light)] text-xs mt-0.5">
+											{reservation.anniversary.description}
+										</p>
+									</div>
+								)}
+								{reservation.specialRequests.length > 0 && (
+									<div className="mt-2">
+										<p className="text-xs text-[var(--nezumi)] mb-1">
+											特記事項
+										</p>
+										<div className="flex flex-wrap gap-1">
+											{reservation.specialRequests.map((req, idx) => (
+												<span
+													key={idx}
+													className="text-xs px-2 py-1 bg-[var(--shironeri-warm)] rounded"
+												>
+													{req}
+												</span>
+											))}
+										</div>
+									</div>
+								)}
+							</div>
+						)}
+
+						{/* Action Buttons */}
+						<div className="pt-4 space-y-2">
+							{task.status === "pending" && (
+								<button
+									onClick={() => handleStatusChange("in_progress")}
+									className="w-full btn btn-primary py-3 text-base"
+								>
+									<TaskIcon size={18} />
+									作業を開始する
+								</button>
+							)}
+							{task.status === "in_progress" && (
+								<>
+									<button
+										onClick={() => handleStatusChange("completed")}
+										className="w-full py-3 text-base rounded bg-[var(--aotake)] text-white font-display font-medium flex items-center justify-center gap-2"
+									>
+										<CheckIcon size={18} />
+										完了にする
+									</button>
+									<button
+										onClick={() => handleStatusChange("pending")}
+										className="w-full btn btn-secondary py-3 text-base"
+									>
+										作業を中断する
+									</button>
+								</>
+							)}
+							{task.status === "completed" && (
+								<div className="flex items-center justify-center gap-2 py-3 text-[var(--aotake)]">
+									<CheckIcon size={18} />
+									<span className="font-display">完了済み</span>
+								</div>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 };
@@ -248,7 +381,9 @@ const CurrentTaskHighlight = ({
 		<div className="shoji-panel p-4 bg-[rgba(27,73,101,0.03)] border-l-4 border-l-[var(--ai)]">
 			<div className="flex items-center gap-2 mb-2">
 				<div className="w-2 h-2 bg-[var(--ai)] rounded-full animate-pulse" />
-				<span className="text-sm font-display text-[var(--ai)]">現在作業中</span>
+				<span className="text-sm font-display text-[var(--ai)]">
+					現在作業中
+				</span>
 			</div>
 			<h3 className="font-medium text-[var(--sumi)] mb-1">{task.title}</h3>
 			<p className="text-sm text-[var(--nezumi)]">
@@ -268,9 +403,12 @@ const CurrentTaskHighlight = ({
 // Main Mobile Task List Component
 export const MobileTaskList = () => {
 	const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
+	const [tasks, setTasks] = useState<Task[]>(() =>
+		mockTasks.filter((t) => t.assignedStaffId === CURRENT_STAFF.id),
+	);
 
-	// Get tasks for current staff
-	const myTasks = mockTasks.filter((t) => t.assignedStaffId === CURRENT_STAFF.id);
+	// Get tasks for current staff (use local state)
+	const myTasks = tasks;
 
 	// Sort tasks: in_progress first, then pending by time, then completed
 	const sortedTasks = [...myTasks].sort((a, b) => {
@@ -282,7 +420,9 @@ export const MobileTaskList = () => {
 	});
 
 	const filteredTasks =
-		statusFilter === "all" ? sortedTasks : sortedTasks.filter((t) => t.status === statusFilter);
+		statusFilter === "all"
+			? sortedTasks
+			: sortedTasks.filter((t) => t.status === statusFilter);
 
 	const currentTask = myTasks.find((t) => t.status === "in_progress");
 
@@ -294,8 +434,11 @@ export const MobileTaskList = () => {
 	};
 
 	const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
-		console.log("Changing task", taskId, "to", newStatus);
-		// In real app, this would update state/backend
+		setTasks((prevTasks) =>
+			prevTasks.map((task) =>
+				task.id === taskId ? { ...task, status: newStatus } : task,
+			),
+		);
 	};
 
 	const currentTime = new Date().toLocaleTimeString("ja-JP", {
@@ -316,10 +459,16 @@ export const MobileTaskList = () => {
 							</h1>
 						</div>
 						<div className="text-right">
-							<p className="text-2xl font-display text-[var(--ai)]">{currentTime}</p>
+							<p className="text-2xl font-display text-[var(--ai)]">
+								{currentTime}
+							</p>
 						</div>
 					</div>
-					<StatusTabs selected={statusFilter} onChange={setStatusFilter} counts={counts} />
+					<StatusTabs
+						selected={statusFilter}
+						onChange={setStatusFilter}
+						counts={counts}
+					/>
 				</div>
 			</div>
 
@@ -330,7 +479,10 @@ export const MobileTaskList = () => {
 
 				{/* Current Task Highlight */}
 				{statusFilter !== "completed" && (
-					<CurrentTaskHighlight task={currentTask || null} onStatusChange={handleStatusChange} />
+					<CurrentTaskHighlight
+						task={currentTask || null}
+						onStatusChange={handleStatusChange}
+					/>
 				)}
 
 				{/* Task List */}
@@ -345,7 +497,10 @@ export const MobileTaskList = () => {
 
 					{filteredTasks.length === 0 && (
 						<div className="shoji-panel p-8 text-center">
-							<TaskIcon size={48} className="mx-auto text-[var(--nezumi-light)] mb-4" />
+							<TaskIcon
+								size={48}
+								className="mx-auto text-[var(--nezumi-light)] mb-4"
+							/>
 							<p className="text-[var(--nezumi)]">
 								{statusFilter === "completed"
 									? "完了したタスクはありません"

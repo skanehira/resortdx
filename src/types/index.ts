@@ -144,7 +144,8 @@ export type AdminPage =
 	| "reservations"
 	| "templates"
 	| "staff_monitor"
-	| "timeline";
+	| "timeline"
+	| "task_history";
 
 export interface FilterState {
 	date: string;
