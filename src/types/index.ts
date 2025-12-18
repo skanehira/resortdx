@@ -145,6 +145,7 @@ export type AdminPage =
 	| "templates"
 	| "staff_monitor"
 	| "equipment"
+	| "shuttle"
 	| "task_history";
 
 export interface FilterState {
@@ -269,4 +270,77 @@ export interface RoomEquipment {
 	status: EquipmentStatusType;
 	lastMaintenanceAt: string | null;
 	notes: string | null;
+}
+
+// === Shuttle Management Types ===
+
+// 送迎ステータス（5段階）
+export type ShuttleStatus =
+	| "not_departed" // 未出発
+	| "heading" // 向かい中
+	| "arrived" // 到着済
+	| "boarded" // 乗車済
+	| "completed"; // 完了
+
+export const SHUTTLE_STATUS_LABELS: Record<ShuttleStatus, string> = {
+	not_departed: "未出発",
+	heading: "向かい中",
+	arrived: "到着済",
+	boarded: "乗車済",
+	completed: "完了",
+};
+
+// ゲスト向けラベル
+export const SHUTTLE_STATUS_GUEST_LABELS: Record<ShuttleStatus, string> = {
+	not_departed: "準備中",
+	heading: "お迎えに向かっています",
+	arrived: "到着しました",
+	boarded: "ご乗車確認済み",
+	completed: "送迎完了",
+};
+
+// 車両ステータス
+export type VehicleStatus = "available" | "in_use" | "maintenance";
+
+export const VEHICLE_STATUS_LABELS: Record<VehicleStatus, string> = {
+	available: "利用可能",
+	in_use: "稼働中",
+	maintenance: "メンテナンス中",
+};
+
+// 車両インターフェース
+export interface Vehicle {
+	id: string;
+	name: string; // "1号車"
+	licensePlate: string; // "三重 500 あ 1234"
+	capacity: number;
+	status: VehicleStatus;
+	currentDriverId: string | null;
+	currentShuttleTaskId: string | null;
+	lastMaintenanceDate: string;
+	nextMaintenanceDate: string | null;
+	notes: string | null;
+}
+
+// 送迎タスクインターフェース
+export interface ShuttleTask {
+	id: string;
+	reservationId: string;
+	guestName: string;
+	guestNameKana: string;
+	numberOfGuests: number;
+	pickupLocation: string; // "鳥羽駅"
+	dropoffLocation: string; // "旅館"
+	direction: "pickup" | "dropoff";
+	scheduledTime: string;
+	estimatedDuration: number;
+	shuttleStatus: ShuttleStatus;
+	assignedVehicleId: string | null;
+	assignedDriverId: string | null;
+	priority: "normal" | "high" | "urgent";
+	guestArrivalNotified: boolean;
+	guestNotifiedAt?: string;
+	notes?: string;
+	completedAt?: string;
+	createdAt: string;
 }

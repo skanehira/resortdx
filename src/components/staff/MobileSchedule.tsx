@@ -1,6 +1,19 @@
 import { useState, useRef, useEffect } from "react";
-import { mockTasks, mockStaff, getReservationById } from "../../data/mockData";
-import { TASK_CATEGORY_LABELS, type Task, type TaskStatus } from "../../types";
+import {
+	mockTasks,
+	mockStaff,
+	mockShuttleTasks,
+	getReservationById,
+	getVehicleById,
+} from "../../data/mockData";
+import {
+	TASK_CATEGORY_LABELS,
+	SHUTTLE_STATUS_LABELS,
+	type Task,
+	type TaskStatus,
+	type ShuttleTask,
+	type ShuttleStatus,
+} from "../../types";
 import {
 	TimelineIcon,
 	RoomIcon,
@@ -10,10 +23,39 @@ import {
 	ArrowLeftIcon,
 	TaskIcon,
 	ClockIcon,
+	ShuttleIcon,
+	LocationIcon,
+	ArrowRightIcon,
 } from "../ui/Icons";
 
-// Simulating current logged-in staff
-const CURRENT_STAFF = mockStaff[0];
+// Simulating current logged-in staff (using driver STF004 to show shuttle tasks)
+const CURRENT_STAFF = mockStaff[3]; // STF004 - 小林 誠 (driver)
+
+// Unified schedule item type
+type ScheduleItem =
+	| { type: "task"; data: Task }
+	| { type: "shuttle"; data: ShuttleTask };
+
+// Get time string from schedule item
+const getItemTime = (item: ScheduleItem): string => {
+	return item.type === "task"
+		? item.data.scheduledTime
+		: item.data.scheduledTime;
+};
+
+// Get status for schedule item
+const getItemStatus = (
+	item: ScheduleItem,
+): "pending" | "in_progress" | "completed" => {
+	if (item.type === "task") {
+		return item.data.status;
+	}
+	// Map shuttle status to task-like status
+	const shuttleStatus = item.data.shuttleStatus;
+	if (shuttleStatus === "completed") return "completed";
+	if (shuttleStatus === "not_departed") return "pending";
+	return "in_progress";
+};
 
 // Timeline Item Component
 interface TimelineItemProps {
@@ -111,6 +153,145 @@ const TimelineItem = ({ task, isActive, onClick }: TimelineItemProps) => {
 				{reservation?.anniversary && (
 					<div className="mt-2 text-sm text-[var(--kincha)]">
 						{reservation.guestName}様 - {reservation.anniversary.description}
+					</div>
+				)}
+			</div>
+		</div>
+	);
+};
+
+// Shuttle Timeline Item Component
+interface ShuttleTimelineItemProps {
+	shuttle: ShuttleTask;
+	isActive: boolean;
+	onClick: () => void;
+}
+
+const ShuttleTimelineItem = ({
+	shuttle,
+	isActive,
+	onClick,
+}: ShuttleTimelineItemProps) => {
+	const vehicle = shuttle.assignedVehicleId
+		? getVehicleById(shuttle.assignedVehicleId)
+		: null;
+
+	// Map shuttle status to display status
+	const getDisplayStatus = (): "pending" | "in_progress" | "completed" => {
+		if (shuttle.shuttleStatus === "completed") return "completed";
+		if (shuttle.shuttleStatus === "not_departed") return "pending";
+		return "in_progress";
+	};
+
+	const displayStatus = getDisplayStatus();
+
+	const statusStyles: Record<string, string> = {
+		pending: "bg-[var(--shironeri)] border-[var(--nezumi-light)]",
+		in_progress: "bg-[rgba(27,73,101,0.05)] border-[var(--ai)]",
+		completed: "bg-[rgba(93,174,139,0.05)] border-[var(--aotake)]",
+	};
+
+	const nodeStyles: Record<string, string> = {
+		pending: "bg-white border-[var(--nezumi-light)]",
+		in_progress: "bg-[var(--ai)] border-[var(--ai)]",
+		completed: "bg-[var(--aotake)] border-[var(--aotake)]",
+	};
+
+	const shuttleStatusBadgeStyles: Record<ShuttleStatus, string> = {
+		not_departed: "bg-gray-100 text-gray-600",
+		heading: "bg-[var(--ai)]/10 text-[var(--ai)]",
+		arrived: "bg-[var(--aotake)]/10 text-[var(--aotake)]",
+		boarded: "bg-[var(--kincha)]/10 text-[var(--kincha)]",
+		completed: "bg-[var(--aotake)]/10 text-[var(--aotake)]",
+	};
+
+	return (
+		<div className="flex gap-4 animate-slide-up">
+			{/* Timeline Node */}
+			<div className="flex flex-col items-center">
+				<div
+					className={`w-4 h-4 rounded-full border-2 ${nodeStyles[displayStatus]} ${
+						displayStatus === "in_progress"
+							? "ring-4 ring-[rgba(27,73,101,0.15)]"
+							: ""
+					}`}
+				>
+					{displayStatus === "completed" && (
+						<CheckIcon size={8} className="text-white m-0.5" />
+					)}
+				</div>
+				<div className="w-0.5 flex-1 bg-[rgba(45,41,38,0.1)] -mt-0.5" />
+			</div>
+
+			{/* Content */}
+			<div
+				onClick={onClick}
+				className={`flex-1 mb-4 p-4 rounded-lg border-l-4 cursor-pointer transition-all active:scale-[0.99] ${statusStyles[displayStatus]} ${
+					isActive ? "ring-2 ring-[var(--ai)]" : ""
+				}`}
+			>
+				{/* Time */}
+				<div className="flex items-center gap-2 mb-2">
+					<span className="text-lg font-display font-semibold text-[var(--ai)]">
+						{shuttle.scheduledTime}
+					</span>
+					<span className="flex items-center gap-1 px-2 py-0.5 bg-[var(--ai)]/10 text-[var(--ai)] rounded text-xs font-medium">
+						<ShuttleIcon className="w-3 h-3" />
+						送迎
+					</span>
+					{shuttle.priority === "urgent" && (
+						<span className="badge badge-urgent">
+							<AlertIcon size={10} />
+							緊急
+						</span>
+					)}
+					<span
+						className={`px-2 py-0.5 rounded text-xs font-medium ${shuttleStatusBadgeStyles[shuttle.shuttleStatus]}`}
+					>
+						{SHUTTLE_STATUS_LABELS[shuttle.shuttleStatus]}
+					</span>
+				</div>
+
+				{/* Title */}
+				<h3
+					className={`font-medium leading-tight ${
+						displayStatus === "completed"
+							? "text-[var(--nezumi)] line-through"
+							: "text-[var(--sumi)]"
+					}`}
+				>
+					{shuttle.guestName}様{" "}
+					{shuttle.direction === "pickup" ? "お迎え" : "お送り"}
+				</h3>
+
+				{/* Route */}
+				<div className="flex items-center gap-2 mt-2 text-sm text-[var(--nezumi)]">
+					<div className="flex items-center gap-1">
+						<LocationIcon className="w-3 h-3" />
+						<span>{shuttle.pickupLocation}</span>
+					</div>
+					<ArrowRightIcon className="w-3 h-3" />
+					<span>{shuttle.dropoffLocation}</span>
+				</div>
+
+				{/* Meta */}
+				<div className="flex items-center gap-2 mt-2 text-sm text-[var(--nezumi)]">
+					<span>{shuttle.numberOfGuests}名</span>
+					<span>・</span>
+					<span>約{shuttle.estimatedDuration}分</span>
+					{vehicle && (
+						<>
+							<span>・</span>
+							<span>{vehicle.name}</span>
+						</>
+					)}
+				</div>
+
+				{/* Guest arrival notification */}
+				{shuttle.guestArrivalNotified && (
+					<div className="mt-2 text-sm text-[var(--aotake)] flex items-center gap-1">
+						<CheckIcon className="w-3 h-3" />
+						ゲスト到着済み
 					</div>
 				)}
 			</div>
@@ -353,6 +534,246 @@ const TaskDetailView = ({
 	);
 };
 
+// Fullscreen Shuttle Detail Component
+interface ShuttleDetailViewProps {
+	shuttle: ShuttleTask;
+	onClose: () => void;
+	onStatusChange: (newStatus: ShuttleStatus) => void;
+}
+
+const ShuttleDetailView = ({
+	shuttle,
+	onClose,
+	onStatusChange,
+}: ShuttleDetailViewProps) => {
+	const vehicle = shuttle.assignedVehicleId
+		? getVehicleById(shuttle.assignedVehicleId)
+		: null;
+
+	const getDisplayStatus = (): "pending" | "in_progress" | "completed" => {
+		if (shuttle.shuttleStatus === "completed") return "completed";
+		if (shuttle.shuttleStatus === "not_departed") return "pending";
+		return "in_progress";
+	};
+
+	const displayStatus = getDisplayStatus();
+
+	const statusConfig = {
+		pending: { label: "未出発", class: "badge-pending" },
+		in_progress: { label: "進行中", class: "badge-in-progress" },
+		completed: { label: "完了", class: "badge-completed" },
+	};
+
+	const priorityConfig = {
+		normal: { label: "通常", class: "text-[var(--nezumi)]" },
+		high: { label: "優先", class: "text-[var(--kincha)]" },
+		urgent: { label: "緊急", class: "text-[var(--shu)] font-medium" },
+	};
+
+	// Get next status
+	const getNextStatus = (): ShuttleStatus | null => {
+		const statusOrder: ShuttleStatus[] = [
+			"not_departed",
+			"heading",
+			"arrived",
+			"boarded",
+			"completed",
+		];
+		const currentIndex = statusOrder.indexOf(shuttle.shuttleStatus);
+		if (currentIndex < statusOrder.length - 1) {
+			return statusOrder[currentIndex + 1];
+		}
+		return null;
+	};
+
+	const nextStatus = getNextStatus();
+
+	const nextStatusLabels: Record<ShuttleStatus, string> = {
+		not_departed: "出発する",
+		heading: "到着した",
+		arrived: "乗車確認",
+		boarded: "完了にする",
+		completed: "",
+	};
+
+	return (
+		<div className="fixed inset-0 z-50 bg-[var(--shironeri)] animate-fade-in">
+			{/* Header */}
+			<div className="sticky top-0 z-10 bg-[var(--shironeri)] border-b border-[rgba(45,41,38,0.06)]">
+				<div className="flex items-center justify-between p-4">
+					<button
+						onClick={onClose}
+						className="flex items-center gap-2 text-[var(--ai)] font-display"
+					>
+						<ArrowLeftIcon size={20} />
+						<span>戻る</span>
+					</button>
+					<span className={`badge ${statusConfig[displayStatus].class}`}>
+						{SHUTTLE_STATUS_LABELS[shuttle.shuttleStatus]}
+					</span>
+				</div>
+			</div>
+
+			{/* Scrollable Content */}
+			<div className="overflow-y-auto h-[calc(100vh-64px-100px)] pb-4">
+				<div className="p-4 space-y-6">
+					{/* Task Title and Time */}
+					<div className="shoji-panel p-5">
+						<div className="flex items-start justify-between gap-4">
+							<div className="flex-1">
+								<div className="flex items-center gap-2 mb-2">
+									<span className="text-2xl font-display font-semibold text-[var(--ai)]">
+										{shuttle.scheduledTime}
+									</span>
+									<span className="flex items-center gap-1 px-2 py-0.5 bg-[var(--ai)]/10 text-[var(--ai)] rounded text-xs font-medium">
+										<ShuttleIcon className="w-3 h-3" />
+										送迎
+									</span>
+									{shuttle.priority === "urgent" && (
+										<span className="badge badge-urgent">
+											<AlertIcon size={10} />
+											緊急
+										</span>
+									)}
+									{shuttle.priority === "high" && (
+										<span className="badge badge-anniversary">優先</span>
+									)}
+								</div>
+								<h1 className="text-xl font-display font-semibold text-[var(--sumi)]">
+									{shuttle.guestName}様{" "}
+									{shuttle.direction === "pickup" ? "お迎え" : "お送り"}
+								</h1>
+							</div>
+						</div>
+					</div>
+
+					{/* Route Info */}
+					<div className="shoji-panel p-4">
+						<p className="text-sm text-[var(--nezumi)] mb-3">ルート</p>
+						<div className="flex items-center gap-3">
+							<div className="flex-1">
+								<div className="flex items-center gap-2 text-[var(--sumi)]">
+									<LocationIcon className="w-4 h-4 text-[var(--ai)]" />
+									<span className="font-medium">{shuttle.pickupLocation}</span>
+								</div>
+							</div>
+							<ArrowRightIcon className="w-5 h-5 text-[var(--nezumi)]" />
+							<div className="flex-1 text-right">
+								<div className="flex items-center justify-end gap-2 text-[var(--sumi)]">
+									<span className="font-medium">{shuttle.dropoffLocation}</span>
+									<LocationIcon className="w-4 h-4 text-[var(--aotake)]" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Task Info Grid */}
+					<div className="grid grid-cols-2 gap-3">
+						<div className="shoji-panel p-4">
+							<div className="flex items-center gap-2 text-[var(--nezumi)] mb-2">
+								<ShuttleIcon className="w-4 h-4" />
+								<span className="text-xs">車両</span>
+							</div>
+							<p className="text-lg font-display font-semibold text-[var(--sumi)]">
+								{vehicle?.name || "未割当"}
+							</p>
+						</div>
+						<div className="shoji-panel p-4">
+							<div className="flex items-center gap-2 text-[var(--nezumi)] mb-2">
+								<ClockIcon size={16} />
+								<span className="text-xs">所要時間</span>
+							</div>
+							<p className="text-lg font-display font-semibold text-[var(--sumi)]">
+								約{shuttle.estimatedDuration}分
+							</p>
+						</div>
+						<div className="shoji-panel p-4">
+							<div className="flex items-center gap-2 text-[var(--nezumi)] mb-2">
+								<TaskIcon size={16} />
+								<span className="text-xs">人数</span>
+							</div>
+							<p className="text-lg font-display font-semibold text-[var(--sumi)]">
+								{shuttle.numberOfGuests}名様
+							</p>
+						</div>
+						<div className="shoji-panel p-4">
+							<div className="flex items-center gap-2 text-[var(--nezumi)] mb-2">
+								<AlertIcon size={16} />
+								<span className="text-xs">優先度</span>
+							</div>
+							<p
+								className={`text-lg font-display font-semibold ${priorityConfig[shuttle.priority].class}`}
+							>
+								{priorityConfig[shuttle.priority].label}
+							</p>
+						</div>
+					</div>
+
+					{/* Guest Info */}
+					<div className="shoji-panel p-4">
+						<p className="text-sm text-[var(--nezumi)] mb-3">ゲスト情報</p>
+						<div className="flex items-center gap-3">
+							<div className="w-12 h-12 bg-[var(--ai)] rounded-full flex items-center justify-center text-white font-display font-semibold text-lg">
+								{shuttle.guestName.charAt(0)}
+							</div>
+							<div>
+								<p className="font-medium text-[var(--sumi)]">
+									{shuttle.guestName}様
+								</p>
+								<p className="text-sm text-[var(--nezumi)]">
+									{shuttle.guestNameKana}
+								</p>
+							</div>
+						</div>
+						{shuttle.guestArrivalNotified && (
+							<div className="mt-3 p-3 bg-[var(--aotake)]/10 rounded-lg border-l-3 border-[var(--aotake)]">
+								<div className="flex items-center gap-2 text-[var(--aotake)]">
+									<CheckIcon className="w-4 h-4" />
+									<span className="font-medium">ゲスト到着済み</span>
+								</div>
+								{shuttle.guestNotifiedAt && (
+									<p className="text-sm text-[var(--nezumi)] mt-1">
+										通知時刻: {shuttle.guestNotifiedAt}
+									</p>
+								)}
+							</div>
+						)}
+					</div>
+
+					{/* Notes */}
+					{shuttle.notes && (
+						<div className="shoji-panel p-4">
+							<p className="text-sm text-[var(--nezumi)] mb-2">備考</p>
+							<p className="text-[var(--sumi-light)] leading-relaxed">
+								{shuttle.notes}
+							</p>
+						</div>
+					)}
+				</div>
+			</div>
+
+			{/* Fixed Bottom Actions */}
+			<div className="fixed bottom-0 left-0 right-0 p-4 bg-[var(--shironeri)] border-t border-[rgba(45,41,38,0.06)] safe-area-pb">
+				{nextStatus && (
+					<button
+						onClick={() => onStatusChange(nextStatus)}
+						className="w-full py-4 text-base rounded-lg bg-[var(--ai)] text-white font-display font-medium flex items-center justify-center gap-2"
+					>
+						<ShuttleIcon className="w-5 h-5" />
+						{nextStatusLabels[nextStatus]}
+					</button>
+				)}
+				{shuttle.shuttleStatus === "completed" && (
+					<div className="py-4 text-center text-[var(--aotake)] font-display flex items-center justify-center gap-2">
+						<CheckIcon size={20} />
+						この送迎は完了済みです
+					</div>
+				)}
+			</div>
+		</div>
+	);
+};
+
 // Hour marker component for current time
 const CurrentTimeMarker = () => {
 	const now = new Date();
@@ -375,25 +796,32 @@ const CurrentTimeMarker = () => {
 
 // Main Mobile Schedule Component
 export const MobileSchedule = () => {
-	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+	const [selectedItem, setSelectedItem] = useState<ScheduleItem | null>(null);
 	const [tasks, setTasks] = useState<Task[]>(() =>
 		mockTasks.filter((t) => t.assignedStaffId === CURRENT_STAFF.id),
 	);
+	const [shuttleTasks, setShuttleTasks] = useState<ShuttleTask[]>(() =>
+		mockShuttleTasks.filter((t) => t.assignedDriverId === CURRENT_STAFF.id),
+	);
 	const timelineRef = useRef<HTMLDivElement>(null);
 
-	// Get tasks for current staff (use local state)
-	const myTasks = tasks;
+	// Create unified schedule items
+	const scheduleItems: ScheduleItem[] = [
+		...tasks.map((t): ScheduleItem => ({ type: "task", data: t })),
+		...shuttleTasks.map((t): ScheduleItem => ({ type: "shuttle", data: t })),
+	];
 
-	// Sort tasks by time
-	const sortedTasks = [...myTasks].sort((a, b) =>
-		a.scheduledTime.localeCompare(b.scheduledTime),
+	// Sort items by time
+	const sortedItems = [...scheduleItems].sort((a, b) =>
+		getItemTime(a).localeCompare(getItemTime(b)),
 	);
 
-	// Find current/next task for auto-scroll
+	// Find current/next item for auto-scroll
 	const now = new Date();
 	const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-	const currentOrNextTask = sortedTasks.find(
-		(t) => t.scheduledTime >= currentTime && t.status !== "completed",
+	const currentOrNextItem = sortedItems.find(
+		(item) =>
+			getItemTime(item) >= currentTime && getItemStatus(item) !== "completed",
 	);
 
 	// Auto scroll to current time on mount
@@ -407,21 +835,50 @@ export const MobileSchedule = () => {
 	}, []);
 
 	const handleStatusChange = (newStatus: TaskStatus) => {
-		if (!selectedTask) return;
+		if (!selectedItem || selectedItem.type !== "task") return;
+
+		const taskId = selectedItem.data.id;
 
 		// Update the task in state
 		setTasks((prevTasks) =>
 			prevTasks.map((task) =>
-				task.id === selectedTask.id ? { ...task, status: newStatus } : task,
+				task.id === taskId ? { ...task, status: newStatus } : task,
 			),
 		);
 
-		// Update the selected task to reflect the change
-		setSelectedTask((prev) => (prev ? { ...prev, status: newStatus } : null));
+		// Update the selected item to reflect the change
+		setSelectedItem((prev) =>
+			prev && prev.type === "task"
+				? { ...prev, data: { ...prev.data, status: newStatus } }
+				: null,
+		);
 	};
 
-	const completedCount = myTasks.filter((t) => t.status === "completed").length;
-	const totalCount = myTasks.length;
+	const handleShuttleStatusChange = (newStatus: ShuttleStatus) => {
+		if (!selectedItem || selectedItem.type !== "shuttle") return;
+
+		const shuttleId = selectedItem.data.id;
+
+		// Update the shuttle task in state
+		setShuttleTasks((prevTasks) =>
+			prevTasks.map((task) =>
+				task.id === shuttleId ? { ...task, shuttleStatus: newStatus } : task,
+			),
+		);
+
+		// Update the selected item to reflect the change
+		setSelectedItem((prev) =>
+			prev && prev.type === "shuttle"
+				? { ...prev, data: { ...prev.data, shuttleStatus: newStatus } }
+				: null,
+		);
+	};
+
+	// Count completed items
+	const completedCount = scheduleItems.filter(
+		(item) => getItemStatus(item) === "completed",
+	).length;
+	const totalCount = scheduleItems.length;
 
 	return (
 		<div className="min-h-screen bg-[var(--shironeri)]">
@@ -466,17 +923,40 @@ export const MobileSchedule = () => {
 				{/* Current time marker */}
 				<CurrentTimeMarker />
 
-				{/* Tasks Timeline */}
+				{/* Schedule Items Timeline */}
 				<div className="relative">
-					{sortedTasks.length > 0 ? (
-						sortedTasks.map((task) => (
-							<TimelineItem
-								key={task.id}
-								task={task}
-								isActive={task.id === currentOrNextTask?.id}
-								onClick={() => setSelectedTask(task)}
-							/>
-						))
+					{sortedItems.length > 0 ? (
+						sortedItems.map((item) => {
+							const itemId = item.type === "task" ? item.data.id : item.data.id;
+							const isActive =
+								currentOrNextItem &&
+								((currentOrNextItem.type === "task" &&
+									item.type === "task" &&
+									currentOrNextItem.data.id === item.data.id) ||
+									(currentOrNextItem.type === "shuttle" &&
+										item.type === "shuttle" &&
+										currentOrNextItem.data.id === item.data.id));
+
+							if (item.type === "task") {
+								return (
+									<TimelineItem
+										key={`task-${itemId}`}
+										task={item.data}
+										isActive={!!isActive}
+										onClick={() => setSelectedItem(item)}
+									/>
+								);
+							} else {
+								return (
+									<ShuttleTimelineItem
+										key={`shuttle-${itemId}`}
+										shuttle={item.data}
+										isActive={!!isActive}
+										onClick={() => setSelectedItem(item)}
+									/>
+								);
+							}
+						})
 					) : (
 						<div className="text-center py-12">
 							<TimelineIcon
@@ -490,11 +970,20 @@ export const MobileSchedule = () => {
 			</div>
 
 			{/* Task Detail Fullscreen View */}
-			{selectedTask && (
+			{selectedItem && selectedItem.type === "task" && (
 				<TaskDetailView
-					task={selectedTask}
-					onClose={() => setSelectedTask(null)}
+					task={selectedItem.data}
+					onClose={() => setSelectedItem(null)}
 					onStatusChange={handleStatusChange}
+				/>
+			)}
+
+			{/* Shuttle Detail Fullscreen View */}
+			{selectedItem && selectedItem.type === "shuttle" && (
+				<ShuttleDetailView
+					shuttle={selectedItem.data}
+					onClose={() => setSelectedItem(null)}
+					onStatusChange={handleShuttleStatusChange}
 				/>
 			)}
 		</div>

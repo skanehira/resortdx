@@ -693,3 +693,117 @@ export const PackageIcon = ({ size = 20, className = "" }: IconProps) => (
 		<path d="M12 22.08V12" />
 	</svg>
 );
+
+// === Shuttle Management Icons ===
+
+export const LocationIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Map pin for pickup/dropoff locations */}
+		<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+		<circle cx="12" cy="10" r="3" />
+	</svg>
+);
+
+export const PassengerIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Multiple people icon */}
+		<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+		<circle cx="9" cy="7" r="4" />
+		<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+		<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+	</svg>
+);
+
+export const ArrivalIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Hand waving / arrival notification */}
+		<path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+		<path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+		<path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+		<path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+	</svg>
+);
+
+export const ShuttleIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Van/shuttle bus icon */}
+		<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+		<circle cx="7" cy="17" r="2" />
+		<path d="M9 17h6" />
+		<circle cx="17" cy="17" r="2" />
+	</svg>
+);
+
+export const ArrowRightIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="2"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		<path d="M5 12h14" />
+		<path d="M12 5l7 7-7 7" />
+	</svg>
+);
+
+export const BellIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+		<path d="M13.73 21a2 2 0 0 1-3.46 0" />
+	</svg>
+);
