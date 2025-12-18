@@ -144,7 +144,7 @@ export type AdminPage =
 	| "reservations"
 	| "templates"
 	| "staff_monitor"
-	| "timeline"
+	| "equipment"
 	| "task_history";
 
 export interface FilterState {
@@ -178,4 +178,95 @@ export interface RoomTimeline {
 	roomType: RoomType;
 	reservation: Reservation | null;
 	slots: TimelineSlot[];
+}
+
+// === Equipment Management Types ===
+
+// アメニティ（消耗品）タイプ
+export type AmenityType =
+	| "shampoo" // シャンプー
+	| "conditioner" // コンディショナー
+	| "body_soap" // ボディソープ
+	| "toothbrush" // 歯ブラシセット
+	| "towel_face" // フェイスタオル
+	| "towel_bath" // バスタオル
+	| "yukata" // 浴衣
+	| "slippers"; // スリッパ
+
+export const AMENITY_TYPE_LABELS: Record<AmenityType, string> = {
+	shampoo: "シャンプー",
+	conditioner: "コンディショナー",
+	body_soap: "ボディソープ",
+	toothbrush: "歯ブラシセット",
+	towel_face: "フェイスタオル",
+	towel_bath: "バスタオル",
+	yukata: "浴衣",
+	slippers: "スリッパ",
+};
+
+// 設備タイプ
+export type EquipmentType =
+	| "air_conditioner" // エアコン
+	| "tv" // テレビ
+	| "refrigerator" // 冷蔵庫
+	| "wifi_router" // WiFiルーター
+	| "safe" // 金庫
+	| "hair_dryer" // ドライヤー
+	| "kettle"; // 電気ケトル
+
+export const EQUIPMENT_TYPE_LABELS: Record<EquipmentType, string> = {
+	air_conditioner: "エアコン",
+	tv: "テレビ",
+	refrigerator: "冷蔵庫",
+	wifi_router: "WiFiルーター",
+	safe: "金庫",
+	hair_dryer: "ドライヤー",
+	kettle: "電気ケトル",
+};
+
+// 残量レベル（4段階）
+export type StockLevel = "full" | "half" | "low" | "empty";
+
+export const STOCK_LEVEL_LABELS: Record<StockLevel, string> = {
+	full: "満タン",
+	half: "半分",
+	low: "少ない",
+	empty: "空",
+};
+
+export const STOCK_LEVEL_VALUES: Record<StockLevel, number> = {
+	full: 4,
+	half: 3,
+	low: 2,
+	empty: 1,
+};
+
+// 設備状態
+export type EquipmentStatusType = "working" | "needs_maintenance" | "broken";
+
+export const EQUIPMENT_STATUS_LABELS: Record<EquipmentStatusType, string> = {
+	working: "正常",
+	needs_maintenance: "要メンテナンス",
+	broken: "故障",
+};
+
+// アメニティ（消耗品）インターフェース
+export interface RoomAmenity {
+	id: string;
+	roomNumber: string;
+	type: AmenityType;
+	stockLevel: StockLevel;
+	threshold: StockLevel; // このレベル以下で補充タスク生成
+	lastCheckedAt: string;
+	lastCheckedBy: string | null;
+}
+
+// 設備インターフェース
+export interface RoomEquipment {
+	id: string;
+	roomNumber: string;
+	type: EquipmentType;
+	status: EquipmentStatusType;
+	lastMaintenanceAt: string | null;
+	notes: string | null;
 }

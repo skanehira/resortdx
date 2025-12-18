@@ -513,3 +513,183 @@ export const ArrowLeftIcon = ({ size = 20, className = "" }: IconProps) => (
 		<path d="M12 19l-7-7 7-7" />
 	</svg>
 );
+
+// === Equipment Management Icons ===
+
+export const AmenityIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Bottle shape for amenities like shampoo */}
+		<path d="M9 2h6" />
+		<path d="M10 2v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2" />
+		<path d="M8 6h8l1 16H7L8 6z" />
+		<path d="M12 10v6" />
+		<path d="M10 13h4" />
+	</svg>
+);
+
+export const TowelIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Folded towel */}
+		<rect x="3" y="6" width="18" height="12" rx="2" />
+		<path d="M3 10h18" />
+		<path d="M3 14h18" />
+		<path d="M7 6v12" />
+	</svg>
+);
+
+export const EquipmentIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Settings/gear icon for equipment */}
+		<circle cx="12" cy="12" r="3" />
+		<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+	</svg>
+);
+
+export const WrenchIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Wrench for maintenance */}
+		<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+	</svg>
+);
+
+export const TVIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		<rect x="2" y="4" width="20" height="14" rx="2" />
+		<path d="M8 21h8" />
+		<path d="M12 18v3" />
+	</svg>
+);
+
+export const WifiIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		<path d="M5 12.55a11 11 0 0 1 14.08 0" />
+		<path d="M1.42 9a16 16 0 0 1 21.16 0" />
+		<path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+		<circle cx="12" cy="20" r="1" />
+	</svg>
+);
+
+export const AirConditionerIcon = ({
+	size = 20,
+	className = "",
+}: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* AC unit */}
+		<rect x="2" y="4" width="20" height="8" rx="2" />
+		<path d="M6 12v2" />
+		<path d="M10 12v4" />
+		<path d="M14 12v6" />
+		<path d="M18 12v4" />
+		<path d="M6 8h.01" />
+		<path d="M10 8h.01" />
+	</svg>
+);
+
+export const RefrigeratorIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		<rect x="4" y="2" width="16" height="20" rx="2" />
+		<path d="M4 10h16" />
+		<path d="M8 6v2" />
+		<path d="M8 14v4" />
+	</svg>
+);
+
+export const PackageIcon = ({ size = 20, className = "" }: IconProps) => (
+	<svg
+		width={size}
+		height={size}
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		className={className}
+	>
+		{/* Package/inventory icon */}
+		<path d="M16.5 9.4l-9-5.19" />
+		<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+		<path d="M3.27 6.96L12 12.01l8.73-5.05" />
+		<path d="M12 22.08V12" />
+	</svg>
+);
