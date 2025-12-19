@@ -5,6 +5,19 @@
     "roomInfo": "Room Information",
     "services": "Services"
   },
+  "header": {
+    "hotelName": "Fufu Atami",
+    "roomName": "Detached Tsukimi",
+    "guestName": "Mr./Ms. {{name}}"
+  },
+  "mock": {
+    "celebrationType": "Wedding Anniversary",
+    "celebrationDetails": "Congratulations on your 5th Wedding Anniversary",
+    "celebrationItem1": "Champagne (Moët & Chandon)",
+    "celebrationItem2": "Flower bouquet (White roses)",
+    "today": "Today",
+    "tomorrow": "Tomorrow"
+  },
   "nav": {
     "home": "Home",
     "shuttle": "Shuttle",
@@ -109,7 +122,10 @@
     "requestPlaceholder": "e.g., Surprise timing, additional flowers, etc.",
     "aboutCelebration": "If you have any additional requests for your celebration, please feel free to let us know.",
     "requestSubmitted": "Request Received",
-    "requestSubmittedMessage": "We will prepare with care\nto make your special day memorable."
+    "requestSubmittedMessage": "We will prepare with care\nto make your special day memorable.",
+    "tapToView": "Tap to view details",
+    "tapToHide": "Tap to hide",
+    "hiddenForSurprise": "Hidden to keep the surprise"
   },
   "info": {
     "facilityInfo": "Facility Information",

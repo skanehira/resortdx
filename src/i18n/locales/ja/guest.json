@@ -5,6 +5,19 @@
     "roomInfo": "お部屋情報",
     "services": "サービス"
   },
+  "header": {
+    "hotelName": "ふふ熱海",
+    "roomName": "離れ 月見",
+    "guestName": "{{name}}様"
+  },
+  "mock": {
+    "celebrationType": "結婚記念日",
+    "celebrationDetails": "ご結婚5周年おめでとうございます",
+    "celebrationItem1": "シャンパン（モエ・エ・シャンドン）",
+    "celebrationItem2": "花束（白バラ中心）",
+    "today": "本日",
+    "tomorrow": "明日"
+  },
   "nav": {
     "home": "ホーム",
     "shuttle": "送迎",
@@ -109,7 +122,10 @@
     "requestPlaceholder": "例：サプライズ演出のタイミング、追加のお花など",
     "aboutCelebration": "お祝いに関する追加のご要望がございましたら、お気軽にお申し付けください。",
     "requestSubmitted": "ご要望を承りました",
-    "requestSubmittedMessage": "特別な一日になりますよう\n心を込めてご準備いたします。"
+    "requestSubmittedMessage": "特別な一日になりますよう\n心を込めてご準備いたします。",
+    "tapToView": "タップして内容を確認",
+    "tapToHide": "タップして閉じる",
+    "hiddenForSurprise": "サプライズのため内容を隠しています"
   },
   "info": {
     "facilityInfo": "施設案内",

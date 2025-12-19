@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../contexts/AuthContext";
 import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 
 // Types
@@ -921,30 +923,11 @@ const HomeView = ({
   t: (key: string) => string;
 }) => (
   <div className="fade-in">
-    <div className="quick-actions">
-      <div className="quick-action" onClick={() => onNavigate("shuttle")}>
-        <div className="quick-action-icon">🚐</div>
-        <div className="quick-action-label">{t("nav.shuttle")}</div>
-      </div>
-      <div className="quick-action" onClick={() => onNavigate("dining")}>
-        <div className="quick-action-icon">🍽️</div>
-        <div className="quick-action-label">{t("nav.dining")}</div>
-      </div>
-      <div className="quick-action" onClick={() => onNavigate("activities")}>
-        <div className="quick-action-icon">🌸</div>
-        <div className="quick-action-label">{t("nav.activities")}</div>
-      </div>
-      <div className="quick-action" onClick={() => onNavigate("requests")}>
-        <div className="quick-action-icon">🛎️</div>
-        <div className="quick-action-label">{t("nav.requests")}</div>
-      </div>
-    </div>
-
     {mockCelebration && (
       <div className="celebration-header">
         <div className="celebration-icon">💐</div>
-        <div className="celebration-type">{mockCelebration.type}</div>
-        <div className="celebration-message">{mockCelebration.details}</div>
+        <div className="celebration-type">{t("mock.celebrationType")}</div>
+        <div className="celebration-message">{t("mock.celebrationDetails")}</div>
       </div>
     )}
 
@@ -1612,17 +1595,21 @@ const CelebrationView = ({ t }: { t: (key: string) => string }) => {
   const [showAddRequest, setShowAddRequest] = useState(false);
   const [additionalRequest, setAdditionalRequest] = useState("");
   const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handleRequestSubmit = () => {
     setRequestSubmitted(true);
   };
 
+  // Translated celebration items
+  const celebrationItems = [t("mock.celebrationItem1"), t("mock.celebrationItem2")];
+
   return (
     <div className="fade-in">
       <div className="celebration-header">
         <div className="celebration-icon">💐</div>
-        <div className="celebration-type">{mockCelebration.type}</div>
-        <div className="celebration-message">{mockCelebration.details}</div>
+        <div className="celebration-type">{t("mock.celebrationType")}</div>
+        <div className="celebration-message">{t("mock.celebrationDetails")}</div>
       </div>
 
       <div className="section-header">
@@ -1630,15 +1617,52 @@ const CelebrationView = ({ t }: { t: (key: string) => string }) => {
         <p className="section-subtitle">{t("celebration.preparationSubtitle")}</p>
       </div>
 
-      <div className="card">
-        <div className="card-body">
-          {mockCelebration.requests.map((request, index) => (
-            <div key={index} className="card-detail" style={{ marginTop: index === 0 ? 0 : 12 }}>
-              <span className="card-detail-icon">✦</span>
-              {request}
+      <div
+        className="card"
+        onClick={() => setShowDetails(!showDetails)}
+        style={{ cursor: "pointer" }}
+      >
+        {showDetails ? (
+          <div className="card-body">
+            {celebrationItems.map((item, index) => (
+              <div key={index} className="card-detail" style={{ marginTop: index === 0 ? 0 : 12 }}>
+                <span className="card-detail-icon">✦</span>
+                {item}
+              </div>
+            ))}
+            <div
+              style={{
+                marginTop: 16,
+                paddingTop: 12,
+                borderTop: "1px solid var(--suna-dark)",
+                textAlign: "center",
+                fontSize: 12,
+                color: "var(--kon-light)",
+              }}
+            >
+              {t("celebration.tapToHide")}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div
+            className="card-body"
+            style={{
+              textAlign: "center",
+              padding: "24px 20px",
+            }}
+          >
+            <div style={{ fontSize: 24, marginBottom: 8 }}>🎁</div>
+            <div
+              style={{
+                fontSize: 14,
+                color: "var(--kon)",
+                fontWeight: 500,
+              }}
+            >
+              {t("celebration.tapToView")}
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: "0 16px", marginTop: "24px" }}>
@@ -1727,15 +1751,59 @@ const CelebrationView = ({ t }: { t: (key: string) => string }) => {
   );
 };
 
+// Valid view names for URL parameter
+const VALID_VIEWS: GuestView[] = [
+  "home",
+  "shuttle",
+  "dining",
+  "activities",
+  "requests",
+  "celebration",
+];
+
 // Main Component
 export const GuestPortal = () => {
   const { t } = useTranslation("guest");
-  const [currentView, setCurrentView] = useState<GuestView>("home");
+  const { t: tAuth } = useTranslation("auth");
+  const { logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentView, setCurrentView] = useState<GuestView>(() => {
+    const viewParam = searchParams.get("view");
+    if (viewParam && VALID_VIEWS.includes(viewParam as GuestView)) {
+      return viewParam as GuestView;
+    }
+    return "home";
+  });
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  // URLクエリパラメータとの同期
+  useEffect(() => {
+    const viewParam = searchParams.get("view");
+    if (viewParam && VALID_VIEWS.includes(viewParam as GuestView)) {
+      setCurrentView(viewParam as GuestView);
+    }
+  }, [searchParams]);
+
+  // ビュー変更時にURLを更新
+  const handleViewChange = (view: GuestView) => {
+    setCurrentView(view);
+    if (view === "home") {
+      searchParams.delete("view");
+    } else {
+      searchParams.set("view", view);
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
 
   const renderView = () => {
     switch (currentView) {
       case "home":
-        return <HomeView onNavigate={setCurrentView} t={t} />;
+        return <HomeView onNavigate={handleViewChange} t={t} />;
       case "shuttle":
         return <ShuttleView t={t} />;
       case "dining":
@@ -1747,7 +1815,7 @@ export const GuestPortal = () => {
       case "celebration":
         return <CelebrationView t={t} />;
       default:
-        return <HomeView onNavigate={setCurrentView} t={t} />;
+        return <HomeView onNavigate={handleViewChange} t={t} />;
     }
   };
 
@@ -1766,11 +1834,53 @@ export const GuestPortal = () => {
               }}
             >
               <div>
-                <div className="brand-mark">ふふ熱海</div>
-                <div className="room-info">離れ 月見 ・ ROOM 201</div>
-                <div className="guest-name">山田様</div>
+                <div className="brand-mark">{t("header.hotelName")}</div>
+                <div className="room-info">{t("header.roomName")}</div>
+                <div className="guest-name">{t("header.guestName", { name: "山田" })}</div>
               </div>
-              <LanguageSwitcher variant="compact" className="text-white" />
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <LanguageSwitcher variant="compact" className="text-white" />
+                {isAuthenticated && (
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      background: "rgba(255, 255, 255, 0.15)",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      borderRadius: "6px",
+                      padding: "6px 12px",
+                      color: "white",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      transition: "background 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                    }}
+                  >
+                    <svg
+                      width={14}
+                      height={14}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    {tAuth("logout.button")}
+                  </button>
+                )}
+              </div>
             </div>
           </header>
 
@@ -1780,35 +1890,42 @@ export const GuestPortal = () => {
         <nav className="portal-nav">
           <button
             className={`nav-item ${currentView === "home" ? "active" : ""}`}
-            onClick={() => setCurrentView("home")}
+            onClick={() => handleViewChange("home")}
           >
             <span className="nav-icon">🏠</span>
             <span className="nav-label">{t("nav.home")}</span>
           </button>
           <button
             className={`nav-item ${currentView === "shuttle" ? "active" : ""}`}
-            onClick={() => setCurrentView("shuttle")}
+            onClick={() => handleViewChange("shuttle")}
           >
             <span className="nav-icon">🚐</span>
             <span className="nav-label">{t("nav.shuttle")}</span>
           </button>
           <button
             className={`nav-item ${currentView === "dining" ? "active" : ""}`}
-            onClick={() => setCurrentView("dining")}
+            onClick={() => handleViewChange("dining")}
           >
             <span className="nav-icon">🍽️</span>
             <span className="nav-label">{t("nav.dining")}</span>
           </button>
           <button
             className={`nav-item ${currentView === "activities" ? "active" : ""}`}
-            onClick={() => setCurrentView("activities")}
+            onClick={() => handleViewChange("activities")}
           >
             <span className="nav-icon">🌸</span>
             <span className="nav-label">{t("nav.activities")}</span>
           </button>
           <button
+            className={`nav-item ${currentView === "requests" ? "active" : ""}`}
+            onClick={() => handleViewChange("requests")}
+          >
+            <span className="nav-icon">🛎️</span>
+            <span className="nav-label">{t("nav.requests")}</span>
+          </button>
+          <button
             className={`nav-item ${currentView === "celebration" ? "active" : ""}`}
-            onClick={() => setCurrentView("celebration")}
+            onClick={() => handleViewChange("celebration")}
           >
             <span className="nav-icon">🎉</span>
             <span className="nav-label">{t("nav.celebration")}</span>
