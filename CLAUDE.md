@@ -31,13 +31,20 @@ npm run check    # Format + lint + TypeScript check (run before commits)
 
 ## Architecture
 
-### Routing Structure
+### Routing & Authentication
 
-App uses HashRouter with three main route groups:
-- `/login` - Authentication
-- `/admin/*` - Admin pages (protected, requires admin role)
-- `/staff/*` - Staff mobile views (protected)
-- `/guest/*` - Guest-facing pages (public)
+App uses HashRouter with role-based access control via `ProtectedRoute`:
+- `/login` - Public authentication page
+- `/admin/*` - Admin pages (requires `isAdmin` flag)
+- `/staff/*` - Staff mobile views (requires staff role, no `isAdmin`/`isGuest` flags)
+- `/guest/*` - Guest portal (requires `isGuest` flag)
+
+Each role can only access their designated routes. Unauthorized access redirects to the user's default page:
+- Admin → `/admin/dashboard`
+- Staff → `/staff/tasks`
+- Guest → `/guest/portal`
+
+Authentication state is managed via `AuthContext` with localStorage persistence.
 
 ### State Management
 
