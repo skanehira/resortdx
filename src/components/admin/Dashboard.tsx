@@ -23,6 +23,7 @@ import {
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 import { RoomStatusMap } from "../shared/RoomStatusMap";
+import { InlineTimeEdit } from "./shared/TimeEditForm";
 
 // Status Badge Component
 const StatusBadge = ({ status, t }: { status: Task["status"]; t: (key: string) => string }) => {
@@ -149,11 +150,13 @@ const TaskDetailModal = ({
   isOpen,
   onClose,
   t,
+  onTimeChange,
 }: {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
   t: (key: string) => string;
+  onTimeChange?: (taskId: string, newTime: string) => void;
 }) => {
   if (!task) return null;
 
@@ -183,7 +186,14 @@ const TaskDetailModal = ({
           <div className="flex items-center gap-2 text-sm">
             <ClockIcon size={16} className="text-[var(--nezumi)]" />
             <span className="text-[var(--nezumi)]">{t("taskDetail.scheduledTime")}:</span>
-            <span className="font-medium">{task.scheduledTime}</span>
+            {onTimeChange ? (
+              <InlineTimeEdit
+                value={task.scheduledTime}
+                onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+              />
+            ) : (
+              <span className="font-medium">{task.scheduledTime}</span>
+            )}
           </div>
           <div className="flex items-center gap-2 text-sm">
             <RoomIcon size={16} className="text-[var(--nezumi)]" />
@@ -381,6 +391,7 @@ const ProgressRing = ({
 // Main Dashboard Component
 export const Dashboard = () => {
   const { t } = useTranslation("admin");
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -389,16 +400,22 @@ export const Dashboard = () => {
     setIsDetailModalOpen(true);
   };
 
+  const handleTimeChange = (taskId: string, newTime: string) => {
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, scheduledTime: newTime } : t)));
+    // Also update the selected task if it's the one being edited
+    setSelectedTask((prev) => (prev?.id === taskId ? { ...prev, scheduledTime: newTime } : prev));
+  };
+
   const todayReservations = mockReservations.filter(
     (r) => r.status === "confirmed" || r.status === "checked_in",
   );
 
-  const upcomingTasks = mockTasks
+  const upcomingTasks = tasks
     .filter((t) => t.status !== "completed")
     .sort((a, b) => a.scheduledTime.localeCompare(b.scheduledTime))
     .slice(0, 8);
 
-  const urgentTasks = mockTasks.filter((t) => t.priority === "urgent" && t.status !== "completed");
+  const urgentTasks = tasks.filter((t) => t.priority === "urgent" && t.status !== "completed");
 
   const taskProgress = (mockDailyStats.completedTasks / mockDailyStats.totalTasks) * 100;
 
@@ -528,7 +545,7 @@ export const Dashboard = () => {
             {t("dashboard.roomStatus")}
           </h2>
           <RoomStatusMap
-            roomStatuses={getRoomCleaningStatuses(mockTasks, getStaffById).map((info) => ({
+            roomStatuses={getRoomCleaningStatuses(tasks, getStaffById).map((info) => ({
               roomId: info.roomId,
               status: info.status,
               cleaningTask: info.cleaningTask,
@@ -604,13 +621,14 @@ export const Dashboard = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         t={t}
+        onTimeChange={handleTimeChange}
       />
 
       {/* Quick Task Summary by Category */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {(["cleaning", "meal_service", "bath", "pickup", "celebration", "turndown"] as const).map(
           (category) => {
-            const categoryTasks = mockTasks.filter((t) => t.category === category);
+            const categoryTasks = tasks.filter((t) => t.category === category);
             const completedCount = categoryTasks.filter((t) => t.status === "completed").length;
             return (
               <div

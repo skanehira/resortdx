@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import {
   mockTasks,
   mockTaskTemplates,
-  mockStaff,
   getStaffById,
   getReservationById,
   getRoomName,
@@ -25,9 +24,9 @@ import {
   SearchIcon,
   TemplateIcon,
   CheckIcon,
-  EditIcon,
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
+import { InlineTimeEdit } from "./shared/TimeEditForm";
 
 // Status Badge Component
 const StatusBadge = ({ status, t }: { status: TaskStatus; t: (key: string) => string }) => {
@@ -114,33 +113,16 @@ const TaskDetailModal = ({
   ) => void;
   t: (key: string) => string;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTime, setEditedTime] = useState(task?.scheduledTime || "");
-  const [editedStaffId, setEditedStaffId] = useState<string | null>(task?.assignedStaffId || null);
-
-  // Reset form when task changes
-  if (task && editedTime !== task.scheduledTime && !isEditing) {
-    setEditedTime(task.scheduledTime);
-    setEditedStaffId(task.assignedStaffId);
-  }
-
   if (!task) return null;
 
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
   const reservation = getReservationById(task.reservationId);
 
-  const handleSave = () => {
+  const handleTimeChange = (newTime: string) => {
     onSave(task.id, {
-      scheduledTime: editedTime,
-      assignedStaffId: editedStaffId,
+      scheduledTime: newTime,
+      assignedStaffId: task.assignedStaffId,
     });
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setEditedTime(task.scheduledTime);
-    setEditedStaffId(task.assignedStaffId);
-    setIsEditing(false);
   };
 
   // Find matching template by category
@@ -156,104 +138,55 @@ const TaskDetailModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("taskDetail.title")} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("taskDetail.title")} size="2xl">
       <div className="space-y-4">
         {/* Task Title and Status */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">{task.title}</h3>
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <StatusBadge status={task.status} t={t} />
-              <PriorityBadge priority={task.priority} t={t} />
-              {task.isAnniversaryRelated && (
-                <span className="badge badge-anniversary">
-                  <CelebrationIcon size={12} />
-                  {t("taskDetail.anniversaryRelated")}
-                </span>
-              )}
-            </div>
+        <div>
+          <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">{task.title}</h3>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <StatusBadge status={task.status} t={t} />
+            <PriorityBadge priority={task.priority} t={t} />
+            {task.isAnniversaryRelated && (
+              <span className="badge badge-anniversary">
+                <CelebrationIcon size={12} />
+                {t("taskDetail.anniversaryRelated")}
+              </span>
+            )}
           </div>
-          {!isEditing && task.status !== "completed" && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="btn btn-ghost p-2"
-              aria-label={t("taskDetail.edit")}
-            >
-              <EditIcon size={16} />
-            </button>
-          )}
         </div>
 
-        {/* Edit Form */}
-        {isEditing ? (
-          <div className="space-y-4 p-4 bg-[var(--shironeri-warm)] rounded border border-[rgba(45,41,38,0.1)]">
-            <div>
-              <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-                {t("taskDetail.scheduledTime")}
-              </label>
-              <input
-                type="time"
-                value={editedTime}
-                onChange={(e) => setEditedTime(e.target.value)}
-                className="input w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-                {t("taskDetail.assignee")}
-              </label>
-              <select
-                value={editedStaffId || ""}
-                onChange={(e) => setEditedStaffId(e.target.value || null)}
-                className="input w-full"
-              >
-                <option value="">{t("taskDetail.unassigned")}</option>
-                {mockStaff
-                  .filter((s) => s.status === "on_duty")
-                  .map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button onClick={handleCancel} className="btn btn-secondary">
-                {t("common.cancel")}
-              </button>
-              <button onClick={handleSave} className="btn btn-primary">
-                {t("common.save")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Task Info (View Mode) */
-          <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[rgba(45,41,38,0.06)]">
-            <div className="flex items-center gap-2 text-sm">
-              <ClockIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">{t("taskDetail.scheduledTime")}:</span>
+        {/* Task Info */}
+        <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[rgba(45,41,38,0.06)]">
+          <div className="flex items-center gap-2 text-sm flex-nowrap">
+            <ClockIcon size={16} className="text-[var(--nezumi)] flex-shrink-0" />
+            <span className="text-[var(--nezumi)] whitespace-nowrap flex-shrink-0">
+              {t("taskDetail.scheduledTime")}:
+            </span>
+            {task.status !== "completed" ? (
+              <InlineTimeEdit value={task.scheduledTime} onTimeChange={handleTimeChange} />
+            ) : (
               <span className="font-medium">{task.scheduledTime}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <RoomIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">{t("taskDetail.room")}:</span>
-              <span className="font-medium">{getRoomName(task.roomId)}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <TaskIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">{t("taskDetail.category")}:</span>
-              <span className="font-medium">{TASK_CATEGORY_LABELS[task.category]}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <TimelineIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">{t("taskDetail.duration")}:</span>
-              <span className="font-medium">
-                {task.estimatedDuration}
-                {t("taskDetail.minutes")}
-              </span>
-            </div>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-2 text-sm">
+            <RoomIcon size={16} className="text-[var(--nezumi)]" />
+            <span className="text-[var(--nezumi)]">{t("taskDetail.room")}:</span>
+            <span className="font-medium">{getRoomName(task.roomId)}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <TaskIcon size={16} className="text-[var(--nezumi)]" />
+            <span className="text-[var(--nezumi)]">{t("taskDetail.category")}:</span>
+            <span className="font-medium">{TASK_CATEGORY_LABELS[task.category]}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <TimelineIcon size={16} className="text-[var(--nezumi)]" />
+            <span className="text-[var(--nezumi)]">{t("taskDetail.duration")}:</span>
+            <span className="font-medium">
+              {task.estimatedDuration}
+              {t("taskDetail.minutes")}
+            </span>
+          </div>
+        </div>
 
         {/* Completion Time (for completed tasks) */}
         {task.status === "completed" && task.completedAt && (

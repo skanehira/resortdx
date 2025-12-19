@@ -35,6 +35,7 @@ import {
   PassengerIcon,
   PlusIcon,
 } from "../ui/Icons";
+import { EditableTimeDisplay } from "./shared/TimeEditForm";
 
 // Filter type for meal tasks
 type FilterType = "all" | "breakfast" | "dinner" | "room_service" | "needs_check";
@@ -361,11 +362,13 @@ const TaskDetailModal = ({
   onClose,
   onStatusChange,
   onToggleNeedsCheck,
+  onTimeChange,
 }: {
   task: MealTask;
   onClose: () => void;
   onStatusChange: (taskId: string, newStatus: MealStatus) => void;
   onToggleNeedsCheck: (taskId: string) => void;
+  onTimeChange: (taskId: string, newTime: string) => void;
 }) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
 
@@ -434,7 +437,7 @@ const TaskDetailModal = ({
               <MealIcon size={18} className="text-[var(--ai)]" />
               <span className="font-display font-semibold text-[var(--sumi)]">食事内容</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
               <div>
                 <span className="text-[var(--nezumi)]">タイプ:</span>
                 <span className="ml-2 font-medium text-[var(--sumi)]">
@@ -447,11 +450,14 @@ const TaskDetailModal = ({
                   {COURSE_TYPE_LABELS[task.courseType]}
                 </span>
               </div>
-              <div>
-                <span className="text-[var(--nezumi)]">時刻:</span>
-                <span className="ml-2 font-medium text-[var(--sumi)]">{task.scheduledTime}</span>
-              </div>
             </div>
+            <EditableTimeDisplay
+              value={task.scheduledTime}
+              onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+              label="配膳予定時刻"
+              size="lg"
+              accentColor="ai"
+            />
           </div>
 
           {/* Allergy info */}
@@ -1012,6 +1018,12 @@ export const MealManagement = () => {
     setMealTasks((prev) => [...prev, newTask]);
   };
 
+  const handleTimeChange = (taskId: string, newTime: string) => {
+    setMealTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, scheduledTime: newTime } : t)),
+    );
+  };
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -1152,6 +1164,7 @@ export const MealManagement = () => {
           onClose={() => setSelectedTaskId(null)}
           onStatusChange={handleStatusChange}
           onToggleNeedsCheck={handleToggleNeedsCheck}
+          onTimeChange={handleTimeChange}
         />
       )}
 

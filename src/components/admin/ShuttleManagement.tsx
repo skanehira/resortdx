@@ -23,6 +23,7 @@ import {
   UserIcon,
   PlusIcon,
 } from "../ui/Icons";
+import { EditableTimeDisplay } from "./shared/TimeEditForm";
 
 // Filter type for shuttle tasks
 type FilterType = "all" | "pickup" | "dropoff" | "unassigned";
@@ -518,11 +519,13 @@ const TaskDetailModal = ({
   onClose,
   onStatusChange,
   onOpenAssignment,
+  onTimeChange,
 }: {
   task: ShuttleTask;
   onClose: () => void;
   onStatusChange: (taskId: string, newStatus: ShuttleStatus) => void;
   onOpenAssignment: () => void;
+  onTimeChange: (taskId: string, newTime: string) => void;
 }) => {
   const vehicle = task.assignedVehicleId ? getVehicleById(task.assignedVehicleId) : null;
   const driver = task.assignedDriverId ? getStaffById(task.assignedDriverId) : null;
@@ -608,8 +611,19 @@ const TaskDetailModal = ({
               </div>
             </div>
             <div className="mt-2 text-sm text-[var(--nezumi)]">
-              予定時刻: {task.scheduledTime} / 所要時間: 約{task.estimatedDuration}分
+              所要時間: 約{task.estimatedDuration}分
             </div>
+          </div>
+
+          {/* Schedule */}
+          <div className="shoji-panel p-4">
+            <EditableTimeDisplay
+              value={task.scheduledTime}
+              onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+              label="出発予定時刻"
+              size="lg"
+              accentColor="ai"
+            />
           </div>
 
           {/* Assignment info */}
@@ -1116,6 +1130,12 @@ export const ShuttleManagement = () => {
     setShuttleTasks((prev) => [...prev, newTask]);
   };
 
+  const handleTimeChange = (taskId: string, newTime: string) => {
+    setShuttleTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, scheduledTime: newTime } : t)),
+    );
+  };
+
   // Drivers list
   const drivers = mockStaff.filter((s) => s.role === "driver");
 
@@ -1246,6 +1266,7 @@ export const ShuttleManagement = () => {
           onClose={() => setSelectedTaskId(null)}
           onStatusChange={handleStatusChange}
           onOpenAssignment={() => setShowAssignmentModal(true)}
+          onTimeChange={handleTimeChange}
         />
       )}
 

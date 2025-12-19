@@ -29,6 +29,7 @@ import {
   MessageCardIcon,
   PlusIcon,
 } from "../ui/Icons";
+import { EditableTimeDisplay } from "./shared/TimeEditForm";
 
 // Filter type for celebration tasks
 type FilterType = "all" | "birthday" | "wedding_anniversary" | "other" | "pending";
@@ -319,12 +320,14 @@ const TaskDetailModal = ({
   onStatusChange,
   onItemToggle,
   onCompletionReportChange,
+  onTimeChange,
 }: {
   task: CelebrationTask;
   onClose: () => void;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onItemToggle: (taskId: string, itemIndex: number) => void;
   onCompletionReportChange: (taskId: string, report: string) => void;
+  onTimeChange: (taskId: string, newTime: string) => void;
 }) => {
   const [report, setReport] = useState(task.completionReport || "");
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
@@ -396,13 +399,13 @@ const TaskDetailModal = ({
 
           {/* Schedule */}
           <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ClockIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">実施予定時刻</span>
-            </div>
-            <div className="text-xl font-display font-medium text-[var(--kincha)]">
-              {task.executionTime}
-            </div>
+            <EditableTimeDisplay
+              value={task.executionTime}
+              onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+              label="実施予定時刻"
+              size="lg"
+              accentColor="kincha"
+            />
           </div>
 
           {/* Checklist */}
@@ -946,6 +949,12 @@ export const CelebrationManagement = () => {
     setCelebrationTasks((prev) => [...prev, newTask]);
   };
 
+  const handleTimeChange = (taskId: string, newTime: string) => {
+    setCelebrationTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, executionTime: newTime } : t)),
+    );
+  };
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -1057,6 +1066,7 @@ export const CelebrationManagement = () => {
           onStatusChange={handleStatusChange}
           onItemToggle={handleItemToggle}
           onCompletionReportChange={handleCompletionReportChange}
+          onTimeChange={handleTimeChange}
         />
       )}
 
