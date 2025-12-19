@@ -180,7 +180,8 @@ export type StaffRole =
   | "driver" // 送迎ドライバー
   | "concierge" // コンシェルジュ
   | "manager" // マネージャー
-  | "front"; // フロント
+  | "front" // フロント
+  | "guest"; // ゲスト
 
 export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   cleaning: "清掃",
@@ -190,6 +191,7 @@ export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   concierge: "コンシェルジュ",
   manager: "マネージャー",
   front: "フロント",
+  guest: "ゲスト",
 };
 
 // スタッフステータス（5段階）

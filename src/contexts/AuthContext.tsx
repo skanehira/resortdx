@@ -82,6 +82,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         avatarColor: "var(--ai)",
         isAdmin: true,
       };
+    } else if (credentials.isGuest) {
+      // ゲストの場合は仮想ユーザーを作成
+      authenticatedUser = {
+        id: credentials.staffId,
+        loginId: credentials.loginId,
+        name: "ゲスト",
+        nameKana: "ゲスト",
+        role: "guest",
+        avatarColor: "#10b981",
+        isGuest: true,
+      };
     } else {
       // スタッフの場合は既存の処理
       const staff = getStaffById(credentials.staffId);

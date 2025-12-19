@@ -6,6 +6,7 @@ export interface StaffCredentials {
   loginId: string;
   password: string; // デモ用のプレーンテキスト
   isAdmin?: boolean; // 管理者フラグ
+  isGuest?: boolean; // ゲストフラグ
 }
 
 // 管理者アカウント（スタッフIDがADMで始まる）
@@ -31,8 +32,17 @@ export const staffCredentials: StaffCredentials[] = [
   { staffId: "STF008", loginId: "tanaka", password: "pass008" },
 ];
 
+// ゲストアカウント（デモ用）
+export const guestCredentials: StaffCredentials[] = [
+  { staffId: "GST001", loginId: "guest", password: "guest123", isGuest: true },
+];
+
 // 全ての資格情報（後方互換性のため）
-export const mockCredentials: StaffCredentials[] = [...adminCredentials, ...staffCredentials];
+export const mockCredentials: StaffCredentials[] = [
+  ...adminCredentials,
+  ...staffCredentials,
+  ...guestCredentials,
+];
 
 // 資格情報の検証
 export const validateCredentials = (loginId: string, password: string): StaffCredentials | null => {

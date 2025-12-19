@@ -25,6 +25,7 @@ export interface AuthenticatedStaff {
   role: StaffRole;
   avatarColor: string;
   isAdmin?: boolean; // 管理者フラグ
+  isGuest?: boolean; // ゲストフラグ
 }
 
 // パスワード変更リクエスト

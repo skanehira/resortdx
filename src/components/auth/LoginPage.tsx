@@ -4,6 +4,40 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../contexts/AuthContext";
 import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 
+// デモ用ログイン情報
+const DEMO_CREDENTIALS = [
+  {
+    id: "admin",
+    label: "Admin",
+    description: "管理者画面へアクセス",
+    loginId: "admin",
+    password: "admin123",
+    bgColor: "bg-blue-50 hover:bg-blue-100",
+    textColor: "text-blue-600",
+    borderColor: "border-blue-200",
+  },
+  {
+    id: "staff",
+    label: "Staff",
+    description: "スタッフ画面へアクセス",
+    loginId: "nakamura",
+    password: "pass001",
+    bgColor: "bg-slate-50 hover:bg-slate-100",
+    textColor: "text-slate-600",
+    borderColor: "border-slate-200",
+  },
+  {
+    id: "guest",
+    label: "Guest",
+    description: "ゲスト画面へアクセス",
+    loginId: "guest",
+    password: "guest123",
+    bgColor: "bg-emerald-50 hover:bg-emerald-100",
+    textColor: "text-emerald-600",
+    borderColor: "border-emerald-200",
+  },
+] as const;
+
 export const LoginPage = () => {
   const { t } = useTranslation("auth");
   const navigate = useNavigate();
@@ -16,6 +50,24 @@ export const LoginPage = () => {
 
   const from = (location.state as { from?: Location })?.from?.pathname || "/staff";
 
+  const performLogin = async (id: string, pass: string) => {
+    setLocalError(null);
+    const success = await login(id, pass);
+    if (success) {
+      const isAdminLogin = id === "admin" || id === "manager";
+      const isGuestLogin = id === "guest";
+      let redirectPath: string;
+      if (isAdminLogin) {
+        redirectPath = "/admin/dashboard";
+      } else if (isGuestLogin) {
+        redirectPath = "/guest/portal";
+      } else {
+        redirectPath = from;
+      }
+      navigate(redirectPath, { replace: true });
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLocalError(null);
@@ -25,15 +77,14 @@ export const LoginPage = () => {
       return;
     }
 
-    const success = await login(loginId, password);
-    if (success) {
-      // ログイン後のリダイレクト先をユーザータイプに基づいて決定
-      // currentUserはまだ更新されていないので、loginIdで判断する
-      // 管理者アカウントかどうかをloginIdで判断（admin, manager）
-      const isAdminLogin = loginId === "admin" || loginId === "manager";
-      const redirectPath = isAdminLogin ? "/admin/dashboard" : from;
-      navigate(redirectPath, { replace: true });
-    }
+    await performLogin(loginId, password);
+  };
+
+  const handleDemoLogin = async (credential: (typeof DEMO_CREDENTIALS)[number]) => {
+    if (isLoading) return;
+    setLoginId(credential.loginId);
+    setPassword(credential.password);
+    await performLogin(credential.loginId, credential.password);
   };
 
   const displayError = localError || error;
@@ -133,32 +184,32 @@ export const LoginPage = () => {
               </button>
             </form>
 
-            {/* Demo credentials hint */}
+            {/* Demo credentials - clickable cards */}
             <div className="mt-6 pt-6 border-t border-slate-100">
-              <p className="text-xs text-slate-400 text-center mb-2">Demo credentials</p>
-              {/* Admin credentials */}
-              <div className="bg-blue-50 rounded-lg p-3 text-xs text-slate-500 font-mono mb-2">
-                <p className="text-blue-600 font-medium mb-1">Admin</p>
-                <div className="flex justify-between">
-                  <span>Login ID:</span>
-                  <span className="text-slate-700">admin</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>Password:</span>
-                  <span className="text-slate-700">admin123</span>
-                </div>
-              </div>
-              {/* Staff credentials */}
-              <div className="bg-slate-50 rounded-lg p-3 text-xs text-slate-500 font-mono">
-                <p className="text-slate-600 font-medium mb-1">Staff</p>
-                <div className="flex justify-between">
-                  <span>Login ID:</span>
-                  <span className="text-slate-700">nakamura</span>
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span>Password:</span>
-                  <span className="text-slate-700">pass001</span>
-                </div>
+              <p className="text-xs text-slate-400 text-center mb-3">
+                Demo credentials - クリックでログイン
+              </p>
+              <div className="space-y-2">
+                {DEMO_CREDENTIALS.map((cred) => (
+                  <button
+                    key={cred.id}
+                    type="button"
+                    onClick={() => handleDemoLogin(cred)}
+                    disabled={isLoading}
+                    className={`w-full ${cred.bgColor} rounded-lg p-3 text-left transition-all border ${cred.borderColor} disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className={`${cred.textColor} font-medium text-sm`}>{cred.label}</p>
+                        <p className="text-slate-500 text-xs mt-0.5">{cred.description}</p>
+                      </div>
+                      <div className="text-right text-xs text-slate-400 font-mono">
+                        <div>{cred.loginId}</div>
+                        <div>{cred.password}</div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
