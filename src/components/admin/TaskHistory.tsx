@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   mockTasks,
@@ -24,6 +24,7 @@ import {
   SearchIcon,
   TemplateIcon,
   CheckIcon,
+  NoteIcon,
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 import { InlineTimeEdit } from "./shared/TimeEditForm";
@@ -102,6 +103,7 @@ const TaskDetailModal = ({
   isOpen,
   onClose,
   onSave,
+  onNotesChange,
   t,
 }: {
   task: Task | null;
@@ -111,8 +113,16 @@ const TaskDetailModal = ({
     taskId: string,
     updates: { scheduledTime: string; assignedStaffId: string | null },
   ) => void;
+  onNotesChange: (taskId: string, notes: string) => void;
   t: (key: string) => string;
 }) => {
+  const [notes, setNotes] = useState(task?.notes || "");
+
+  // task変更時にnotesを同期
+  useEffect(() => {
+    setNotes(task?.notes || "");
+  }, [task?.id, task?.notes]);
+
   if (!task) return null;
 
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
@@ -123,6 +133,12 @@ const TaskDetailModal = ({
       scheduledTime: newTime,
       assignedStaffId: task.assignedStaffId,
     });
+  };
+
+  const handleNotesBlur = () => {
+    if (notes !== (task.notes || "")) {
+      onNotesChange(task.id, notes);
+    }
   };
 
   // Find matching template by category
@@ -288,6 +304,22 @@ const TaskDetailModal = ({
             </div>
           </div>
         </div>
+
+        {/* Notes */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <NoteIcon size={16} className="text-[var(--ai)]" />
+            <p className="text-xs text-[var(--nezumi)]">{t("taskDetail.notes")}</p>
+          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            onBlur={handleNotesBlur}
+            placeholder={t("taskDetail.notesPlaceholder")}
+            className="w-full px-3 py-2 text-sm border border-[rgba(45,41,38,0.12)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)] focus:border-transparent resize-none"
+            rows={3}
+          />
+        </div>
       </div>
     </Modal>
   );
@@ -426,6 +458,14 @@ export const TaskHistory = () => {
     // Update selectedTask to reflect changes
     if (selectedTask?.id === taskId) {
       setSelectedTask({ ...selectedTask, ...updates });
+    }
+  };
+
+  const handleNotesChange = (taskId: string, notes: string) => {
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, notes } : task)));
+    // Update selectedTask to reflect changes
+    if (selectedTask?.id === taskId) {
+      setSelectedTask({ ...selectedTask, notes });
     }
   };
 
@@ -587,6 +627,7 @@ export const TaskHistory = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onSave={handleTaskUpdate}
+        onNotesChange={handleNotesChange}
         t={t}
       />
     </div>

@@ -77,7 +77,9 @@
     "completedAt": "完了時刻",
     "template": "テンプレート",
     "reservationProgress": "この予約のタスク進捗",
-    "edit": "編集"
+    "edit": "編集",
+    "notes": "メモ",
+    "notesPlaceholder": "タスクに関するメモを入力..."
   },
   "anniversary": {
     "birthday": "誕生日",
