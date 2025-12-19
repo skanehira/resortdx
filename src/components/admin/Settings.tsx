@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { mockRooms, mockAmenityTypes, mockEquipmentTypes } from "../../data/mock";
 import type {
   Room,
@@ -331,9 +332,22 @@ const EquipmentTypeModal = ({
   );
 };
 
+// Valid tab keys for URL parameter validation
+const VALID_TABS: SettingsTab[] = ["templates", "staff", "rooms", "amenities", "equipment", "dev"];
+
+const isValidTab = (tab: string | null): tab is SettingsTab => {
+  return tab !== null && VALID_TABS.includes(tab as SettingsTab);
+};
+
 // === Main Settings Component ===
 export const Settings = () => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("templates");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab: SettingsTab = isValidTab(tabParam) ? tabParam : "templates";
+
+  const setActiveTab = (tab: SettingsTab) => {
+    setSearchParams({ tab });
+  };
 
   // Room state
   const [rooms, setRooms] = useState<Room[]>(mockRooms);

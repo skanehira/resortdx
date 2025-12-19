@@ -214,6 +214,60 @@ export interface EmergencyContact {
   relationship: string;
 }
 
+// 雇用形態
+export type EmploymentType = "full_time" | "part_time" | "temp" | "dispatch";
+
+export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
+  full_time: "正社員",
+  part_time: "パート",
+  temp: "アルバイト",
+  dispatch: "派遣",
+};
+
+// 資格
+export type Certification =
+  | "driver_license" // 普通自動車免許
+  | "driver_license_2" // 中型自動車免許
+  | "cooking_license" // 調理師免許
+  | "food_hygiene" // 食品衛生責任者
+  | "sommelier" // ソムリエ
+  | "hotel_business" // ホテルビジネス実務検定
+  | "service_hospitality" // サービス接遇検定
+  | "first_aid"; // 救急法救急員
+
+export const CERTIFICATION_LABELS: Record<Certification, string> = {
+  driver_license: "普通自動車免許",
+  driver_license_2: "中型自動車免許",
+  cooking_license: "調理師免許",
+  food_hygiene: "食品衛生責任者",
+  sommelier: "ソムリエ",
+  hotel_business: "ホテルビジネス実務検定",
+  service_hospitality: "サービス接遇検定",
+  first_aid: "救急法救急員",
+};
+
+// 言語能力
+export type Language = "japanese" | "english" | "chinese" | "korean" | "other";
+
+export const LANGUAGE_LABELS: Record<Language, string> = {
+  japanese: "日本語",
+  english: "英語",
+  chinese: "中国語",
+  korean: "韓国語",
+  other: "その他",
+};
+
+// 担当エリア
+export type AssignedArea = "east_wing" | "west_wing" | "main_building" | "annex" | "all";
+
+export const ASSIGNED_AREA_LABELS: Record<AssignedArea, string> = {
+  east_wing: "東館",
+  west_wing: "西館",
+  main_building: "本館",
+  annex: "別館",
+  all: "全エリア",
+};
+
 export interface Staff {
   id: string;
   name: string;
@@ -225,7 +279,17 @@ export interface Staff {
   shiftEnd: string;
   currentTaskId: string | null;
   avatarColor: string;
+  // 基本情報
+  employmentType: EmploymentType;
+  hireDate: string;
+  phoneNumber: string;
+  // スキル・資格
+  certifications: Certification[];
+  languages: Language[];
+  assignedArea: AssignedArea;
+  // 連絡先・管理
   emergencyContact?: EmergencyContact;
+  notes?: string;
 }
 
 // === Task Template Types ===

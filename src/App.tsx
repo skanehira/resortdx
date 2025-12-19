@@ -393,6 +393,21 @@ const StaffPages = () => {
           | "other"
         )[],
         currentTaskId: null,
+        employmentType: "full_time" as const,
+        hireDate: "2020-01-01",
+        phoneNumber: "",
+        certifications: [] as (
+          | "driver_license"
+          | "driver_license_2"
+          | "cooking_license"
+          | "food_hygiene"
+          | "sommelier"
+          | "hotel_business"
+          | "service_hospitality"
+          | "first_aid"
+        )[],
+        languages: ["japanese"] as ("japanese" | "english" | "chinese" | "korean" | "other")[],
+        assignedArea: "all" as const,
       }
     : mockStaff[0];
 
