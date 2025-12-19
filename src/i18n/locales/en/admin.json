@@ -7,7 +7,7 @@
     "shuttle": "Shuttle",
     "meal": "Meal Service",
     "celebration": "Celebrations",
-    "taskHistory": "Task List",
+    "taskHistory": "Task Management",
     "settings": "Settings",
     "toStaff": "Staff View",
     "toAdmin": "Admin View"
@@ -89,7 +89,7 @@
   },
   "taskManagement": {
     "title": "Task Management",
-    "taskList": "Task List",
+    "taskList": "Task Management",
     "taskHistory": "Task History",
     "taskTemplates": "Task Templates",
     "createTask": "Create Task",

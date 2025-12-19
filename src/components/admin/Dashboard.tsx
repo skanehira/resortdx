@@ -6,7 +6,6 @@ import {
   mockDailyStats,
   getStaffById,
   getReservationById,
-  getRoomCleaningStatuses,
   getRoomName,
 } from "../../data/mock";
 import { ROOM_TYPE_LABELS, TASK_CATEGORY_LABELS, type Task, type Reservation } from "../../types";
@@ -19,10 +18,8 @@ import {
   AlertIcon,
   RoomIcon,
   ClockIcon,
-  CleaningIcon,
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
-import { RoomStatusMap } from "../shared/RoomStatusMap";
 import { InlineTimeEdit } from "./shared/TimeEditForm";
 
 // Status Badge Component
@@ -339,55 +336,6 @@ const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   );
 };
 
-// Progress Ring Component
-const ProgressRing = ({
-  progress,
-  size = 120,
-  completedLabel,
-}: {
-  progress: number;
-  size?: number;
-  completedLabel: string;
-}) => {
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (progress / 100) * circumference;
-
-  return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="var(--shironeri-warm)"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="var(--aotake)"
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="transition-all duration-500 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-display font-semibold text-[var(--sumi)]">
-          {Math.round(progress)}%
-        </span>
-        <span className="text-xs text-[var(--nezumi)]">{completedLabel}</span>
-      </div>
-    </div>
-  );
-};
-
 // Main Dashboard Component
 export const Dashboard = () => {
   const { t } = useTranslation("admin");
@@ -416,8 +364,6 @@ export const Dashboard = () => {
     .slice(0, 8);
 
   const urgentTasks = tasks.filter((t) => t.priority === "urgent" && t.status !== "completed");
-
-  const taskProgress = (mockDailyStats.completedTasks / mockDailyStats.totalTasks) * 100;
 
   const currentTime = new Date().toLocaleTimeString("ja-JP", {
     hour: "2-digit",
@@ -501,60 +447,6 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Task Progress */}
-        <div className="shoji-panel p-6 animate-slide-up stagger-1">
-          <h2 className="text-lg font-display font-medium text-[var(--sumi)] mb-4 flex items-center gap-2">
-            <TimelineIcon size={18} />
-            {t("dashboard.taskProgress")}
-          </h2>
-          <div className="flex flex-col items-center">
-            <ProgressRing
-              progress={taskProgress}
-              size={140}
-              completedLabel={t("dashboard.completed")}
-            />
-            <div className="mt-4 grid grid-cols-3 gap-4 w-full text-center">
-              <div>
-                <p className="text-lg font-display font-semibold text-[var(--aotake)]">
-                  {mockDailyStats.completedTasks}
-                </p>
-                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.completed")}</p>
-              </div>
-              <div>
-                <p className="text-lg font-display font-semibold text-[var(--ai)]">
-                  {mockDailyStats.inProgressTasks}
-                </p>
-                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.inProgress")}</p>
-              </div>
-              <div>
-                <p className="text-lg font-display font-semibold text-[var(--nezumi)]">
-                  {mockDailyStats.pendingTasks}
-                </p>
-                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.pending")}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Room Status Map */}
-        <div className="lg:col-span-2 shoji-panel p-6 animate-slide-up stagger-2">
-          <h2 className="text-lg font-display font-medium text-[var(--sumi)] mb-4 flex items-center gap-2">
-            <CleaningIcon size={18} />
-            {t("dashboard.roomStatus")}
-          </h2>
-          <RoomStatusMap
-            roomStatuses={getRoomCleaningStatuses(tasks, getStaffById).map((info) => ({
-              roomId: info.roomId,
-              status: info.status,
-              cleaningTask: info.cleaningTask,
-              assignedStaff: info.assignedStaff,
-            }))}
-          />
-        </div>
-      </div>
-
       {/* Today's Reservations */}
       <div className="shoji-panel animate-slide-up stagger-3">
         <div className="p-4 border-b border-[rgba(45,41,38,0.06)]">
@@ -623,37 +515,6 @@ export const Dashboard = () => {
         t={t}
         onTimeChange={handleTimeChange}
       />
-
-      {/* Quick Task Summary by Category */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {(["cleaning", "meal_service", "bath", "pickup", "celebration", "turndown"] as const).map(
-          (category) => {
-            const categoryTasks = tasks.filter((t) => t.category === category);
-            const completedCount = categoryTasks.filter((t) => t.status === "completed").length;
-            return (
-              <div
-                key={category}
-                className="shoji-panel p-4 text-center card-hover animate-slide-up"
-              >
-                <p className="text-2xl font-display font-semibold text-[var(--sumi)]">
-                  {completedCount}/{categoryTasks.length}
-                </p>
-                <p className="text-xs text-[var(--nezumi)] mt-1">
-                  {TASK_CATEGORY_LABELS[category]}
-                </p>
-                <div className="mt-2 h-1 bg-[var(--shironeri-warm)] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[var(--aotake)] transition-all duration-300"
-                    style={{
-                      width: `${categoryTasks.length > 0 ? (completedCount / categoryTasks.length) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          },
-        )}
-      </div>
     </div>
   );
 };

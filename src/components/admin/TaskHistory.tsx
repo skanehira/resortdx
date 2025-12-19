@@ -335,6 +335,9 @@ interface TaskRowProps {
 const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
   const reservation = getReservationById(task.reservationId);
+  const roomName = getRoomName(task.roomId);
+  // Remove room name from task title
+  const titleWithoutRoom = task.title.replace(` ${roomName}`, "").replace(roomName, "");
 
   const priorityLabels = {
     normal: t("priority.normal"),
@@ -352,15 +355,15 @@ const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
       <td className="font-display">{task.scheduledTime}</td>
       <td>
         <div className="flex flex-col">
-          <span className="font-medium">{getRoomName(task.roomId)}</span>
+          <span className="font-medium whitespace-nowrap">{roomName}</span>
         </div>
       </td>
       <td>
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded">
+          <span className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded whitespace-nowrap">
             {TASK_CATEGORY_LABELS[task.category]}
           </span>
-          <span className="font-medium">{task.title}</span>
+          <span className="font-medium">{titleWithoutRoom}</span>
           {task.isAnniversaryRelated && (
             <CelebrationIcon size={14} className="text-[var(--kincha)]" />
           )}
@@ -592,13 +595,13 @@ export const TaskHistory = () => {
           <table>
             <thead>
               <tr>
-                <th className="w-20">{t("table.time")}</th>
-                <th className="w-24">{t("table.room")}</th>
-                <th>{t("table.task")}</th>
-                <th className="w-20">{t("table.priority")}</th>
-                <th className="w-36">{t("table.assignee")}</th>
-                <th className="w-32">{t("table.guest")}</th>
-                <th className="w-24">{t("table.status")}</th>
+                <th className="w-20 whitespace-nowrap">{t("table.time")}</th>
+                <th className="w-52 whitespace-nowrap">{t("table.room")}</th>
+                <th className="whitespace-nowrap">{t("table.task")}</th>
+                <th className="w-20 whitespace-nowrap">{t("table.priority")}</th>
+                <th className="w-36 whitespace-nowrap">{t("table.assignee")}</th>
+                <th className="w-32 whitespace-nowrap">{t("table.guest")}</th>
+                <th className="w-28 whitespace-nowrap">{t("table.status")}</th>
               </tr>
             </thead>
             <tbody>

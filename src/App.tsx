@@ -80,15 +80,15 @@ const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) =
     icon: React.ReactNode;
   }[] = [
     { page: "dashboard", labelKey: "nav.dashboard", icon: <DashboardIcon /> },
-    { page: "equipment", labelKey: "nav.equipment", icon: <EquipmentIcon /> },
-    { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
-    { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
-    { page: "celebration", labelKey: "nav.celebration", icon: <CakeIcon /> },
     {
       page: "task_history",
       labelKey: "nav.taskHistory",
       icon: <HistoryIcon />,
     },
+    { page: "equipment", labelKey: "nav.equipment", icon: <EquipmentIcon /> },
+    { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
+    { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
+    { page: "celebration", labelKey: "nav.celebration", icon: <CakeIcon /> },
     { page: "settings", labelKey: "nav.settings", icon: <SettingsIcon /> },
   ];
 

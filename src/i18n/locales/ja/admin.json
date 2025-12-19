@@ -7,7 +7,7 @@
     "shuttle": "送迎管理",
     "meal": "配膳管理",
     "celebration": "記念日管理",
-    "taskHistory": "タスク一覧",
+    "taskHistory": "タスク管理",
     "settings": "設定",
     "toStaff": "スタッフ画面へ",
     "toAdmin": "管理画面へ"
@@ -89,7 +89,7 @@
   },
   "taskManagement": {
     "title": "タスク管理",
-    "taskList": "タスク一覧",
+    "taskList": "タスク管理",
     "taskHistory": "タスク履歴",
     "taskTemplates": "タスクテンプレート",
     "createTask": "タスク作成",
