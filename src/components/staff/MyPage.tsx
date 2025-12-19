@@ -5,7 +5,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getStaffById } from "../../data/mock/staff";
 import { STAFF_ROLE_LABELS } from "../../types";
 import { ArrowLeftIcon, EditIcon, CheckIcon, CloseIcon } from "../ui/Icons";
-import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 
 export const MyPage = () => {
   const { t } = useTranslation(["auth", "types"]);
@@ -130,7 +129,6 @@ export const MyPage = () => {
             </button>
             <h1 className="text-lg font-bold text-slate-800">{t("auth:mypage.title")}</h1>
           </div>
-          <LanguageSwitcher variant="compact" />
         </div>
       </div>
 
@@ -237,7 +235,7 @@ export const MyPage = () => {
                         className="flex-1 py-2 px-4 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         <CloseIcon size={16} className="inline mr-1" />
-                        Cancel
+                        {t("auth:common.cancel")}
                       </button>
                       <button
                         type="button"
@@ -319,7 +317,7 @@ export const MyPage = () => {
                         className="flex-1 py-2 px-4 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         <CloseIcon size={16} className="inline mr-1" />
-                        Cancel
+                        {t("auth:common.cancel")}
                       </button>
                       <button
                         type="button"

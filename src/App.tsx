@@ -628,6 +628,22 @@ const StaffPages = () => {
     // 実際の実装ではサーバーに送信
   }, []);
 
+  // メモ変更
+  const handleMemoChange = useCallback(
+    (taskId: string, memoType: "personal" | "shared", value: string | null) => {
+      setUnifiedTasks((prev) =>
+        prev.map((task) => {
+          if (task.id !== taskId) return task;
+          return {
+            ...task,
+            ...(memoType === "personal" ? { personalMemo: value } : { sharedMemo: value }),
+          };
+        }),
+      );
+    },
+    [],
+  );
+
   // ヘルプ依頼作成
   const handleCreateHelpRequest = useCallback(
     (data: { targetStaffIds: string[] | "all"; message: string; relatedTaskId?: string }) => {
@@ -775,6 +791,7 @@ const StaffPages = () => {
                 onCreateHelpRequest={handleCreateHelpRequest}
                 categoryFilter={categoryFilter}
                 onCategoryFilterChange={setCategoryFilter}
+                onMemoChange={handleMemoChange}
               />
             }
           />
@@ -797,6 +814,7 @@ const StaffPages = () => {
                 onCompleteHelp={handleCompleteHelp}
                 onCancelHelp={handleCancelHelp}
                 onEquipmentReport={handleEquipmentReport}
+                onMemoChange={handleMemoChange}
               />
             }
           />
