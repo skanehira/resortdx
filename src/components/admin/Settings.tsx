@@ -19,11 +19,13 @@ import {
   EquipmentIcon,
   CheckIcon,
   TemplateIcon,
+  StaffIcon,
 } from "../ui/Icons";
 import { TaskTemplates } from "./TaskTemplates";
+import { StaffMonitor } from "./StaffMonitor";
 
 // Tab types
-type SettingsTab = "templates" | "rooms" | "amenities" | "equipment" | "dev";
+type SettingsTab = "templates" | "staff" | "rooms" | "amenities" | "equipment" | "dev";
 
 // === Room Management Section ===
 interface RoomModalProps {
@@ -426,6 +428,11 @@ export const Settings = () => {
       label: "タスクテンプレート",
       icon: <TemplateIcon size={18} />,
     },
+    {
+      key: "staff",
+      label: "スタッフ管理",
+      icon: <StaffIcon size={18} />,
+    },
     { key: "rooms", label: "客室タイプ", icon: <RoomIcon size={18} /> },
     {
       key: "amenities",
@@ -482,8 +489,12 @@ export const Settings = () => {
       {/* Tab Content */}
       {/* Templates Tab - rendered outside shoji-panel to use its own styling */}
       {activeTab === "templates" && <TaskTemplates />}
+      {/* Staff Tab - rendered outside shoji-panel to use its own styling */}
+      {activeTab === "staff" && <StaffMonitor />}
 
-      <div className={activeTab === "templates" ? "hidden" : "shoji-panel"}>
+      <div
+        className={activeTab === "templates" || activeTab === "staff" ? "hidden" : "shoji-panel"}
+      >
         {/* Rooms Tab */}
         {activeTab === "rooms" && (
           <div>

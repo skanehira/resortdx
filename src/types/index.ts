@@ -254,7 +254,6 @@ export interface RelativeTimeConfig {
 export type AdminPage =
   | "dashboard"
   | "reservations"
-  | "staff_monitor"
   | "equipment"
   | "shuttle"
   | "meal"

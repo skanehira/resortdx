@@ -17,7 +17,6 @@ import type {
 } from "./types";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Dashboard } from "./components/admin/Dashboard";
-import { StaffMonitor } from "./components/admin/StaffMonitor";
 import { EquipmentManagement } from "./components/admin/EquipmentManagement";
 import { ShuttleManagement } from "./components/admin/ShuttleManagement";
 import { MealManagement } from "./components/admin/MealManagement";
@@ -81,11 +80,6 @@ const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) =
     icon: React.ReactNode;
   }[] = [
     { page: "dashboard", labelKey: "nav.dashboard", icon: <DashboardIcon /> },
-    {
-      page: "staff_monitor",
-      labelKey: "nav.staffMonitor",
-      icon: <StaffIcon />,
-    },
     { page: "equipment", labelKey: "nav.equipment", icon: <EquipmentIcon /> },
     { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
     { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
@@ -255,7 +249,6 @@ const AdminPages = () => {
 
   const getCurrentPage = (): AdminPage => {
     const path = location.pathname;
-    if (path.includes("staff_monitor")) return "staff_monitor";
     if (path.includes("equipment")) return "equipment";
     if (path.includes("shuttle")) return "shuttle";
     if (path.includes("meal")) return "meal";
@@ -273,7 +266,6 @@ const AdminPages = () => {
     <AdminLayout currentPage={getCurrentPage()} onPageChange={handlePageChange}>
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="staff_monitor" element={<StaffMonitor />} />
         <Route path="equipment" element={<EquipmentManagement />} />
         <Route path="shuttle" element={<ShuttleManagement />} />
         <Route path="meal" element={<MealManagement />} />
