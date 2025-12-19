@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type {
   UnifiedTask,
   CleaningChecklistItem,
@@ -15,6 +16,7 @@ import {
   ChevronRightIcon,
 } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
+import { MemoSection, MemoDisplay } from "../../shared/MemoSection";
 
 // Step Flow Component for Cleaning Tasks
 interface CleaningTaskFlowProps {
@@ -186,11 +188,14 @@ const CleaningChecklist = ({ items, onToggleItem, disabled = false }: CleaningCh
   );
 };
 
+type MemoType = "personal" | "shared";
+
 interface HousekeepingCardProps {
   task: UnifiedTask;
   onStatusChange: (taskId: string, newStatus: UnifiedTask["status"]) => void;
   onToggleCleaningItem?: (taskId: string, item: CleaningChecklistItemType) => void;
   onRequestEquipmentReport?: (taskId: string, roomId: string) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
 }
 
 export const HousekeepingCard = ({
@@ -198,7 +203,9 @@ export const HousekeepingCard = ({
   onStatusChange,
   onToggleCleaningItem,
   onRequestEquipmentReport,
+  onMemoChange,
 }: HousekeepingCardProps) => {
+  const { t } = useTranslation("staff");
   const [isExpanded, setIsExpanded] = useState(false);
   const housekeeping = task.housekeeping;
 
@@ -516,6 +523,25 @@ export const HousekeepingCard = ({
           )}
         </div>
       )}
+
+      {/* Memo Section */}
+      <div className="mt-4 space-y-3">
+        {/* Admin Memo (read-only) */}
+        <MemoDisplay title={t("memo.fromAdmin")} value={task.adminMemo} variant="admin" />
+
+        {/* Shared Memo (read-only) */}
+        <MemoDisplay title={t("memo.sharedMemo")} value={task.sharedMemo} variant="shared" />
+
+        {/* Personal Memo (editable) */}
+        <MemoSection
+          title={t("memo.personalMemo")}
+          value={task.personalMemo}
+          onSave={(value) => onMemoChange?.(task.id, "personal", value)}
+          placeholder={t("memo.placeholder")}
+          editable={true}
+          variant="personal"
+        />
+      </div>
     </TaskCardBase>
   );
 };

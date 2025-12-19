@@ -30,10 +30,14 @@
 
   /* 鼠色 - Mouse Gray */
   --nezumi: #7d7d7d;
-  --nezumi-light: #a8a8a8;
+  --nezumi-light: #949494; /* Improved contrast: 3.9:1 (was #a8a8a8 at 2.7:1) */
 
   /* 桜鼠 - Cherry Blossom Gray */
   --sakuranezumi: #e8d5d5;
+
+  /* 藤色 - Wisteria Purple (for help requests) */
+  --fuji: #8b7fba;
+  --fuji-light: #a89fd1;
 
   /* === Typography === */
   --font-display: "Noto Serif JP", serif;
@@ -179,6 +183,12 @@ h6 {
   background: rgba(199, 62, 58, 0.1);
   color: var(--shu);
   border: 1px solid rgba(199, 62, 58, 0.2);
+}
+
+.badge-help {
+  background: rgba(139, 127, 186, 0.1);
+  color: var(--fuji);
+  border: 1px solid rgba(139, 127, 186, 0.2);
 }
 
 /* === Buttons === */
@@ -528,6 +538,38 @@ tr:hover td {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* === Urgent Task Animation === */
+@keyframes pulse-urgent {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(199, 62, 58, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(199, 62, 58, 0);
+  }
+}
+
+.animate-pulse-urgent {
+  animation: pulse-urgent 1.5s ease-in-out infinite;
+}
+
+/* === Swipe Hint Animation === */
+@keyframes swipe-hint {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(16px);
+    opacity: 0.6;
+  }
+}
+
+.animate-swipe-hint {
+  animation: swipe-hint 1.5s ease-in-out infinite;
 }
 
 /* === Shimmer Animation === */

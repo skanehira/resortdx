@@ -97,6 +97,38 @@ export const mockStaff: Staff[] = [
       relationship: "配偶者",
     },
   },
+  {
+    id: "STF007",
+    name: "山本 真理子",
+    nameKana: "ヤマモト マリコ",
+    role: "front",
+    skills: ["meal_service", "celebration", "other"],
+    status: "on_duty",
+    shiftStart: "08:00",
+    shiftEnd: "17:00",
+    currentTaskId: null,
+    avatarColor: "#9B59B6",
+    emergencyContact: {
+      phone: "090-7890-1234",
+      relationship: "母",
+    },
+  },
+  {
+    id: "STF008",
+    name: "田中 健太",
+    nameKana: "タナカ ケンタ",
+    role: "manager",
+    skills: ["cleaning", "meal_service", "celebration", "pickup", "other"],
+    status: "on_duty",
+    shiftStart: "09:00",
+    shiftEnd: "18:00",
+    currentTaskId: null,
+    avatarColor: "#2C3E50",
+    emergencyContact: {
+      phone: "090-8901-2345",
+      relationship: "配偶者",
+    },
+  },
 ];
 
 // Helper functions

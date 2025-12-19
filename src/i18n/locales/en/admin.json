@@ -1,0 +1,200 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "templates": "Task Templates",
+    "staffMonitor": "Staff Management",
+    "equipment": "Equipment",
+    "shuttle": "Shuttle",
+    "meal": "Meal Service",
+    "celebration": "Celebrations",
+    "taskHistory": "Task List",
+    "settings": "Settings",
+    "toStaff": "Staff View",
+    "toAdmin": "Admin View"
+  },
+  "header": {
+    "adminMode": "Admin Mode"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "todaysTasks": "Today's Tasks",
+    "upcomingTasks": "Upcoming Tasks",
+    "completedTasks": "Completed Tasks",
+    "staffStatus": "Staff Status",
+    "roomStatus": "Room Status",
+    "taskProgress": "Task Progress",
+    "todaysReservations": "Today's Reservations",
+    "urgentTasks": "Urgent Tasks",
+    "todaysCheckIn": "Today's Check-ins",
+    "todaysGuests": "Today's Guests",
+    "anniversaryGuests": "Anniversary Guests",
+    "reservation": "reservations",
+    "guests": "guests",
+    "groups": "groups",
+    "unassigned": "Unassigned",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "pending": "Pending",
+    "incompleteTasks": "incomplete tasks",
+    "guestCount": ""
+  },
+  "table": {
+    "arrival": "Arrival",
+    "room": "Room",
+    "guestName": "Guest Name",
+    "numberOfGuests": "Guests",
+    "notes": "Notes",
+    "time": "Time",
+    "task": "Task",
+    "priority": "Priority",
+    "assignee": "Assignee",
+    "status": "Status",
+    "guest": "Guest"
+  },
+  "status": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "priority": {
+    "normal": "Normal",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "taskDetail": {
+    "title": "Task Details",
+    "scheduledTime": "Scheduled Time",
+    "room": "Room",
+    "category": "Category",
+    "duration": "Duration",
+    "minutes": "min",
+    "description": "Description",
+    "assignee": "Assignee",
+    "unassigned": "Unassigned",
+    "guestInfo": "Guest Information",
+    "anniversaryRelated": "Anniversary Related",
+    "completedAt": "Completed At",
+    "template": "Template",
+    "reservationProgress": "Reservation Task Progress",
+    "edit": "Edit"
+  },
+  "anniversary": {
+    "birthday": "Birthday",
+    "wedding": "Wedding Anniversary",
+    "weddingAnniversary": "Wedding Anniversary",
+    "anniversary": "Anniversary"
+  },
+  "taskManagement": {
+    "title": "Task Management",
+    "taskList": "Task List",
+    "taskHistory": "Task History",
+    "taskTemplates": "Task Templates",
+    "createTask": "Create Task",
+    "editTask": "Edit Task",
+    "assignStaff": "Assign Staff",
+    "timeEdit": "Edit Time",
+    "memoEdit": "Edit Memo",
+    "description": "Review and manage all tasks for today",
+    "totalTasks": "Total Tasks",
+    "urgentTasksAlert": "Urgent Tasks",
+    "urgentTasksAlertItems": "",
+    "urgentNeedsAttention": "Urgent tasks require immediate attention",
+    "noTasksFound": "No tasks found",
+    "noTasksMatchSearch": "No tasks match search criteria",
+    "searchPlaceholder": "Search tasks..."
+  },
+  "staffManagement": {
+    "title": "Staff Management",
+    "description": "Manage staff availability and task assignments",
+    "staffList": "Staff List",
+    "staffMonitor": "Staff Monitor",
+    "onDuty": "On Duty",
+    "onBreak": "On Break",
+    "offDuty": "Off Duty",
+    "shiftStart": "Shift Start",
+    "shiftEnd": "Shift End",
+    "onDutyStaff": "On Duty Staff",
+    "activeTasks": "Active Tasks",
+    "inProgressTasks": "In Progress Tasks",
+    "unassignedTasks": "Unassigned Tasks",
+    "statusChange": "Change Status",
+    "selectStatus": "'s Status",
+    "emergencyContact": "Emergency Contact",
+    "emergencyContactFor": "'s Emergency Contact",
+    "phoneNumber": "Phone Number",
+    "phonePlaceholder": "090-1234-5678",
+    "relationship": "Relationship",
+    "relationshipPlaceholder": "Mother, spouse, etc.",
+    "registerEmergencyContact": "Register Emergency Contact",
+    "currentTask": "In Progress",
+    "remainingTasks": "Remaining",
+    "completedTasks": "Completed",
+    "availableSkills": "Available Skills",
+    "taskReassign": "Reassign Task",
+    "currentAssignee": "Current Assignee",
+    "selectNewAssignee": "Select New Assignee",
+    "remainingCount": "{{count}} remaining",
+    "noAvailableStaff": "No available staff",
+    "reassign": "Reassign",
+    "doReassign": "Reassign",
+    "staffTaskList": "{{name}}'s Tasks",
+    "taskCount": "{{count}} tasks",
+    "noAssignedTasks": "No assigned tasks",
+    "workloadBalance": "Workload Balance",
+    "items": "",
+    "incomplete": "Incomplete",
+    "allRoles": "All",
+    "selectStaffToView": "Select staff to view details"
+  },
+  "shuttleManagement": {
+    "title": "Shuttle Management",
+    "shuttleList": "Shuttle List",
+    "vehicleStatus": "Vehicle Status",
+    "schedulePickup": "Scheduled Pickup",
+    "scheduleDropoff": "Scheduled Dropoff"
+  },
+  "mealManagement": {
+    "title": "Meal Management",
+    "mealList": "Meal List",
+    "orderNotifications": "Order Notifications",
+    "breakfast": "Breakfast",
+    "dinner": "Dinner",
+    "roomService": "Room Service"
+  },
+  "celebrationManagement": {
+    "title": "Celebration Management",
+    "celebrationList": "Celebration List",
+    "preparation": "Preparation",
+    "execution": "Execution"
+  },
+  "equipmentManagement": {
+    "title": "Equipment Management",
+    "amenities": "Amenities",
+    "equipment": "Equipment"
+  },
+  "settings": {
+    "title": "Settings",
+    "systemSettings": "System Settings",
+    "languageSettings": "Language Settings"
+  },
+  "memo": {
+    "adminMemo": "Admin Memo",
+    "sharedMemo": "Shared Memo",
+    "placeholder": "Enter memo..."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "all": "All"
+  },
+  "category": {
+    "all": "All",
+    "cleaning": "Cleaning",
+    "mealService": "Meal",
+    "bath": "Bath",
+    "pickup": "Pickup",
+    "celebration": "Celebration",
+    "turndown": "Turndown"
+  }
+}

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { UnifiedTask } from "../../../types";
 import { HELP_REQUEST_STATUS_LABELS } from "../../../types";
 import { UserIcon, CheckIcon, ClockIcon } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
+import { MemoSection, MemoDisplay } from "../../shared/MemoSection";
+
+type MemoType = "personal" | "shared";
 
 interface HelpRequestCardProps {
   task: UnifiedTask;
@@ -11,6 +15,7 @@ interface HelpRequestCardProps {
   onAcceptHelp?: (taskId: string) => void;
   onCompleteHelp?: (taskId: string) => void;
   onCancelHelp?: (taskId: string) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
 }
 
 export const HelpRequestCard = ({
@@ -20,7 +25,9 @@ export const HelpRequestCard = ({
   onAcceptHelp,
   onCompleteHelp,
   onCancelHelp,
+  onMemoChange,
 }: HelpRequestCardProps) => {
+  const { t } = useTranslation("staff");
   const [isExpanded, setIsExpanded] = useState(false);
   const helpRequest = task.helpRequest;
 
@@ -59,8 +66,8 @@ export const HelpRequestCard = ({
     >
       <div className="space-y-4">
         {/* Requester info */}
-        <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-          <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold">
+        <div className="flex items-center gap-3 p-3 bg-[var(--fuji)]/10 rounded-lg">
+          <div className="w-10 h-10 rounded-full bg-[var(--fuji)] flex items-center justify-center text-white font-bold">
             {helpRequest.requesterName.charAt(0)}
           </div>
           <div>
@@ -126,7 +133,7 @@ export const HelpRequestCard = ({
           {canAccept && (
             <button
               onClick={() => onAcceptHelp?.(task.id)}
-              className="flex-1 py-3 bg-purple-500 text-white rounded-lg font-medium"
+              className="flex-1 py-3 bg-[var(--fuji)] text-white rounded-lg font-medium"
             >
               ヘルプする
             </button>
@@ -169,6 +176,25 @@ export const HelpRequestCard = ({
             </p>
           </div>
         )}
+
+        {/* Memo Section */}
+        <div className="mt-4 space-y-3">
+          {/* Admin Memo (read-only) */}
+          <MemoDisplay title={t("memo.fromAdmin")} value={task.adminMemo} variant="admin" />
+
+          {/* Shared Memo (read-only) */}
+          <MemoDisplay title={t("memo.sharedMemo")} value={task.sharedMemo} variant="shared" />
+
+          {/* Personal Memo (editable) */}
+          <MemoSection
+            title={t("memo.personalMemo")}
+            value={task.personalMemo}
+            onSave={(value) => onMemoChange?.(task.id, "personal", value)}
+            placeholder={t("memo.placeholder")}
+            editable={true}
+            variant="personal"
+          />
+        </div>
       </div>
     </TaskCardBase>
   );

@@ -2,7 +2,8 @@ import { useState, useRef, useCallback } from "react";
 import type { UnifiedTask } from "../../../types";
 import { UNIFIED_TASK_TYPE_LABELS, UNIFIED_TASK_TYPE_ICONS } from "../../../types";
 import { getRoomName } from "../../../data/mock";
-import { ClockIcon, RoomIcon, CelebrationIcon, ChevronDownIcon, AlertIcon } from "../../ui/Icons";
+import { RoomIcon, CelebrationIcon, ChevronDownIcon, AlertIcon } from "../../ui/Icons";
+import { StatusBadge } from "../../ui/StatusBadge";
 
 // Swipe threshold in pixels
 const SWIPE_THRESHOLD = 80;
@@ -37,33 +38,11 @@ const CATEGORY_COLORS: Record<
     badge: "bg-[var(--shu)]",
   },
   help_request: {
-    bg: "bg-purple-100",
-    border: "border-purple-500",
-    text: "text-purple-600",
-    badge: "bg-purple-500",
+    bg: "bg-[var(--fuji)]/10",
+    border: "border-[var(--fuji)]",
+    text: "text-[var(--fuji)]",
+    badge: "bg-[var(--fuji)]",
   },
-};
-
-// ステータスバッジ
-const StatusBadge = ({ status }: { status: UnifiedTask["status"] }) => {
-  const config = {
-    pending: { bg: "bg-[var(--nezumi)]/20", text: "text-[var(--nezumi)]" },
-    in_progress: { bg: "bg-[var(--ai)]/20", text: "text-[var(--ai)]" },
-    completed: { bg: "bg-[var(--aotake)]/20", text: "text-[var(--aotake)]" },
-  };
-  const labels = {
-    pending: "未着手",
-    in_progress: "作業中",
-    completed: "完了",
-  };
-
-  return (
-    <span
-      className={`px-2 py-0.5 rounded-full text-xs font-medium ${config[status].bg} ${config[status].text}`}
-    >
-      {labels[status]}
-    </span>
-  );
 };
 
 interface TaskCardBaseProps {
@@ -149,12 +128,14 @@ export const TaskCardBase = ({
   }, [swipeOffset, task.id, task.status, onStatusChange]);
 
   // 優先度に応じたスタイル
-  const priorityStyle =
-    task.priority === "urgent"
-      ? "ring-2 ring-[var(--shu)] ring-offset-1"
-      : task.priority === "high"
-        ? "ring-1 ring-[var(--kincha)]"
-        : "";
+  const isUrgent = task.priority === "urgent";
+  const isHigh = task.priority === "high";
+  const priorityStyle = isUrgent
+    ? "ring-2 ring-[var(--shu)] ring-offset-1"
+    : isHigh
+      ? "ring-1 ring-[var(--kincha)]"
+      : "";
+  const urgentBgStyle = isUrgent ? "bg-[var(--shu)]/5" : "bg-white/80";
 
   return (
     <div className="relative overflow-hidden rounded-xl">
@@ -184,14 +165,24 @@ export const TaskCardBase = ({
 
       {/* Card content */}
       <div
-        className={`relative bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border transition-transform
+        className={`relative ${urgentBgStyle} backdrop-blur-sm rounded-xl shadow-sm border transition-transform
           ${colors.border} ${priorityStyle}
-          ${isSwiping ? "" : "transition-transform duration-200"}`}
+          ${isSwiping ? "" : "transition-transform duration-200"}
+          ${isUrgent ? "animate-pulse-urgent" : ""}`}
         style={{ transform: `translateX(${swipeOffset}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Priority color bar */}
+        {(isUrgent || isHigh) && (
+          <div
+            className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
+              isUrgent ? "bg-[var(--shu)]" : "bg-[var(--kincha)]"
+            }`}
+          />
+        )}
+
         {/* Header */}
         <button type="button" className="w-full p-4" onClick={onExpand}>
           <div className="flex items-start gap-3">
@@ -215,9 +206,14 @@ export const TaskCardBase = ({
                 )}
               </div>
 
-              <h3 className="font-display font-bold text-[var(--sumi)] text-left truncate">
-                {task.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--nezumi)] font-medium tabular-nums">
+                  {task.scheduledTime}
+                </span>
+                <h3 className="font-display font-bold text-[var(--sumi)] text-left truncate">
+                  {task.title}
+                </h3>
+              </div>
 
               <div className="flex items-center gap-3 mt-1 text-xs text-[var(--nezumi)]">
                 {task.roomId && (
@@ -226,10 +222,6 @@ export const TaskCardBase = ({
                     {getRoomName(task.roomId)}
                   </span>
                 )}
-                <span className="flex items-center gap-1">
-                  <ClockIcon size={12} />
-                  {task.scheduledTime}
-                </span>
                 {task.priority === "urgent" && (
                   <span className="flex items-center gap-1 text-[var(--shu)]">
                     <AlertIcon size={12} />

@@ -4,26 +4,55 @@
 interface IconProps {
   size?: number;
   className?: string;
+  /** Accessible title for the icon (adds a title element and makes icon accessible) */
+  title?: string;
 }
 
-export const DashboardIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-);
+// Counter for generating unique IDs for title elements
+let iconIdCounter = 0;
+
+/**
+ * Hook to generate accessibility attributes for SVG icons.
+ * - Without title: icon is decorative (aria-hidden="true")
+ * - With title: icon is accessible with role="img" and aria-labelledby
+ */
+const useIconAccessibility = (title?: string) => {
+  if (!title) {
+    return { "aria-hidden": true as const };
+  }
+  const titleId = `icon-title-${++iconIdCounter}`;
+  return {
+    role: "img" as const,
+    "aria-labelledby": titleId,
+    titleId,
+  };
+};
+
+export const DashboardIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+};
 
 export const ReservationIcon = ({ size = 20, className = "" }: IconProps) => (
   <svg
@@ -322,40 +351,54 @@ export const ChevronDownIcon = ({ size = 20, className = "" }: IconProps) => (
   </svg>
 );
 
-export const MenuIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M3 12h18" />
-    <path d="M3 6h18" />
-    <path d="M3 18h18" />
-  </svg>
-);
+export const MenuIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M3 12h18" />
+      <path d="M3 6h18" />
+      <path d="M3 18h18" />
+    </svg>
+  );
+};
 
-export const CloseIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M18 6L6 18" />
-    <path d="M6 6l12 12" />
-  </svg>
-);
+export const CloseIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  );
+};
 
 export const AlertIcon = ({ size = 20, className = "" }: IconProps) => (
   <svg
@@ -375,94 +418,129 @@ export const AlertIcon = ({ size = 20, className = "" }: IconProps) => (
   </svg>
 );
 
-export const SearchIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="M21 21l-4.35-4.35" />
-  </svg>
-);
+export const SearchIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.35-4.35" />
+    </svg>
+  );
+};
 
-export const PlusIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M12 5v14" />
-    <path d="M5 12h14" />
-  </svg>
-);
+export const PlusIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+};
 
-export const EditIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </svg>
-);
+export const EditIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+};
 
-export const TrashIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-    <line x1="10" y1="11" x2="10" y2="17" />
-    <line x1="14" y1="11" x2="14" y2="17" />
-  </svg>
-);
+export const TrashIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+  );
+};
 
-export const RefreshIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M21 2v6h-6" />
-    <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-    <path d="M3 22v-6h6" />
-    <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-  </svg>
-);
+export const RefreshIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M21 2v6h-6" />
+      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+      <path d="M3 22v-6h6" />
+      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+    </svg>
+  );
+};
 
 export const PhoneIcon = ({ size = 20, className = "" }: IconProps) => (
   <svg
@@ -516,22 +594,29 @@ export const UserIcon = ({ size = 20, className = "" }: IconProps) => (
   </svg>
 );
 
-export const ArrowLeftIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M19 12H5" />
-    <path d="M12 19l-7-7 7-7" />
-  </svg>
-);
+export const ArrowLeftIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M19 12H5" />
+      <path d="M12 19l-7-7 7-7" />
+    </svg>
+  );
+};
 
 // === Equipment Management Icons ===
 
@@ -807,22 +892,29 @@ export const ArrowRightIcon = ({ size = 20, className = "" }: IconProps) => (
   </svg>
 );
 
-export const BellIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-  </svg>
-);
+export const BellIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+};
 
 // === Meal & Celebration Icons ===
 
@@ -1149,22 +1241,29 @@ export const SendIcon = ({ size = 20, className = "" }: IconProps) => (
   </svg>
 );
 
-export const FilterIcon = ({ size = 20, className = "" }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    {/* Filter icon */}
-    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-  </svg>
-);
+export const FilterIcon = ({ size = 20, className = "", title }: IconProps) => {
+  const a11y = useIconAccessibility(title);
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...("aria-hidden" in a11y
+        ? { "aria-hidden": a11y["aria-hidden"] }
+        : { role: a11y.role, "aria-labelledby": a11y["aria-labelledby"] })}
+    >
+      {"titleId" in a11y && <title id={a11y.titleId}>{title}</title>}
+      {/* Filter icon */}
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+  );
+};
 
 export const PlayIcon = ({ size = 20, className = "" }: IconProps) => (
   <svg
@@ -1251,5 +1350,44 @@ export const ChatIcon = ({ size = 20, className = "" }: IconProps) => (
   >
     {/* Chat bubble icon */}
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+export const GlobeIcon = ({ size = 20, className = "" }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Globe icon for language switching */}
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+export const NoteIcon = ({ size = 20, className = "" }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    {/* Note/Memo icon for shared notes */}
+    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="8" y1="13" x2="16" y2="13" />
+    <line x1="8" y1="17" x2="16" y2="17" />
   </svg>
 );

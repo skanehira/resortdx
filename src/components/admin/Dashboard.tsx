@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   mockReservations,
   mockTasks,
@@ -24,30 +25,36 @@ import { Modal } from "../ui/Modal";
 import { RoomStatusMap } from "../shared/RoomStatusMap";
 
 // Status Badge Component
-const StatusBadge = ({ status }: { status: Task["status"] }) => {
+const StatusBadge = ({ status, t }: { status: Task["status"]; t: (key: string) => string }) => {
   const classes = {
     pending: "badge badge-pending",
     in_progress: "badge badge-in-progress",
     completed: "badge badge-completed",
   };
   const labels = {
-    pending: "未着手",
-    in_progress: "作業中",
-    completed: "完了",
+    pending: t("status.pending"),
+    in_progress: t("status.inProgress"),
+    completed: t("status.completed"),
   };
   return <span className={classes[status]}>{labels[status]}</span>;
 };
 
 // Priority Badge Component
-const PriorityBadge = ({ priority }: { priority: Task["priority"] }) => {
+const PriorityBadge = ({
+  priority,
+  t,
+}: {
+  priority: Task["priority"];
+  t: (key: string) => string;
+}) => {
   if (priority === "normal") return null;
   const classes = {
     high: "badge badge-anniversary",
     urgent: "badge badge-urgent",
   };
   const labels = {
-    high: "優先",
-    urgent: "緊急",
+    high: t("priority.high"),
+    urgent: t("priority.urgent"),
   };
   return <span className={classes[priority]}>{labels[priority]}</span>;
 };
@@ -84,7 +91,13 @@ const StatCard = ({ icon, label, value, subValue, accent = "ai" }: StatCardProps
 };
 
 // Reservation Row Component
-const ReservationRow = ({ reservation }: { reservation: Reservation }) => {
+const ReservationRow = ({
+  reservation,
+  t,
+}: {
+  reservation: Reservation;
+  t: (key: string) => string;
+}) => {
   const hasAnniversary = !!reservation.anniversary;
 
   return (
@@ -103,15 +116,18 @@ const ReservationRow = ({ reservation }: { reservation: Reservation }) => {
             <span className="badge badge-anniversary">
               <CelebrationIcon size={12} />
               {reservation.anniversary?.type === "birthday"
-                ? "誕生日"
+                ? t("anniversary.birthday")
                 : reservation.anniversary?.type === "wedding"
-                  ? "結婚記念"
-                  : "記念日"}
+                  ? t("anniversary.wedding")
+                  : t("anniversary.anniversary")}
             </span>
           )}
         </div>
       </td>
-      <td className="text-center">{reservation.numberOfGuests}名</td>
+      <td className="text-center">
+        {reservation.numberOfGuests}
+        {t("dashboard.guestCount")}
+      </td>
       <td>
         {reservation.specialRequests.length > 0 ? (
           <span className="text-sm text-[var(--sumi-light)]">
@@ -132,10 +148,12 @@ const TaskDetailModal = ({
   task,
   isOpen,
   onClose,
+  t,
 }: {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  t: (key: string) => string;
 }) => {
   if (!task) return null;
 
@@ -143,18 +161,18 @@ const TaskDetailModal = ({
   const reservation = getReservationById(task.reservationId);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="タスク詳細" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("taskDetail.title")} size="md">
       <div className="space-y-4">
         {/* Task Title and Status */}
         <div>
           <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">{task.title}</h3>
           <div className="flex items-center gap-2 mt-2">
-            <StatusBadge status={task.status} />
-            <PriorityBadge priority={task.priority} />
+            <StatusBadge status={task.status} t={t} />
+            <PriorityBadge priority={task.priority} t={t} />
             {task.isAnniversaryRelated && (
               <span className="badge badge-anniversary">
                 <CelebrationIcon size={12} />
-                記念日関連
+                {t("taskDetail.anniversaryRelated")}
               </span>
             )}
           </div>
@@ -164,37 +182,40 @@ const TaskDetailModal = ({
         <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[rgba(45,41,38,0.06)]">
           <div className="flex items-center gap-2 text-sm">
             <ClockIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">予定時刻:</span>
+            <span className="text-[var(--nezumi)]">{t("taskDetail.scheduledTime")}:</span>
             <span className="font-medium">{task.scheduledTime}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <RoomIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">部屋:</span>
+            <span className="text-[var(--nezumi)]">{t("taskDetail.room")}:</span>
             <span className="font-medium">{getRoomName(task.roomId)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <TaskIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">カテゴリ:</span>
+            <span className="text-[var(--nezumi)]">{t("taskDetail.category")}:</span>
             <span className="font-medium">{TASK_CATEGORY_LABELS[task.category]}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <TimelineIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">所要時間:</span>
-            <span className="font-medium">{task.estimatedDuration}分</span>
+            <span className="text-[var(--nezumi)]">{t("taskDetail.duration")}:</span>
+            <span className="font-medium">
+              {task.estimatedDuration}
+              {t("taskDetail.minutes")}
+            </span>
           </div>
         </div>
 
         {/* Description */}
         {task.description && (
           <div>
-            <p className="text-xs text-[var(--nezumi)] mb-1">説明</p>
+            <p className="text-xs text-[var(--nezumi)] mb-1">{t("taskDetail.description")}</p>
             <p className="text-sm text-[var(--sumi-light)]">{task.description}</p>
           </div>
         )}
 
         {/* Assigned Staff */}
         <div>
-          <p className="text-xs text-[var(--nezumi)] mb-2">担当者</p>
+          <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.assignee")}</p>
           {staff ? (
             <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded">
               <div
@@ -209,23 +230,26 @@ const TaskDetailModal = ({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-[var(--nezumi-light)]">未割当</p>
+            <p className="text-sm text-[var(--nezumi-light)]">{t("taskDetail.unassigned")}</p>
           )}
         </div>
 
         {/* Guest Info */}
         {reservation && (
           <div>
-            <p className="text-xs text-[var(--nezumi)] mb-2">ゲスト情報</p>
+            <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.guestInfo")}</p>
             <div className="p-3 bg-[var(--shironeri-warm)] rounded">
               <p className="font-medium">{reservation.guestName}</p>
               <p className="text-sm text-[var(--nezumi)]">
-                {reservation.numberOfGuests}名 ・ {ROOM_TYPE_LABELS[reservation.roomType]}
+                {reservation.numberOfGuests}
+                {t("dashboard.guestCount")} ・ {ROOM_TYPE_LABELS[reservation.roomType]}
               </p>
               {reservation.anniversary && (
                 <div className="mt-2 p-2 bg-[rgba(184,134,11,0.1)] rounded">
                   <p className="text-sm text-[var(--kincha)] font-medium">
-                    {reservation.anniversary.type === "birthday" ? "誕生日" : "結婚記念日"}
+                    {reservation.anniversary.type === "birthday"
+                      ? t("anniversary.birthday")
+                      : t("anniversary.weddingAnniversary")}
                   </p>
                   <p className="text-xs text-[var(--sumi-light)]">
                     {reservation.anniversary.description}
@@ -244,15 +268,16 @@ const TaskDetailModal = ({
 interface TaskRowProps {
   task: Task;
   onClick?: (task: Task) => void;
+  t: (key: string) => string;
 }
 
-const TaskRow = ({ task, onClick }: TaskRowProps) => {
+const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
 
   const priorityLabels = {
-    normal: "通常",
-    high: "優先",
-    urgent: "緊急",
+    normal: t("priority.normal"),
+    high: t("priority.high"),
+    urgent: t("priority.urgent"),
   };
 
   return (
@@ -291,13 +316,13 @@ const TaskRow = ({ task, onClick }: TaskRowProps) => {
             <span className="text-sm">{staff.name}</span>
           </div>
         ) : (
-          <span className="text-[var(--nezumi-light)]">未割当</span>
+          <span className="text-[var(--nezumi-light)]">{t("taskDetail.unassigned")}</span>
         )}
       </td>
       <td>
         <div className="flex items-center gap-2">
-          <StatusBadge status={task.status} />
-          <PriorityBadge priority={task.priority} />
+          <StatusBadge status={task.status} t={t} />
+          <PriorityBadge priority={task.priority} t={t} />
         </div>
       </td>
     </tr>
@@ -305,7 +330,15 @@ const TaskRow = ({ task, onClick }: TaskRowProps) => {
 };
 
 // Progress Ring Component
-const ProgressRing = ({ progress, size = 120 }: { progress: number; size?: number }) => {
+const ProgressRing = ({
+  progress,
+  size = 120,
+  completedLabel,
+}: {
+  progress: number;
+  size?: number;
+  completedLabel: string;
+}) => {
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -339,7 +372,7 @@ const ProgressRing = ({ progress, size = 120 }: { progress: number; size?: numbe
         <span className="text-2xl font-display font-semibold text-[var(--sumi)]">
           {Math.round(progress)}%
         </span>
-        <span className="text-xs text-[var(--nezumi)]">完了</span>
+        <span className="text-xs text-[var(--nezumi)]">{completedLabel}</span>
       </div>
     </div>
   );
@@ -347,6 +380,7 @@ const ProgressRing = ({ progress, size = 120 }: { progress: number; size?: numbe
 
 // Main Dashboard Component
 export const Dashboard = () => {
+  const { t } = useTranslation("admin");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -386,13 +420,11 @@ export const Dashboard = () => {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-display font-semibold text-[var(--sumi)] ink-stroke inline-block">
-            ダッシュボード
+            {t("dashboard.title")}
           </h1>
           <p className="text-sm text-[var(--nezumi)] mt-2">{currentDate}</p>
         </div>
-        <div className="text-right">
-          <p className="text-3xl font-display text-[var(--ai)]">{currentTime}</p>
-        </div>
+        <p className="text-3xl font-display text-[var(--ai)]">{currentTime}</p>
       </div>
 
       {/* Urgent Alerts */}
@@ -402,7 +434,7 @@ export const Dashboard = () => {
             <AlertIcon size={20} className="text-[var(--shu)]" />
             <div>
               <p className="font-display font-medium text-[var(--shu)]">
-                緊急タスク: {urgentTasks.length}件
+                {t("dashboard.urgentTasks")}: {urgentTasks.length}
               </p>
               <p className="text-sm text-[var(--sumi-light)]">
                 {urgentTasks.map((t) => t.title).join("、")}
@@ -417,36 +449,36 @@ export const Dashboard = () => {
         <div className="stagger-1">
           <StatCard
             icon={<ReservationIcon size={28} />}
-            label="本日のチェックイン"
+            label={t("dashboard.todaysCheckIn")}
             value={mockDailyStats.checkInsToday}
-            subValue="予約"
+            subValue={t("dashboard.reservation")}
             accent="ai"
           />
         </div>
         <div className="stagger-2">
           <StatCard
             icon={<TaskIcon size={28} />}
-            label="本日のタスク"
+            label={t("dashboard.todaysTasks")}
             value={mockDailyStats.totalTasks}
-            subValue={`完了: ${mockDailyStats.completedTasks}`}
+            subValue={`${t("dashboard.completed")}: ${mockDailyStats.completedTasks}`}
             accent="aotake"
           />
         </div>
         <div className="stagger-3">
           <StatCard
             icon={<GuestIcon size={28} />}
-            label="本日のゲスト"
+            label={t("dashboard.todaysGuests")}
             value={todayReservations.reduce((sum, r) => sum + r.numberOfGuests, 0)}
-            subValue="名様"
+            subValue={t("dashboard.guests")}
             accent="ai"
           />
         </div>
         <div className="stagger-4">
           <StatCard
             icon={<CelebrationIcon size={28} />}
-            label="記念日ゲスト"
+            label={t("dashboard.anniversaryGuests")}
             value={mockDailyStats.anniversaryGuests}
-            subValue="組"
+            subValue={t("dashboard.groups")}
             accent="kincha"
           />
         </div>
@@ -458,28 +490,32 @@ export const Dashboard = () => {
         <div className="shoji-panel p-6 animate-slide-up stagger-1">
           <h2 className="text-lg font-display font-medium text-[var(--sumi)] mb-4 flex items-center gap-2">
             <TimelineIcon size={18} />
-            タスク進捗
+            {t("dashboard.taskProgress")}
           </h2>
           <div className="flex flex-col items-center">
-            <ProgressRing progress={taskProgress} size={140} />
+            <ProgressRing
+              progress={taskProgress}
+              size={140}
+              completedLabel={t("dashboard.completed")}
+            />
             <div className="mt-4 grid grid-cols-3 gap-4 w-full text-center">
               <div>
                 <p className="text-lg font-display font-semibold text-[var(--aotake)]">
                   {mockDailyStats.completedTasks}
                 </p>
-                <p className="text-xs text-[var(--nezumi)]">完了</p>
+                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.completed")}</p>
               </div>
               <div>
                 <p className="text-lg font-display font-semibold text-[var(--ai)]">
                   {mockDailyStats.inProgressTasks}
                 </p>
-                <p className="text-xs text-[var(--nezumi)]">作業中</p>
+                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.inProgress")}</p>
               </div>
               <div>
                 <p className="text-lg font-display font-semibold text-[var(--nezumi)]">
                   {mockDailyStats.pendingTasks}
                 </p>
-                <p className="text-xs text-[var(--nezumi)]">未着手</p>
+                <p className="text-xs text-[var(--nezumi)]">{t("dashboard.pending")}</p>
               </div>
             </div>
           </div>
@@ -489,7 +525,7 @@ export const Dashboard = () => {
         <div className="lg:col-span-2 shoji-panel p-6 animate-slide-up stagger-2">
           <h2 className="text-lg font-display font-medium text-[var(--sumi)] mb-4 flex items-center gap-2">
             <CleaningIcon size={18} />
-            客室ステータス
+            {t("dashboard.roomStatus")}
           </h2>
           <RoomStatusMap
             roomStatuses={getRoomCleaningStatuses(mockTasks, getStaffById).map((info) => ({
@@ -507,23 +543,23 @@ export const Dashboard = () => {
         <div className="p-4 border-b border-[rgba(45,41,38,0.06)]">
           <h2 className="text-lg font-display font-medium text-[var(--sumi)] flex items-center gap-2">
             <ReservationIcon size={18} />
-            本日の予約一覧
+            {t("dashboard.todaysReservations")}
           </h2>
         </div>
         <div className="table-container shadow-none">
           <table>
             <thead>
               <tr>
-                <th className="w-20">到着</th>
-                <th className="w-32">部屋</th>
-                <th>ゲスト名</th>
-                <th className="w-20 text-center">人数</th>
-                <th>特記事項</th>
+                <th className="w-20">{t("table.arrival")}</th>
+                <th className="w-32">{t("table.room")}</th>
+                <th>{t("table.guestName")}</th>
+                <th className="w-20 text-center">{t("table.numberOfGuests")}</th>
+                <th>{t("table.notes")}</th>
               </tr>
             </thead>
             <tbody>
               {todayReservations.map((reservation) => (
-                <ReservationRow key={reservation.id} reservation={reservation} />
+                <ReservationRow key={reservation.id} reservation={reservation} t={t} />
               ))}
             </tbody>
           </table>
@@ -535,26 +571,27 @@ export const Dashboard = () => {
         <div className="p-4 border-b border-[rgba(45,41,38,0.06)] flex items-center justify-between">
           <h2 className="text-lg font-display font-medium text-[var(--sumi)] flex items-center gap-2">
             <TaskIcon size={18} />
-            直近のタスク
+            {t("dashboard.upcomingTasks")}
           </h2>
           <span className="text-sm text-[var(--nezumi)]">
-            {upcomingTasks.length}件の未完了タスク
+            {upcomingTasks.length}
+            {t("dashboard.incompleteTasks")}
           </span>
         </div>
         <div className="table-container shadow-none">
           <table>
             <thead>
               <tr>
-                <th className="w-20">時刻</th>
-                <th>タスク</th>
-                <th className="w-20">優先度</th>
-                <th className="w-36">担当者</th>
-                <th className="w-32">ステータス</th>
+                <th className="w-20">{t("table.time")}</th>
+                <th>{t("table.task")}</th>
+                <th className="w-20">{t("table.priority")}</th>
+                <th className="w-36">{t("table.assignee")}</th>
+                <th className="w-32">{t("table.status")}</th>
               </tr>
             </thead>
             <tbody>
               {upcomingTasks.map((task) => (
-                <TaskRow key={task.id} task={task} onClick={handleTaskClick} />
+                <TaskRow key={task.id} task={task} onClick={handleTaskClick} t={t} />
               ))}
             </tbody>
           </table>
@@ -566,6 +603,7 @@ export const Dashboard = () => {
         task={selectedTask}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+        t={t}
       />
 
       {/* Quick Task Summary by Category */}

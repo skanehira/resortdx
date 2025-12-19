@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type {
   AdminPage,
   UnifiedTask,
@@ -12,7 +13,9 @@ import type {
   EquipmentReport,
   RoomAmenity,
   RoomEquipment,
+  StaffSharedNote,
 } from "./types";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Dashboard } from "./components/admin/Dashboard";
 import { TaskTemplates } from "./components/admin/TaskTemplates";
 import { StaffMonitor } from "./components/admin/StaffMonitor";
@@ -22,9 +25,15 @@ import { MealManagement } from "./components/admin/MealManagement";
 import { CelebrationManagement } from "./components/admin/CelebrationManagement";
 import { TaskHistory } from "./components/admin/TaskHistory";
 import { Settings } from "./components/admin/Settings";
+import { LoginPage } from "./components/auth/LoginPage";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UnifiedTaskList } from "./components/staff/UnifiedTaskList";
 import { MobileMessages } from "./components/staff/MobileMessages";
 import { StaffChat } from "./components/staff/StaffChat";
+import { MyPage } from "./components/staff/MyPage";
+import { TimelineView } from "./components/staff/TimelineView";
+import { AllStaffScheduleView } from "./components/staff/AllStaffScheduleView";
+import { StaffSharedNotes } from "./components/staff/StaffSharedNotes";
 import { GuestShuttleStatus } from "./components/guest/GuestShuttleStatus";
 import { GuestMealStatus } from "./components/guest/GuestMealStatus";
 import { GuestPortal } from "./components/guest/GuestPortal";
@@ -34,6 +43,7 @@ import {
   mockStaffMessages,
   roomAmenitiesMap,
   roomEquipmentMap,
+  mockStaffNotes,
 } from "./data/mock";
 import {
   DashboardIcon,
@@ -42,7 +52,6 @@ import {
   EquipmentIcon,
   HistoryIcon,
   TaskIcon,
-  PhoneIcon,
   MenuIcon,
   CloseIcon,
   MessageIcon,
@@ -51,36 +60,49 @@ import {
   CakeIcon,
   SettingsIcon,
   ChatIcon,
+  HelpIcon,
+  TimelineIcon,
+  NoteIcon,
 } from "./components/ui/Icons";
+import { HelpRequestModal } from "./components/staff/modals/HelpRequestModal";
+import { UserMenu } from "./components/ui/UserMenu";
 
 // Admin Sidebar Navigation
 interface SidebarProps {
   currentPage: AdminPage;
   onPageChange: (page: AdminPage) => void;
-  onModeChange: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const Sidebar = ({ currentPage, onPageChange, onModeChange, isOpen, onClose }: SidebarProps) => {
-  const navItems: { page: AdminPage; label: string; icon: React.ReactNode }[] = [
-    { page: "dashboard", label: "ダッシュボード", icon: <DashboardIcon /> },
+const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) => {
+  const { t } = useTranslation("admin");
+  const navItems: {
+    page: AdminPage;
+    labelKey: string;
+    icon: React.ReactNode;
+  }[] = [
+    { page: "dashboard", labelKey: "nav.dashboard", icon: <DashboardIcon /> },
     {
       page: "templates",
-      label: "タスクテンプレート",
+      labelKey: "nav.templates",
       icon: <TemplateIcon />,
     },
-    { page: "staff_monitor", label: "スタッフ管理", icon: <StaffIcon /> },
-    { page: "equipment", label: "設備管理", icon: <EquipmentIcon /> },
-    { page: "shuttle", label: "送迎管理", icon: <ShuttleIcon /> },
-    { page: "meal", label: "配膳管理", icon: <DiningIcon /> },
-    { page: "celebration", label: "記念日管理", icon: <CakeIcon /> },
+    {
+      page: "staff_monitor",
+      labelKey: "nav.staffMonitor",
+      icon: <StaffIcon />,
+    },
+    { page: "equipment", labelKey: "nav.equipment", icon: <EquipmentIcon /> },
+    { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
+    { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
+    { page: "celebration", labelKey: "nav.celebration", icon: <CakeIcon /> },
     {
       page: "task_history",
-      label: "タスク一覧",
+      labelKey: "nav.taskHistory",
       icon: <HistoryIcon />,
     },
-    { page: "settings", label: "設定", icon: <SettingsIcon /> },
+    { page: "settings", labelKey: "nav.settings", icon: <SettingsIcon /> },
   ];
 
   return (
@@ -123,96 +145,79 @@ const Sidebar = ({ currentPage, onPageChange, onModeChange, isOpen, onClose }: S
               }`}
             >
               {item.icon}
-              <span className="font-display text-sm">{item.label}</span>
+              <span className="font-display text-sm">{t(item.labelKey)}</span>
             </button>
           ))}
         </nav>
-
-        {/* Mode Switch */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[rgba(255,255,255,0.1)]">
-          <button
-            onClick={onModeChange}
-            className="w-full flex items-center gap-3 px-4 py-3 bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.15)] rounded-md transition-all"
-          >
-            <PhoneIcon size={18} />
-            <span className="font-display text-sm">スタッフ画面へ</span>
-          </button>
-        </div>
       </aside>
     </>
   );
 };
 
-// Mobile Bottom Navigation for Staff (4-tab layout)
+// Mobile Bottom Navigation for Staff (3-tab layout)
 type StaffView = "tasks" | "messages" | "chat";
 
 interface MobileNavProps {
   currentView: StaffView;
   onViewChange: (view: StaffView) => void;
-  onModeChange: () => void;
   hasUnreadMessages?: boolean;
 }
 
 const MobileBottomNav = ({
   currentView,
   onViewChange,
-  onModeChange,
   hasUnreadMessages = false,
-}: MobileNavProps) => (
-  <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[rgba(45,41,38,0.1)] z-50 safe-area-pb">
-    <div className="flex">
-      <button
-        onClick={() => onViewChange("tasks")}
-        className={`flex-1 flex flex-col items-center py-3 transition-colors ${
-          currentView === "tasks" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
-        }`}
-      >
-        <TaskIcon size={22} />
-        <span className="text-xs mt-1 font-display">タスク</span>
-      </button>
-      <button
-        onClick={() => onViewChange("messages")}
-        className={`flex-1 flex flex-col items-center py-3 transition-colors relative ${
-          currentView === "messages" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
-        }`}
-      >
-        <div className="relative">
-          <MessageIcon size={22} />
-          {hasUnreadMessages && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--shu)] rounded-full" />
-          )}
-        </div>
-        <span className="text-xs mt-1 font-display">メッセージ</span>
-      </button>
-      <button
-        onClick={() => onViewChange("chat")}
-        className={`flex-1 flex flex-col items-center py-3 transition-colors ${
-          currentView === "chat" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
-        }`}
-      >
-        <ChatIcon size={22} />
-        <span className="text-xs mt-1 font-display">チャット</span>
-      </button>
-      <button
-        onClick={onModeChange}
-        className="flex-1 flex flex-col items-center py-3 text-[var(--nezumi)]"
-      >
-        <DashboardIcon size={22} />
-        <span className="text-xs mt-1 font-display">管理</span>
-      </button>
-    </div>
-  </nav>
-);
+}: MobileNavProps) => {
+  const { t } = useTranslation("staff");
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-[rgba(45,41,38,0.1)] z-50 safe-area-pb">
+      <div className="flex">
+        <button
+          onClick={() => onViewChange("tasks")}
+          className={`flex-1 flex flex-col items-center py-3 transition-colors ${
+            currentView === "tasks" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
+          }`}
+        >
+          <TaskIcon size={22} />
+          <span className="text-xs mt-1 font-display">{t("nav.tasks")}</span>
+        </button>
+        <button
+          onClick={() => onViewChange("messages")}
+          className={`flex-1 flex flex-col items-center py-3 transition-colors relative ${
+            currentView === "messages" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
+          }`}
+        >
+          <div className="relative">
+            <MessageIcon size={22} />
+            {hasUnreadMessages && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--shu)] rounded-full" />
+            )}
+          </div>
+          <span className="text-xs mt-1 font-display">{t("nav.messages")}</span>
+        </button>
+        <button
+          onClick={() => onViewChange("chat")}
+          className={`flex-1 flex flex-col items-center py-3 transition-colors ${
+            currentView === "chat" ? "text-[var(--ai)]" : "text-[var(--nezumi)]"
+          }`}
+        >
+          <ChatIcon size={22} />
+          <span className="text-xs mt-1 font-display">{t("nav.chat")}</span>
+        </button>
+      </div>
+    </nav>
+  );
+};
 
 // Admin Layout
 interface AdminLayoutProps {
   children: React.ReactNode;
   currentPage: AdminPage;
   onPageChange: (page: AdminPage) => void;
-  onModeChange: () => void;
 }
 
-const AdminLayout = ({ children, currentPage, onPageChange, onModeChange }: AdminLayoutProps) => {
+const AdminLayout = ({ children, currentPage, onPageChange }: AdminLayoutProps) => {
+  const { t } = useTranslation("admin");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -220,7 +225,6 @@ const AdminLayout = ({ children, currentPage, onPageChange, onModeChange }: Admi
       <Sidebar
         currentPage={currentPage}
         onPageChange={onPageChange}
-        onModeChange={onModeChange}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -238,10 +242,8 @@ const AdminLayout = ({ children, currentPage, onPageChange, onModeChange }: Admi
             </button>
             <div className="hidden lg:block" />
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[var(--nezumi)]">管理者モード</span>
-              <div className="w-8 h-8 bg-[var(--ai)] rounded-full flex items-center justify-center text-white text-sm font-medium">
-                管
-              </div>
+              <span className="text-sm text-[var(--nezumi)]">{t("header.adminMode")}</span>
+              <UserMenu variant="admin" />
             </div>
           </div>
         </header>
@@ -275,16 +277,8 @@ const AdminPages = () => {
     navigate(`/admin/${page}`);
   };
 
-  const handleModeChange = () => {
-    navigate("/staff/tasks");
-  };
-
   return (
-    <AdminLayout
-      currentPage={getCurrentPage()}
-      onPageChange={handlePageChange}
-      onModeChange={handleModeChange}
-    >
+    <AdminLayout currentPage={getCurrentPage()} onPageChange={handlePageChange}>
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="templates" element={<TaskTemplates />} />
@@ -301,19 +295,132 @@ const AdminPages = () => {
   );
 };
 
+// Staff Layout Header
+type StaffTaskView = "tasks" | "timeline" | "schedule" | "notes";
+
+interface StaffHeaderProps {
+  onOpenHelpRequest?: () => void;
+  currentTaskView: StaffTaskView;
+  onTaskViewChange: (view: StaffTaskView) => void;
+}
+
+const StaffHeader = ({
+  onOpenHelpRequest,
+  currentTaskView,
+  onTaskViewChange,
+}: StaffHeaderProps) => {
+  const { t } = useTranslation("staff");
+  const currentTime = new Date().toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const taskViewItems: {
+    view: StaffTaskView;
+    labelKey: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      view: "tasks",
+      labelKey: "taskList.myTasks",
+      icon: <TaskIcon size={14} />,
+    },
+    {
+      view: "timeline",
+      labelKey: "taskList.timeline",
+      icon: <TimelineIcon size={14} />,
+    },
+    {
+      view: "schedule",
+      labelKey: "taskList.allStaffSchedule",
+      icon: <StaffIcon size={14} />,
+    },
+    {
+      view: "notes",
+      labelKey: "sharedNotes.title",
+      icon: <NoteIcon size={14} />,
+    },
+  ];
+
+  return (
+    <header className="sticky top-0 z-40 bg-[var(--shironeri)]/80 backdrop-blur-sm border-b border-[rgba(45,41,38,0.06)]">
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="text-sm font-display text-[var(--ai)]">{t("nav.staffMode")}</div>
+        <div className="flex items-center gap-3">
+          {onOpenHelpRequest && (
+            <button
+              onClick={onOpenHelpRequest}
+              className="p-2 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
+              title={t("taskList.requestHelp")}
+            >
+              <HelpIcon size={20} />
+            </button>
+          )}
+          <span className="text-lg font-display text-[var(--ai)] tabular-nums">{currentTime}</span>
+          <UserMenu variant="staff" />
+        </div>
+      </div>
+      {/* View Switcher */}
+      <div className="flex gap-2 px-4 pb-2 overflow-x-auto scrollbar-hide">
+        {taskViewItems.map((item) => (
+          <button
+            key={item.view}
+            onClick={() => onTaskViewChange(item.view)}
+            disabled={currentTaskView === item.view}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              currentTaskView === item.view
+                ? "bg-[var(--ai)] text-white"
+                : "bg-[var(--shironeri-warm)] text-[var(--nezumi)] hover:bg-[var(--ai)]/10"
+            }`}
+          >
+            {item.icon}
+            {t(item.labelKey)}
+          </button>
+        ))}
+      </div>
+    </header>
+  );
+};
+
 // Staff Pages Wrapper with state management
 const StaffPages = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser } = useAuth();
 
-  // デモ用: 最初のスタッフをログインユーザーとして使用
-  const currentStaff = mockStaff[0];
+  // 認証済みユーザーのスタッフ情報を取得
+  const currentStaff = currentUser
+    ? {
+        id: currentUser.id,
+        name: currentUser.name,
+        nameKana: currentUser.nameKana,
+        role: currentUser.role,
+        avatarColor: currentUser.avatarColor,
+        status: "on_duty" as const,
+        shiftStart: "09:00",
+        shiftEnd: "18:00",
+        skills: [] as (
+          | "cleaning"
+          | "inspection"
+          | "meal_service"
+          | "turndown"
+          | "pickup"
+          | "bath"
+          | "celebration"
+          | "other"
+        )[],
+        currentTaskId: null,
+      }
+    : mockStaff[0];
 
   // 統合タスクのステート
   const [unifiedTasks, setUnifiedTasks] = useState<UnifiedTask[]>(mockUnifiedTasks);
 
   // メッセージのステート
   const [messages, setMessages] = useState<StaffMessage[]>(mockStaffMessages);
+
+  // スタッフ共有メモのステート
+  const [staffNotes, setStaffNotes] = useState<StaffSharedNote[]>(mockStaffNotes);
 
   // アメニティと設備データ
   const [roomAmenities] = useState<Record<string, RoomAmenity[]>>(roomAmenitiesMap);
@@ -575,9 +682,56 @@ const StaffPages = () => {
     [currentStaff.id, currentStaff.name],
   );
 
+  // スタッフ共有メモ追加
+  const handleAddNote = useCallback(
+    (content: string, isImportant: boolean, expiresAt: string | null) => {
+      const newNote: StaffSharedNote = {
+        id: `note-${Date.now()}`,
+        content,
+        createdBy: currentStaff.id,
+        createdByName: currentStaff.name,
+        createdAt: new Date().toISOString(),
+        isImportant,
+        expiresAt,
+      };
+      setStaffNotes((prev) => [newNote, ...prev]);
+    },
+    [currentStaff.id, currentStaff.name],
+  );
+
+  // スタッフ共有メモ更新
+  const handleUpdateNote = useCallback(
+    (
+      noteId: string,
+      updates: Partial<Pick<StaffSharedNote, "content" | "isImportant" | "expiresAt">>,
+    ) => {
+      setStaffNotes((prev) =>
+        prev.map((note) =>
+          note.id === noteId ? { ...note, ...updates, updatedAt: new Date().toISOString() } : note,
+        ),
+      );
+    },
+    [],
+  );
+
+  // スタッフ共有メモ削除
+  const handleDeleteNote = useCallback((noteId: string) => {
+    setStaffNotes((prev) => prev.filter((note) => note.id !== noteId));
+  }, []);
+
+  // ヘルプ依頼モーダルの状態
+  const [helpRequestModalOpen, setHelpRequestModalOpen] = useState(false);
+
   const getCurrentView = (): StaffView => {
     if (location.pathname.includes("messages")) return "messages";
     if (location.pathname.includes("chat")) return "chat";
+    return "tasks";
+  };
+
+  const getCurrentTaskView = (): StaffTaskView => {
+    if (location.pathname.includes("timeline")) return "timeline";
+    if (location.pathname.includes("schedule")) return "schedule";
+    if (location.pathname.includes("notes")) return "notes";
     return "tasks";
   };
 
@@ -585,59 +739,123 @@ const StaffPages = () => {
     navigate(`/staff/${view}`);
   };
 
-  const handleModeChange = () => {
-    navigate("/admin/dashboard");
+  const handleTaskViewChange = (view: StaffTaskView) => {
+    navigate(`/staff/${view}`);
   };
 
   return (
-    <div className="min-h-screen bg-[var(--shironeri)]">
-      <Routes>
-        <Route
-          path="tasks"
-          element={
-            <UnifiedTaskList
-              tasks={unifiedTasks}
-              currentStaff={currentStaff}
-              allStaff={mockStaff}
-              roomAmenities={roomAmenities}
-              roomEquipment={roomEquipment}
-              onStatusChange={handleStatusChange}
-              onToggleCleaningItem={handleToggleCleaningItem}
-              onMealStatusChange={handleMealStatusChange}
-              onShuttleStatusChange={handleShuttleStatusChange}
-              onSendShuttleMessage={handleSendShuttleMessage}
-              onToggleCelebrationItem={handleToggleCelebrationItem}
-              onCelebrationReport={handleCelebrationReport}
-              onAcceptHelp={handleAcceptHelp}
-              onCompleteHelp={handleCompleteHelp}
-              onCancelHelp={handleCancelHelp}
-              onEquipmentReport={handleEquipmentReport}
-              onCreateHelpRequest={handleCreateHelpRequest}
-              categoryFilter={categoryFilter}
-              onCategoryFilterChange={setCategoryFilter}
-            />
-          }
-        />
-        <Route
-          path="messages"
-          element={
-            <MobileMessages
-              messages={messages}
-              currentStaff={currentStaff}
-              tasks={unifiedTasks}
-              onSendMessage={handleSendMessage}
-            />
-          }
-        />
-        <Route path="chat" element={<StaffChat currentStaff={currentStaff} />} />
-        <Route path="*" element={<Navigate to="tasks" replace />} />
-      </Routes>
+    <div className="h-screen flex flex-col bg-[var(--shironeri)] overflow-hidden">
+      <StaffHeader
+        onOpenHelpRequest={() => setHelpRequestModalOpen(true)}
+        currentTaskView={getCurrentTaskView()}
+        onTaskViewChange={handleTaskViewChange}
+      />
+      <div className="flex-1 overflow-auto">
+        <Routes>
+          <Route
+            path="tasks"
+            element={
+              <UnifiedTaskList
+                tasks={unifiedTasks}
+                currentStaff={currentStaff}
+                allStaff={mockStaff}
+                roomAmenities={roomAmenities}
+                roomEquipment={roomEquipment}
+                onStatusChange={handleStatusChange}
+                onToggleCleaningItem={handleToggleCleaningItem}
+                onMealStatusChange={handleMealStatusChange}
+                onShuttleStatusChange={handleShuttleStatusChange}
+                onSendShuttleMessage={handleSendShuttleMessage}
+                onToggleCelebrationItem={handleToggleCelebrationItem}
+                onCelebrationReport={handleCelebrationReport}
+                onAcceptHelp={handleAcceptHelp}
+                onCompleteHelp={handleCompleteHelp}
+                onCancelHelp={handleCancelHelp}
+                onEquipmentReport={handleEquipmentReport}
+                onCreateHelpRequest={handleCreateHelpRequest}
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={setCategoryFilter}
+              />
+            }
+          />
+          <Route
+            path="timeline"
+            element={
+              <TimelineView
+                tasks={unifiedTasks}
+                currentStaff={currentStaff}
+                roomAmenities={roomAmenities}
+                roomEquipment={roomEquipment}
+                onStatusChange={handleStatusChange}
+                onToggleCleaningItem={handleToggleCleaningItem}
+                onMealStatusChange={handleMealStatusChange}
+                onShuttleStatusChange={handleShuttleStatusChange}
+                onSendShuttleMessage={handleSendShuttleMessage}
+                onToggleCelebrationItem={handleToggleCelebrationItem}
+                onCelebrationReport={handleCelebrationReport}
+                onAcceptHelp={handleAcceptHelp}
+                onCompleteHelp={handleCompleteHelp}
+                onCancelHelp={handleCancelHelp}
+                onEquipmentReport={handleEquipmentReport}
+              />
+            }
+          />
+          <Route
+            path="schedule"
+            element={
+              <AllStaffScheduleView
+                tasks={unifiedTasks}
+                allStaff={mockStaff}
+                currentStaff={currentStaff}
+              />
+            }
+          />
+          <Route
+            path="notes"
+            element={
+              <StaffSharedNotes
+                notes={staffNotes}
+                currentStaff={currentStaff}
+                onAddNote={handleAddNote}
+                onUpdateNote={handleUpdateNote}
+                onDeleteNote={handleDeleteNote}
+              />
+            }
+          />
+          <Route
+            path="messages"
+            element={
+              <MobileMessages
+                messages={messages}
+                currentStaff={currentStaff}
+                tasks={unifiedTasks}
+                onSendMessage={handleSendMessage}
+              />
+            }
+          />
+          <Route path="chat" element={<StaffChat currentStaff={currentStaff} />} />
+          <Route path="mypage" element={<MyPage />} />
+          <Route path="*" element={<Navigate to="tasks" replace />} />
+        </Routes>
+      </div>
       <MobileBottomNav
         currentView={getCurrentView()}
         onViewChange={handleViewChange}
-        onModeChange={handleModeChange}
         hasUnreadMessages={hasUnreadMessages}
       />
+
+      {/* Help Request Modal */}
+      {helpRequestModalOpen && (
+        <HelpRequestModal
+          currentStaffId={currentStaff.id}
+          allStaff={mockStaff}
+          onSubmit={(data) => {
+            handleCreateHelpRequest(data);
+            setHelpRequestModalOpen(false);
+          }}
+          onClose={() => setHelpRequestModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
@@ -663,16 +881,33 @@ const GuestMealPage = () => {
 // Main App Component
 function App() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/admin/*" element={<AdminPages />} />
-        <Route path="/staff/*" element={<StaffPages />} />
-        <Route path="/guest/shuttle" element={<GuestShuttlePage />} />
-        <Route path="/guest/meal" element={<GuestMealPage />} />
-        <Route path="/guest/portal" element={<GuestPortal />} />
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-      </Routes>
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminPages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/*"
+            element={
+              <ProtectedRoute>
+                <StaffPages />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/guest/shuttle" element={<GuestShuttlePage />} />
+          <Route path="/guest/meal" element={<GuestMealPage />} />
+          <Route path="/guest/portal" element={<GuestPortal />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </HashRouter>
+    </AuthProvider>
   );
 }
 

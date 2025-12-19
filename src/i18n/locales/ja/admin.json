@@ -1,0 +1,200 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "templates": "タスクテンプレート",
+    "staffMonitor": "スタッフ管理",
+    "equipment": "設備管理",
+    "shuttle": "送迎管理",
+    "meal": "配膳管理",
+    "celebration": "記念日管理",
+    "taskHistory": "タスク一覧",
+    "settings": "設定",
+    "toStaff": "スタッフ画面へ",
+    "toAdmin": "管理画面へ"
+  },
+  "header": {
+    "adminMode": "管理者モード"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "overview": "概要",
+    "todaysTasks": "本日のタスク",
+    "upcomingTasks": "直近のタスク",
+    "completedTasks": "完了タスク",
+    "staffStatus": "スタッフ状況",
+    "roomStatus": "客室ステータス",
+    "taskProgress": "タスク進捗",
+    "todaysReservations": "本日の予約一覧",
+    "urgentTasks": "緊急タスク",
+    "todaysCheckIn": "本日のチェックイン",
+    "todaysGuests": "本日のゲスト",
+    "anniversaryGuests": "記念日ゲスト",
+    "reservation": "予約",
+    "guests": "名様",
+    "groups": "組",
+    "unassigned": "未割当",
+    "completed": "完了",
+    "inProgress": "作業中",
+    "pending": "未着手",
+    "incompleteTasks": "件の未完了タスク",
+    "guestCount": "名"
+  },
+  "table": {
+    "arrival": "到着",
+    "room": "部屋",
+    "guestName": "ゲスト名",
+    "numberOfGuests": "人数",
+    "notes": "特記事項",
+    "time": "時刻",
+    "task": "タスク",
+    "priority": "優先度",
+    "assignee": "担当者",
+    "status": "ステータス",
+    "guest": "ゲスト"
+  },
+  "status": {
+    "pending": "未着手",
+    "inProgress": "作業中",
+    "completed": "完了"
+  },
+  "priority": {
+    "normal": "通常",
+    "high": "優先",
+    "urgent": "緊急"
+  },
+  "taskDetail": {
+    "title": "タスク詳細",
+    "scheduledTime": "予定時刻",
+    "room": "部屋",
+    "category": "カテゴリ",
+    "duration": "所要時間",
+    "minutes": "分",
+    "description": "説明",
+    "assignee": "担当者",
+    "unassigned": "未割当",
+    "guestInfo": "ゲスト情報",
+    "anniversaryRelated": "記念日関連",
+    "completedAt": "完了時刻",
+    "template": "テンプレート",
+    "reservationProgress": "この予約のタスク進捗",
+    "edit": "編集"
+  },
+  "anniversary": {
+    "birthday": "誕生日",
+    "wedding": "結婚記念",
+    "weddingAnniversary": "結婚記念日",
+    "anniversary": "記念日"
+  },
+  "taskManagement": {
+    "title": "タスク管理",
+    "taskList": "タスク一覧",
+    "taskHistory": "タスク履歴",
+    "taskTemplates": "タスクテンプレート",
+    "createTask": "タスク作成",
+    "editTask": "タスク編集",
+    "assignStaff": "担当者割当",
+    "timeEdit": "時間編集",
+    "memoEdit": "メモ編集",
+    "description": "本日のすべてのタスクを確認・管理します",
+    "totalTasks": "総タスク数",
+    "urgentTasksAlert": "緊急タスク",
+    "urgentTasksAlertItems": "件",
+    "urgentNeedsAttention": "対応が必要な緊急タスクがあります",
+    "noTasksFound": "タスクがありません",
+    "noTasksMatchSearch": "検索条件に一致するタスクがありません",
+    "searchPlaceholder": "タスクを検索..."
+  },
+  "staffManagement": {
+    "title": "スタッフ管理",
+    "description": "スタッフの稼働状況とタスク割当を管理します",
+    "staffList": "スタッフ一覧",
+    "staffMonitor": "スタッフモニター",
+    "onDuty": "勤務中",
+    "onBreak": "休憩中",
+    "offDuty": "勤務外",
+    "shiftStart": "勤務開始",
+    "shiftEnd": "勤務終了",
+    "onDutyStaff": "出勤中スタッフ",
+    "activeTasks": "アクティブタスク",
+    "inProgressTasks": "作業中タスク",
+    "unassignedTasks": "未割当タスク",
+    "statusChange": "ステータス変更",
+    "selectStatus": "さんのステータスを選択",
+    "emergencyContact": "緊急連絡先",
+    "emergencyContactFor": "さんの緊急連絡先",
+    "phoneNumber": "電話番号",
+    "phonePlaceholder": "090-1234-5678",
+    "relationship": "続柄",
+    "relationshipPlaceholder": "母、配偶者、など",
+    "registerEmergencyContact": "緊急連絡先を登録",
+    "currentTask": "作業中",
+    "remainingTasks": "残タスク",
+    "completedTasks": "完了",
+    "availableSkills": "対応可能業務",
+    "taskReassign": "タスク再割当",
+    "currentAssignee": "現在の担当者",
+    "selectNewAssignee": "新しい担当者を選択",
+    "remainingCount": "残{{count}}件",
+    "noAvailableStaff": "対応可能なスタッフがいません",
+    "reassign": "再割当",
+    "doReassign": "再割当する",
+    "staffTaskList": "{{name}}のタスク一覧",
+    "taskCount": "{{count}}件のタスク",
+    "noAssignedTasks": "割り当てられたタスクはありません",
+    "workloadBalance": "負荷バランス",
+    "items": "件",
+    "incomplete": "未完了",
+    "allRoles": "すべて",
+    "selectStaffToView": "スタッフを選択して詳細を表示"
+  },
+  "shuttleManagement": {
+    "title": "送迎管理",
+    "shuttleList": "送迎一覧",
+    "vehicleStatus": "車両状況",
+    "schedulePickup": "お迎え予定",
+    "scheduleDropoff": "お見送り予定"
+  },
+  "mealManagement": {
+    "title": "配膳管理",
+    "mealList": "配膳一覧",
+    "orderNotifications": "追加注文通知",
+    "breakfast": "朝食",
+    "dinner": "夕食",
+    "roomService": "ルームサービス"
+  },
+  "celebrationManagement": {
+    "title": "記念日管理",
+    "celebrationList": "記念日一覧",
+    "preparation": "準備",
+    "execution": "実施"
+  },
+  "equipmentManagement": {
+    "title": "設備管理",
+    "amenities": "アメニティ",
+    "equipment": "備品"
+  },
+  "settings": {
+    "title": "設定",
+    "systemSettings": "システム設定",
+    "languageSettings": "言語設定"
+  },
+  "memo": {
+    "adminMemo": "管理者メモ",
+    "sharedMemo": "共有メモ",
+    "placeholder": "メモを入力..."
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "save": "保存",
+    "all": "すべて"
+  },
+  "category": {
+    "all": "すべて",
+    "cleaning": "清掃",
+    "mealService": "食事",
+    "bath": "温泉",
+    "pickup": "送迎",
+    "celebration": "記念日",
+    "turndown": "ターンダウン"
+  }
+}

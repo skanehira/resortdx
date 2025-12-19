@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "tasks": "Tasks",
+    "messages": "Messages",
+    "chat": "Chat",
+    "admin": "Admin",
+    "staffMode": "Staff Mode"
+  },
+  "taskList": {
+    "title": "Tasks",
+    "myTasks": "My Tasks",
+    "allTasks": "All Tasks",
+    "todaysSchedule": "Today's Schedule",
+    "timeline": "Timeline",
+    "allStaffSchedule": "All Staff Schedule",
+    "greeting": "Hello",
+    "staffSuffix": "",
+    "todaysProgress": "Today's Progress",
+    "tasksCompleted": " completed",
+    "filter": "Filter",
+    "requestHelp": "Request Help",
+    "noTasksCategory": " tasks available",
+    "noTasksCompleted": "No completed tasks",
+    "noTasksPending": "No pending tasks",
+    "noTasksInProgress": "No tasks in progress",
+    "noTasksAssigned": "No tasks assigned"
+  },
+  "status": {
+    "all": "All",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "categories": {
+    "all": "All",
+    "cleaning": "Cleaning",
+    "meal": "Meal Service",
+    "shuttle": "Shuttle",
+    "celebration": "Celebration",
+    "help": "Help",
+    "inspection": "Inspection",
+    "turndown": "Turndown",
+    "bath": "Outdoor Bath"
+  },
+  "taskCard": {
+    "startTask": "Start",
+    "completeTask": "Complete",
+    "pauseTask": "Pause",
+    "resumeTask": "Resume",
+    "viewDetails": "View Details",
+    "scheduledTime": "Scheduled",
+    "assignedTo": "Assigned to",
+    "room": "Room",
+    "guest": "Guest"
+  },
+  "memo": {
+    "personalMemo": "Personal Memo",
+    "sharedMemo": "Shared Memo",
+    "addMemo": "Add Memo",
+    "editMemo": "Edit Memo",
+    "placeholder": "Enter memo...",
+    "fromAdmin": "From Admin"
+  },
+  "sharedNotes": {
+    "title": "Staff Shared Notes",
+    "subtitle": "For All Staff",
+    "addNote": "Add Note",
+    "editNote": "Edit Note",
+    "important": "Important",
+    "markImportant": "Mark as Important",
+    "expiresAt": "Expires",
+    "setExpiry": "Set Expiry",
+    "createdBy": "Created by",
+    "noNotes": "No shared notes",
+    "inputPlaceholder": "Enter note content...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "deleteConfirm": "Delete this note?",
+    "updated": "Updated"
+  },
+  "messages": {
+    "title": "Messages",
+    "chat": "Chat",
+    "notifications": "Notifications",
+    "unread": "Unread"
+  },
+  "help": {
+    "title": "Help Request",
+    "requestHelp": "Request Help",
+    "respondToHelp": "Respond to Help"
+  },
+  "schedule": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "noTasksScheduled": "No tasks scheduled",
+    "today": "Today",
+    "overallProgress": "Overall Progress",
+    "itemsCompleted": " completed",
+    "itemsInProgress": " in progress",
+    "selfLabel": "(You)",
+    "noStaffSchedule": "No staff schedules available"
+  },
+  "swipeHint": {
+    "title": "Swipe to change status",
+    "description": "Swipe left to 'Start' or 'Complete', right to 'Undo'",
+    "dismiss": "Dismiss"
+  }
+}

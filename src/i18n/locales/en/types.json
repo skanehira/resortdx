@@ -1,0 +1,100 @@
+{
+  "staffRole": {
+    "cleaning": "Housekeeping",
+    "service": "Service",
+    "kitchen": "Kitchen",
+    "driver": "Driver",
+    "concierge": "Concierge",
+    "manager": "Manager",
+    "front": "Front Desk"
+  },
+  "staffStatus": {
+    "on_duty": "On Duty",
+    "on_break": "On Break",
+    "out": "Off Duty"
+  },
+  "taskStatus": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Completed"
+  },
+  "taskType": {
+    "housekeeping": "Housekeeping",
+    "meal": "Meal Service",
+    "shuttle": "Shuttle",
+    "celebration": "Celebration"
+  },
+  "housekeepingCategory": {
+    "cleaning": "Cleaning",
+    "inspection": "Inspection",
+    "turndown": "Turndown",
+    "bath": "Outdoor Bath"
+  },
+  "mealType": {
+    "breakfast": "Breakfast",
+    "dinner": "Dinner",
+    "room_service": "Room Service",
+    "special": "Special Meal"
+  },
+  "courseType": {
+    "standard": "Standard",
+    "premium": "Premium",
+    "kaiseki": "Kaiseki"
+  },
+  "mealStatus": {
+    "preparing": "Preparing",
+    "ready": "Ready to Serve",
+    "serving": "Serving",
+    "needs_check": "Needs Check",
+    "completed": "Completed"
+  },
+  "shuttleStatus": {
+    "not_departed": "Not Departed",
+    "heading": "En Route",
+    "arrived": "Arrived",
+    "completed": "Completed"
+  },
+  "shuttleDirection": {
+    "pickup": "Pickup",
+    "dropoff": "Dropoff"
+  },
+  "celebrationType": {
+    "birthday": "Birthday",
+    "wedding_anniversary": "Wedding Anniversary",
+    "other": "Other"
+  },
+  "celebrationItem": {
+    "cake": "Cake",
+    "flowers": "Flowers",
+    "champagne": "Champagne",
+    "decoration": "Decoration",
+    "message_card": "Message Card"
+  },
+  "priority": {
+    "urgent": "Urgent",
+    "high": "High",
+    "normal": "Normal",
+    "low": "Low"
+  },
+  "dietaryRestriction": {
+    "shellfish": "Shellfish",
+    "dairy": "Dairy",
+    "wheat": "Wheat",
+    "eggs": "Eggs",
+    "nuts": "Nuts",
+    "fish": "Fish",
+    "soy": "Soy",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan"
+  },
+  "cleaningItem": {
+    "bed_making": "Bed Making",
+    "floor_cleaning": "Floor Cleaning",
+    "bathroom_cleaning": "Bathroom Cleaning",
+    "amenity_check": "Amenity Check",
+    "garbage_collection": "Garbage Collection",
+    "outdoor_bath_cleaning": "Outdoor Bath Cleaning",
+    "window_cleaning": "Window Cleaning",
+    "special_cleaning": "Special Cleaning"
+  }
+}

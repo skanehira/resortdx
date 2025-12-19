@@ -1,0 +1,69 @@
+{
+  "app": {
+    "title": "ResortDX",
+    "subtitle": "旅館タスク管理"
+  },
+  "navigation": {
+    "dashboard": "ダッシュボード",
+    "tasks": "タスク",
+    "staff": "スタッフ",
+    "settings": "設定",
+    "logout": "ログアウト",
+    "mypage": "マイページ"
+  },
+  "status": {
+    "pending": "未着手",
+    "in_progress": "作業中",
+    "completed": "完了",
+    "all": "すべて"
+  },
+  "priority": {
+    "urgent": "緊急",
+    "high": "高",
+    "normal": "通常",
+    "low": "低"
+  },
+  "buttons": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "add": "追加",
+    "confirm": "確認",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "search": "検索",
+    "filter": "フィルター",
+    "reset": "リセット",
+    "refresh": "更新",
+    "view": "表示",
+    "details": "詳細"
+  },
+  "messages": {
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "saved": "保存しました",
+    "error": "エラーが発生しました",
+    "noData": "データがありません",
+    "confirmDelete": "削除してもよろしいですか？",
+    "success": "成功しました"
+  },
+  "time": {
+    "today": "本日",
+    "tomorrow": "明日",
+    "yesterday": "昨日",
+    "now": "現在"
+  },
+  "labels": {
+    "room": "客室",
+    "guest": "ゲスト",
+    "staff": "スタッフ",
+    "time": "時間",
+    "date": "日付",
+    "memo": "メモ",
+    "notes": "備考",
+    "description": "説明"
+  }
+}

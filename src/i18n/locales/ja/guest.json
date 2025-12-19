@@ -1,0 +1,126 @@
+{
+  "portal": {
+    "title": "ゲストポータル",
+    "welcome": "ようこそ",
+    "roomInfo": "お部屋情報",
+    "services": "サービス"
+  },
+  "nav": {
+    "home": "ホーム",
+    "shuttle": "送迎",
+    "dining": "お食事",
+    "activities": "体験",
+    "celebration": "お祝い",
+    "requests": "ご依頼"
+  },
+  "menu": {
+    "home": "ホーム",
+    "requests": "リクエスト",
+    "info": "施設案内",
+    "chat": "チャット"
+  },
+  "home": {
+    "todaysShuttle": "本日の送迎",
+    "todaysMeal": "本日のお食事",
+    "scheduled": "予定"
+  },
+  "requests": {
+    "title": "ご依頼",
+    "subtitle": "お気軽にお申し付けください",
+    "amenities": "アメニティ",
+    "roomService": "ルームサービス",
+    "shuttle": "送迎",
+    "cleaning": "清掃",
+    "other": "その他",
+    "checkoutTimeChange": "チェックアウト\n時間変更",
+    "noCleaning": "清掃不要",
+    "amenityAdd": "アメニティ\n追加",
+    "towelAdd": "タオル\n追加",
+    "mealRequest": "お食事\nリクエスト",
+    "otherRequest": "その他\nご要望",
+    "noteLabel": "ご要望・備考",
+    "notePlaceholder": "詳細をご記入ください（任意）",
+    "submit": "送信する",
+    "submitted": "ご依頼を承りました",
+    "submittedMessage": "担当スタッフが対応いたします。\nしばらくお待ちくださいませ。"
+  },
+  "shuttle": {
+    "title": "送迎予定",
+    "subtitle": "本日のお迎え・お送りの予定",
+    "pickup": "お迎え",
+    "dropoff": "お送り",
+    "status": "状況",
+    "driverMessage": "ドライバーからのメッセージ",
+    "estimatedArrival": "到着予定",
+    "vehicle": "車両",
+    "statusScheduled": "ご予約済み",
+    "statusDeparting": "出発しました",
+    "statusArriving": "まもなく到着",
+    "statusArrived": "到着しました",
+    "statusCompleted": "完了",
+    "notifyArrival": "到着を連絡する",
+    "arrivedNow": "今到着しました",
+    "arrivalNotification": "到着連絡",
+    "arrivalThanks": "ご連絡ありがとうございます",
+    "arrivalConfirmed": "ドライバーに到着をお伝えしました。\nまもなくお迎えに参ります。",
+    "arrivalInstructions": "熱海駅東口ロータリーに到着されましたら、\n下のボタンでお知らせください。ドライバーがお迎えに参ります。",
+    "flow": "送迎の流れ",
+    "flowStep1": "熱海駅東口ロータリーでお待ちください",
+    "flowStep2": "車両到着・お名前確認",
+    "flowStep3": "ふふ熱海 到着予定"
+  },
+  "meal": {
+    "title": "お食事",
+    "subtitle": "ご滞在中のお食事予定",
+    "breakfast": "ご朝食",
+    "dinner": "ご夕食",
+    "roomService": "ルームサービス",
+    "additionalOrder": "追加注文",
+    "timeChange": "時間変更",
+    "dietaryRestrictions": "アレルギー・食事制限",
+    "allergyInfo": "アレルギー対応",
+    "detail": "詳細",
+    "timeChangeRequest": "お時間の変更をリクエスト",
+    "timeChangeTitle": "お時間変更リクエスト",
+    "selectTime": "ご希望のお時間をお選びください",
+    "requestChange": "変更をリクエスト",
+    "changeRequested": "リクエストを承りました",
+    "changeRequestedMessage": "ご希望のお時間で調整いたします。\n確定次第、お部屋にご連絡いたします."
+  },
+  "activities": {
+    "title": "体験・アクティビティ",
+    "subtitle": "熱海ならではの特別な体験を",
+    "categoryNature": "自然",
+    "categoryCulture": "文化",
+    "categoryWellness": "癒し",
+    "categoryAdventure": "冒険",
+    "perPerson": "/お一人様",
+    "selectTime": "ご希望のお時間",
+    "book": "予約する",
+    "booked": "ご予約を承りました",
+    "bookedMessage": "詳細はお部屋にご連絡いたします。"
+  },
+  "celebration": {
+    "title": "お祝い",
+    "preparation": "ご準備内容",
+    "preparationSubtitle": "当日ご用意させていただきます",
+    "additionalRequest": "追加のご要望",
+    "requestLabel": "ご要望内容",
+    "requestPlaceholder": "例：サプライズ演出のタイミング、追加のお花など",
+    "aboutCelebration": "お祝いに関する追加のご要望がございましたら、お気軽にお申し付けください。",
+    "requestSubmitted": "ご要望を承りました",
+    "requestSubmittedMessage": "特別な一日になりますよう\n心を込めてご準備いたします。"
+  },
+  "info": {
+    "facilityInfo": "施設案内",
+    "spa": "温泉",
+    "restaurant": "レストラン",
+    "amenities": "アメニティ",
+    "wifi": "Wi-Fi",
+    "checkout": "チェックアウト"
+  },
+  "common": {
+    "submit": "送信する",
+    "close": "閉じる"
+  }
+}

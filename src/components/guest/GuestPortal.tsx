@@ -1,132 +1,127 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 
 // Types
-type GuestView =
-	| "home"
-	| "shuttle"
-	| "dining"
-	| "activities"
-	| "requests"
-	| "celebration";
+type GuestView = "home" | "shuttle" | "dining" | "activities" | "requests" | "celebration";
 
 interface ShuttleInfo {
-	type: "pickup" | "dropoff";
-	time: string;
-	location: string;
-	status: "scheduled" | "departing" | "arriving" | "arrived" | "completed";
-	vehicleNumber?: string;
+  type: "pickup" | "dropoff";
+  time: string;
+  location: string;
+  status: "scheduled" | "departing" | "arriving" | "arrived" | "completed";
+  vehicleNumber?: string;
 }
 
 interface MealInfo {
-	id: string;
-	type: "breakfast" | "dinner";
-	date: string;
-	time: string;
-	location: string;
-	course: string;
-	allergies: string[];
-	notes: string;
+  id: string;
+  type: "breakfast" | "dinner";
+  date: string;
+  time: string;
+  location: string;
+  course: string;
+  allergies: string[];
+  notes: string;
 }
 
 interface Activity {
-	id: string;
-	name: string;
-	description: string;
-	duration: string;
-	price: number;
-	image: string;
-	availableTimes: string[];
-	category: "nature" | "culture" | "wellness" | "adventure";
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+  price: number;
+  image: string;
+  availableTimes: string[];
+  category: "nature" | "culture" | "wellness" | "adventure";
 }
 
 interface Celebration {
-	type: string;
-	date: string;
-	details: string;
-	requests: string[];
+  type: string;
+  date: string;
+  details: string;
+  requests: string[];
 }
 
 // Mock Data
 const mockShuttle: ShuttleInfo = {
-	type: "pickup",
-	time: "14:30",
-	location: "熱海駅 東口ロータリー",
-	status: "scheduled",
-	vehicleNumber: "品川 300 あ 1234",
+  type: "pickup",
+  time: "14:30",
+  location: "熱海駅 東口ロータリー",
+  status: "scheduled",
+  vehicleNumber: "品川 300 あ 1234",
 };
 
 const mockMeals: MealInfo[] = [
-	{
-		id: "meal-1",
-		type: "dinner",
-		date: "本日",
-		time: "18:30",
-		location: "個室ダイニング「月見」",
-		course: "季節の懐石コース",
-		allergies: ["甲殻類"],
-		notes: "お子様用取り分け皿をご用意",
-	},
-	{
-		id: "meal-2",
-		type: "breakfast",
-		date: "明日",
-		time: "08:00",
-		location: "お部屋食",
-		course: "和朝食",
-		allergies: ["甲殻類"],
-		notes: "",
-	},
+  {
+    id: "meal-1",
+    type: "dinner",
+    date: "本日",
+    time: "18:30",
+    location: "個室ダイニング「月見」",
+    course: "季節の懐石コース",
+    allergies: ["甲殻類"],
+    notes: "お子様用取り分け皿をご用意",
+  },
+  {
+    id: "meal-2",
+    type: "breakfast",
+    date: "明日",
+    time: "08:00",
+    location: "お部屋食",
+    course: "和朝食",
+    allergies: ["甲殻類"],
+    notes: "",
+  },
 ];
 
 const mockActivities: Activity[] = [
-	{
-		id: "act-1",
-		name: "熱海梅園 早朝散策ツアー",
-		description:
-			"専属ガイドと巡る、静寂の梅園。朝露に輝く梅の花をお楽しみください。",
-		duration: "2時間",
-		price: 5500,
-		image: "🌸",
-		availableTimes: ["06:30", "07:00", "07:30"],
-		category: "nature",
-	},
-	{
-		id: "act-2",
-		name: "来宮神社 参拝と御朱印",
-		description: "樹齢2000年の大楠を擁する来宮神社へ。送迎付きでご案内。",
-		duration: "1.5時間",
-		price: 3300,
-		image: "⛩️",
-		availableTimes: ["09:00", "10:00", "14:00", "15:00"],
-		category: "culture",
-	},
-	{
-		id: "act-3",
-		name: "プライベートヨガセッション",
-		description: "海を望むテラスで、心身を整える特別なひととき。",
-		duration: "1時間",
-		price: 8800,
-		image: "🧘",
-		availableTimes: ["06:00", "07:00", "16:00", "17:00"],
-		category: "wellness",
-	},
-	{
-		id: "act-4",
-		name: "初島クルーズ＆ランチ",
-		description: "熱海港から初島へ。島内散策と海鮮ランチをお楽しみに。",
-		duration: "4時間",
-		price: 15400,
-		image: "🚢",
-		availableTimes: ["10:00"],
-		category: "adventure",
-	},
+  {
+    id: "act-1",
+    name: "熱海梅園 早朝散策ツアー",
+    description: "専属ガイドと巡る、静寂の梅園。朝露に輝く梅の花をお楽しみください。",
+    duration: "2時間",
+    price: 5500,
+    image: "🌸",
+    availableTimes: ["06:30", "07:00", "07:30"],
+    category: "nature",
+  },
+  {
+    id: "act-2",
+    name: "来宮神社 参拝と御朱印",
+    description: "樹齢2000年の大楠を擁する来宮神社へ。送迎付きでご案内。",
+    duration: "1.5時間",
+    price: 3300,
+    image: "⛩️",
+    availableTimes: ["09:00", "10:00", "14:00", "15:00"],
+    category: "culture",
+  },
+  {
+    id: "act-3",
+    name: "プライベートヨガセッション",
+    description: "海を望むテラスで、心身を整える特別なひととき。",
+    duration: "1時間",
+    price: 8800,
+    image: "🧘",
+    availableTimes: ["06:00", "07:00", "16:00", "17:00"],
+    category: "wellness",
+  },
+  {
+    id: "act-4",
+    name: "初島クルーズ＆ランチ",
+    description: "熱海港から初島へ。島内散策と海鮮ランチをお楽しみに。",
+    duration: "4時間",
+    price: 15400,
+    image: "🚢",
+    availableTimes: ["10:00"],
+    category: "adventure",
+  },
 ];
 
 const mockCelebration: Celebration = {
-	type: "結婚記念日",
-	date: "本日",
-	details: "ご結婚5周年おめでとうございます",
-	requests: ["シャンパン（モエ・エ・シャンドン）", "花束（白バラ中心）"],
+  type: "結婚記念日",
+  date: "本日",
+  details: "ご結婚5周年おめでとうございます",
+  requests: ["シャンパン（モエ・エ・シャンドン）", "花束（白バラ中心）"],
 };
 
 // Styles
@@ -919,916 +914,909 @@ const styles = `
 
 // Components
 const HomeView = ({
-	onNavigate,
+  onNavigate,
+  t,
 }: {
-	onNavigate: (view: GuestView) => void;
+  onNavigate: (view: GuestView) => void;
+  t: (key: string) => string;
 }) => (
-	<div className="fade-in">
-		<div className="quick-actions">
-			<div className="quick-action" onClick={() => onNavigate("shuttle")}>
-				<div className="quick-action-icon">🚐</div>
-				<div className="quick-action-label">送迎</div>
-			</div>
-			<div className="quick-action" onClick={() => onNavigate("dining")}>
-				<div className="quick-action-icon">🍽️</div>
-				<div className="quick-action-label">お食事</div>
-			</div>
-			<div className="quick-action" onClick={() => onNavigate("activities")}>
-				<div className="quick-action-icon">🌸</div>
-				<div className="quick-action-label">体験</div>
-			</div>
-			<div className="quick-action" onClick={() => onNavigate("requests")}>
-				<div className="quick-action-icon">🛎️</div>
-				<div className="quick-action-label">ご依頼</div>
-			</div>
-		</div>
+  <div className="fade-in">
+    <div className="quick-actions">
+      <div className="quick-action" onClick={() => onNavigate("shuttle")}>
+        <div className="quick-action-icon">🚐</div>
+        <div className="quick-action-label">{t("nav.shuttle")}</div>
+      </div>
+      <div className="quick-action" onClick={() => onNavigate("dining")}>
+        <div className="quick-action-icon">🍽️</div>
+        <div className="quick-action-label">{t("nav.dining")}</div>
+      </div>
+      <div className="quick-action" onClick={() => onNavigate("activities")}>
+        <div className="quick-action-icon">🌸</div>
+        <div className="quick-action-label">{t("nav.activities")}</div>
+      </div>
+      <div className="quick-action" onClick={() => onNavigate("requests")}>
+        <div className="quick-action-icon">🛎️</div>
+        <div className="quick-action-label">{t("nav.requests")}</div>
+      </div>
+    </div>
 
-		{mockCelebration && (
-			<div className="celebration-header">
-				<div className="celebration-icon">💐</div>
-				<div className="celebration-type">{mockCelebration.type}</div>
-				<div className="celebration-message">{mockCelebration.details}</div>
-			</div>
-		)}
+    {mockCelebration && (
+      <div className="celebration-header">
+        <div className="celebration-icon">💐</div>
+        <div className="celebration-type">{mockCelebration.type}</div>
+        <div className="celebration-message">{mockCelebration.details}</div>
+      </div>
+    )}
 
-		<div className="section-header">
-			<h2 className="section-title">本日の送迎</h2>
-		</div>
-		<div className="card card-accent">
-			<div className="card-header">
-				<div className="card-title">お迎え</div>
-				<span className="card-badge badge-kon">予定</span>
-			</div>
-			<div className="card-body">
-				<div className="card-detail">
-					<span className="card-detail-icon">🕐</span>
-					{mockShuttle.time}
-				</div>
-				<div className="card-detail">
-					<span className="card-detail-icon">📍</span>
-					{mockShuttle.location}
-				</div>
-			</div>
-		</div>
+    <div className="section-header">
+      <h2 className="section-title">{t("home.todaysShuttle")}</h2>
+    </div>
+    <div className="card card-accent">
+      <div className="card-header">
+        <div className="card-title">{t("shuttle.pickup")}</div>
+        <span className="card-badge badge-kon">{t("home.scheduled")}</span>
+      </div>
+      <div className="card-body">
+        <div className="card-detail">
+          <span className="card-detail-icon">🕐</span>
+          {mockShuttle.time}
+        </div>
+        <div className="card-detail">
+          <span className="card-detail-icon">📍</span>
+          {mockShuttle.location}
+        </div>
+      </div>
+    </div>
 
-		<div className="section-header">
-			<h2 className="section-title">本日のお食事</h2>
-		</div>
-		{mockMeals
-			.filter((m) => m.date === "本日")
-			.map((meal) => (
-				<div
-					key={meal.id}
-					className="card"
-					onClick={() => onNavigate("dining")}
-				>
-					<div className="card-header">
-						<div className="card-title">
-							{meal.type === "dinner" ? "ご夕食" : "ご朝食"}
-						</div>
-						<span className="card-badge badge-gold">{meal.course}</span>
-					</div>
-					<div className="card-body">
-						<div className="card-detail">
-							<span className="card-detail-icon">🕐</span>
-							{meal.time}
-						</div>
-						<div className="card-detail">
-							<span className="card-detail-icon">📍</span>
-							{meal.location}
-						</div>
-					</div>
-				</div>
-			))}
-	</div>
+    <div className="section-header">
+      <h2 className="section-title">{t("home.todaysMeal")}</h2>
+    </div>
+    {mockMeals
+      .filter((m) => m.date === "本日")
+      .map((meal) => (
+        <div key={meal.id} className="card" onClick={() => onNavigate("dining")}>
+          <div className="card-header">
+            <div className="card-title">
+              {meal.type === "dinner" ? t("meal.dinner") : t("meal.breakfast")}
+            </div>
+            <span className="card-badge badge-gold">{meal.course}</span>
+          </div>
+          <div className="card-body">
+            <div className="card-detail">
+              <span className="card-detail-icon">🕐</span>
+              {meal.time}
+            </div>
+            <div className="card-detail">
+              <span className="card-detail-icon">📍</span>
+              {meal.location}
+            </div>
+          </div>
+        </div>
+      ))}
+  </div>
 );
 
-const ShuttleView = () => {
-	const [showArrivalModal, setShowArrivalModal] = useState(false);
-	const [arrivalSent, setArrivalSent] = useState(false);
+const ShuttleView = ({ t }: { t: (key: string) => string }) => {
+  const [showArrivalModal, setShowArrivalModal] = useState(false);
+  const [arrivalSent, setArrivalSent] = useState(false);
 
-	const handleArrivalNotify = () => {
-		setArrivalSent(true);
-	};
+  const handleArrivalNotify = () => {
+    setArrivalSent(true);
+  };
 
-	const getStatusText = (status: ShuttleInfo["status"]) => {
-		const statusMap = {
-			scheduled: "ご予約済み",
-			departing: "出発しました",
-			arriving: "まもなく到着",
-			arrived: "到着しました",
-			completed: "完了",
-		};
-		return statusMap[status];
-	};
+  const getStatusText = (status: ShuttleInfo["status"]) => {
+    const statusMap: Record<ShuttleInfo["status"], string> = {
+      scheduled: t("shuttle.statusScheduled"),
+      departing: t("shuttle.statusDeparting"),
+      arriving: t("shuttle.statusArriving"),
+      arrived: t("shuttle.statusArrived"),
+      completed: t("shuttle.statusCompleted"),
+    };
+    return statusMap[status];
+  };
 
-	return (
-		<div className="fade-in">
-			<div className="section-header">
-				<h2 className="section-title">送迎予定</h2>
-				<p className="section-subtitle">本日のお迎え・お送りの予定</p>
-			</div>
+  return (
+    <div className="fade-in">
+      <div className="section-header">
+        <h2 className="section-title">{t("shuttle.title")}</h2>
+        <p className="section-subtitle">{t("shuttle.subtitle")}</p>
+      </div>
 
-			<div className="card card-accent">
-				<div className="card-header">
-					<div className="card-title">
-						{mockShuttle.type === "pickup" ? "お迎え" : "お送り"}
-					</div>
-					<span className="card-badge badge-kon">
-						{getStatusText(mockShuttle.status)}
-					</span>
-				</div>
-				<div className="card-body">
-					<div className="card-detail">
-						<span className="card-detail-icon">🕐</span>
-						<strong>{mockShuttle.time}</strong>
-					</div>
-					<div className="card-detail">
-						<span className="card-detail-icon">📍</span>
-						{mockShuttle.location}
-					</div>
-					{mockShuttle.vehicleNumber && (
-						<div className="card-detail">
-							<span className="card-detail-icon">🚐</span>
-							車両: {mockShuttle.vehicleNumber}
-						</div>
-					)}
-					<div className="status-indicator">
-						<span className={`status-dot ${mockShuttle.status}`}></span>
-						<span className="status-text">
-							{getStatusText(mockShuttle.status)}
-						</span>
-					</div>
-				</div>
-			</div>
+      <div className="card card-accent">
+        <div className="card-header">
+          <div className="card-title">
+            {mockShuttle.type === "pickup" ? t("shuttle.pickup") : t("shuttle.dropoff")}
+          </div>
+          <span className="card-badge badge-kon">{getStatusText(mockShuttle.status)}</span>
+        </div>
+        <div className="card-body">
+          <div className="card-detail">
+            <span className="card-detail-icon">🕐</span>
+            <strong>{mockShuttle.time}</strong>
+          </div>
+          <div className="card-detail">
+            <span className="card-detail-icon">📍</span>
+            {mockShuttle.location}
+          </div>
+          {mockShuttle.vehicleNumber && (
+            <div className="card-detail">
+              <span className="card-detail-icon">🚐</span>
+              {t("shuttle.vehicle")}: {mockShuttle.vehicleNumber}
+            </div>
+          )}
+          <div className="status-indicator">
+            <span className={`status-dot ${mockShuttle.status}`}></span>
+            <span className="status-text">{getStatusText(mockShuttle.status)}</span>
+          </div>
+        </div>
+      </div>
 
-			<div style={{ padding: "0 16px", marginTop: "24px" }}>
-				<button
-					className="btn btn-gold"
-					onClick={() => setShowArrivalModal(true)}
-				>
-					🏁 到着を連絡する
-				</button>
-			</div>
+      <div style={{ padding: "0 16px", marginTop: "24px" }}>
+        <button className="btn btn-gold" onClick={() => setShowArrivalModal(true)}>
+          🏁 {t("shuttle.notifyArrival")}
+        </button>
+      </div>
 
-			<div className="section-header" style={{ marginTop: "32px" }}>
-				<h2 className="section-title">送迎の流れ</h2>
-			</div>
-			<div className="card">
-				<div className="timeline">
-					<div className="timeline-item">
-						<div className="timeline-time">14:30</div>
-						<div className="timeline-content">
-							熱海駅東口ロータリーでお待ちください
-						</div>
-					</div>
-					<div className="timeline-item">
-						<div className="timeline-time">14:35</div>
-						<div className="timeline-content">車両到着・お名前確認</div>
-					</div>
-					<div className="timeline-item">
-						<div className="timeline-time">14:50</div>
-						<div className="timeline-content">ふふ熱海 到着予定</div>
-					</div>
-				</div>
-			</div>
+      <div className="section-header" style={{ marginTop: "32px" }}>
+        <h2 className="section-title">{t("shuttle.flow")}</h2>
+      </div>
+      <div className="card">
+        <div className="timeline">
+          <div className="timeline-item">
+            <div className="timeline-time">14:30</div>
+            <div className="timeline-content">{t("shuttle.flowStep1")}</div>
+          </div>
+          <div className="timeline-item">
+            <div className="timeline-time">14:35</div>
+            <div className="timeline-content">{t("shuttle.flowStep2")}</div>
+          </div>
+          <div className="timeline-item">
+            <div className="timeline-time">14:50</div>
+            <div className="timeline-content">{t("shuttle.flowStep3")}</div>
+          </div>
+        </div>
+      </div>
 
-			{showArrivalModal && (
-				<div
-					className="modal-overlay"
-					onClick={() => setShowArrivalModal(false)}
-				>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">到着連絡</h3>
-							<button
-								className="modal-close"
-								onClick={() => setShowArrivalModal(false)}
-							>
-								×
-							</button>
-						</div>
-						{arrivalSent ? (
-							<div className="success-state">
-								<div className="success-icon">✓</div>
-								<div className="success-title">ご連絡ありがとうございます</div>
-								<div className="success-message">
-									ドライバーに到着をお伝えしました。
-									<br />
-									まもなくお迎えに参ります。
-								</div>
-							</div>
-						) : (
-							<>
-								<div className="modal-body">
-									<p
-										style={{
-											fontSize: "14px",
-											color: "#2d2d2d",
-											lineHeight: 1.7,
-										}}
-									>
-										熱海駅東口ロータリーに到着されましたら、
-										下のボタンでお知らせください。ドライバーがお迎えに参ります。
-									</p>
-								</div>
-								<div className="modal-footer">
-									<button
-										className="btn btn-gold"
-										onClick={handleArrivalNotify}
-									>
-										🏁 今到着しました
-									</button>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+      {showArrivalModal && (
+        <div className="modal-overlay" onClick={() => setShowArrivalModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t("shuttle.arrivalNotification")}</h3>
+              <button className="modal-close" onClick={() => setShowArrivalModal(false)}>
+                ×
+              </button>
+            </div>
+            {arrivalSent ? (
+              <div className="success-state">
+                <div className="success-icon">✓</div>
+                <div className="success-title">{t("shuttle.arrivalThanks")}</div>
+                <div className="success-message">
+                  {t("shuttle.arrivalConfirmed")
+                    .split("\n")
+                    .map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        {i === 0 && <br />}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#2d2d2d",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {t("shuttle.arrivalInstructions")
+                      .split("\n")
+                      .map((line, i) => (
+                        <span key={i}>
+                          {line}
+                          {i === 0 && <br />}
+                        </span>
+                      ))}
+                  </p>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-gold" onClick={handleArrivalNotify}>
+                    🏁 {t("shuttle.arrivedNow")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
-const DiningView = () => {
-	const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
-	const [showTimeChange, setShowTimeChange] = useState(false);
-	const [selectedTime, setSelectedTime] = useState<string | null>(null);
-	const [changeSubmitted, setChangeSubmitted] = useState(false);
+const DiningView = ({ t }: { t: (key: string) => string }) => {
+  const [selectedMeal, setSelectedMeal] = useState<MealInfo | null>(null);
+  const [showTimeChange, setShowTimeChange] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [changeSubmitted, setChangeSubmitted] = useState(false);
 
-	const availableTimes = ["17:30", "18:00", "18:30", "19:00", "19:30", "20:00"];
+  const availableTimes = ["17:30", "18:00", "18:30", "19:00", "19:30", "20:00"];
 
-	const handleTimeChangeSubmit = () => {
-		setChangeSubmitted(true);
-	};
+  const handleTimeChangeSubmit = () => {
+    setChangeSubmitted(true);
+  };
 
-	return (
-		<div className="fade-in">
-			<div className="section-header">
-				<h2 className="section-title">お食事</h2>
-				<p className="section-subtitle">ご滞在中のお食事予定</p>
-			</div>
+  return (
+    <div className="fade-in">
+      <div className="section-header">
+        <h2 className="section-title">{t("meal.title")}</h2>
+        <p className="section-subtitle">{t("meal.subtitle")}</p>
+      </div>
 
-			{mockMeals.map((meal) => (
-				<div
-					key={meal.id}
-					className="card card-accent"
-					onClick={() => setSelectedMeal(meal)}
-				>
-					<div className="card-header">
-						<div className="card-title">
-							{meal.type === "dinner" ? "ご夕食" : "ご朝食"}
-						</div>
-						<span className="card-badge badge-gold">{meal.date}</span>
-					</div>
-					<div className="card-body">
-						<div className="card-detail">
-							<span className="card-detail-icon">🕐</span>
-							<strong>{meal.time}</strong>
-						</div>
-						<div className="card-detail">
-							<span className="card-detail-icon">📍</span>
-							{meal.location}
-						</div>
-						<div className="card-detail">
-							<span className="card-detail-icon">🍱</span>
-							{meal.course}
-						</div>
-						{meal.allergies.length > 0 && (
-							<div className="card-detail">
-								<span className="card-detail-icon">⚠️</span>
-								アレルギー対応: {meal.allergies.join("、")}
-							</div>
-						)}
-					</div>
-				</div>
-			))}
+      {mockMeals.map((meal) => (
+        <div key={meal.id} className="card card-accent" onClick={() => setSelectedMeal(meal)}>
+          <div className="card-header">
+            <div className="card-title">
+              {meal.type === "dinner" ? t("meal.dinner") : t("meal.breakfast")}
+            </div>
+            <span className="card-badge badge-gold">{meal.date}</span>
+          </div>
+          <div className="card-body">
+            <div className="card-detail">
+              <span className="card-detail-icon">🕐</span>
+              <strong>{meal.time}</strong>
+            </div>
+            <div className="card-detail">
+              <span className="card-detail-icon">📍</span>
+              {meal.location}
+            </div>
+            <div className="card-detail">
+              <span className="card-detail-icon">🍱</span>
+              {meal.course}
+            </div>
+            {meal.allergies.length > 0 && (
+              <div className="card-detail">
+                <span className="card-detail-icon">⚠️</span>
+                {t("meal.allergyInfo")}: {meal.allergies.join("、")}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
 
-			{selectedMeal && (
-				<div className="modal-overlay" onClick={() => setSelectedMeal(null)}>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">
-								{selectedMeal.type === "dinner" ? "ご夕食" : "ご朝食"}詳細
-							</h3>
-							<button
-								className="modal-close"
-								onClick={() => setSelectedMeal(null)}
-							>
-								×
-							</button>
-						</div>
-						<div className="modal-body">
-							<div className="card">
-								<div className="card-body">
-									<div className="card-detail">
-										<span className="card-detail-icon">📅</span>
-										{selectedMeal.date}
-									</div>
-									<div className="card-detail">
-										<span className="card-detail-icon">🕐</span>
-										<strong>{selectedMeal.time}</strong>
-									</div>
-									<div className="card-detail">
-										<span className="card-detail-icon">📍</span>
-										{selectedMeal.location}
-									</div>
-									<div className="card-detail">
-										<span className="card-detail-icon">🍱</span>
-										{selectedMeal.course}
-									</div>
-									{selectedMeal.allergies.length > 0 && (
-										<div className="card-detail">
-											<span className="card-detail-icon">⚠️</span>
-											アレルギー対応: {selectedMeal.allergies.join("、")}
-										</div>
-									)}
-									{selectedMeal.notes && (
-										<div className="card-detail">
-											<span className="card-detail-icon">📝</span>
-											{selectedMeal.notes}
-										</div>
-									)}
-								</div>
-							</div>
-						</div>
-						<div className="modal-footer">
-							<button
-								className="btn btn-outline"
-								onClick={() => {
-									setShowTimeChange(true);
-									setSelectedMeal(null);
-								}}
-							>
-								⏰ お時間の変更をリクエスト
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+      {selectedMeal && (
+        <div className="modal-overlay" onClick={() => setSelectedMeal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {selectedMeal.type === "dinner" ? t("meal.dinner") : t("meal.breakfast")}
+                {t("meal.detail")}
+              </h3>
+              <button className="modal-close" onClick={() => setSelectedMeal(null)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="card">
+                <div className="card-body">
+                  <div className="card-detail">
+                    <span className="card-detail-icon">📅</span>
+                    {selectedMeal.date}
+                  </div>
+                  <div className="card-detail">
+                    <span className="card-detail-icon">🕐</span>
+                    <strong>{selectedMeal.time}</strong>
+                  </div>
+                  <div className="card-detail">
+                    <span className="card-detail-icon">📍</span>
+                    {selectedMeal.location}
+                  </div>
+                  <div className="card-detail">
+                    <span className="card-detail-icon">🍱</span>
+                    {selectedMeal.course}
+                  </div>
+                  {selectedMeal.allergies.length > 0 && (
+                    <div className="card-detail">
+                      <span className="card-detail-icon">⚠️</span>
+                      {t("meal.allergyInfo")}: {selectedMeal.allergies.join("、")}
+                    </div>
+                  )}
+                  {selectedMeal.notes && (
+                    <div className="card-detail">
+                      <span className="card-detail-icon">📝</span>
+                      {selectedMeal.notes}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-outline"
+                onClick={() => {
+                  setShowTimeChange(true);
+                  setSelectedMeal(null);
+                }}
+              >
+                ⏰ {t("meal.timeChangeRequest")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-			{showTimeChange && (
-				<div className="modal-overlay" onClick={() => setShowTimeChange(false)}>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">お時間変更リクエスト</h3>
-							<button
-								className="modal-close"
-								onClick={() => {
-									setShowTimeChange(false);
-									setChangeSubmitted(false);
-									setSelectedTime(null);
-								}}
-							>
-								×
-							</button>
-						</div>
-						{changeSubmitted ? (
-							<div className="success-state">
-								<div className="success-icon">✓</div>
-								<div className="success-title">リクエストを承りました</div>
-								<div className="success-message">
-									ご希望のお時間で調整いたします。
-									<br />
-									確定次第、お部屋にご連絡いたします。
-								</div>
-							</div>
-						) : (
-							<>
-								<div className="modal-body">
-									<p
-										style={{
-											fontSize: "14px",
-											color: "#2d2d2d",
-											marginBottom: "16px",
-										}}
-									>
-										ご希望のお時間をお選びください
-									</p>
-									<div className="time-picker">
-										{availableTimes.map((time) => (
-											<button
-												key={time}
-												className={`time-option ${selectedTime === time ? "selected" : ""}`}
-												onClick={() => setSelectedTime(time)}
-											>
-												{time}
-											</button>
-										))}
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button
-										className="btn btn-primary"
-										onClick={handleTimeChangeSubmit}
-										disabled={!selectedTime}
-										style={{ opacity: selectedTime ? 1 : 0.5 }}
-									>
-										変更をリクエスト
-									</button>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+      {showTimeChange && (
+        <div className="modal-overlay" onClick={() => setShowTimeChange(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t("meal.timeChangeTitle")}</h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowTimeChange(false);
+                  setChangeSubmitted(false);
+                  setSelectedTime(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            {changeSubmitted ? (
+              <div className="success-state">
+                <div className="success-icon">✓</div>
+                <div className="success-title">{t("meal.changeRequested")}</div>
+                <div className="success-message">
+                  {t("meal.changeRequestedMessage")
+                    .split("\n")
+                    .map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        {i === 0 && <br />}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#2d2d2d",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {t("meal.selectTime")}
+                  </p>
+                  <div className="time-picker">
+                    {availableTimes.map((time) => (
+                      <button
+                        key={time}
+                        className={`time-option ${selectedTime === time ? "selected" : ""}`}
+                        onClick={() => setSelectedTime(time)}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleTimeChangeSubmit}
+                    disabled={!selectedTime}
+                    style={{ opacity: selectedTime ? 1 : 0.5 }}
+                  >
+                    {t("meal.requestChange")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
-const ActivitiesView = () => {
-	const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
-		null,
-	);
-	const [selectedTime, setSelectedTime] = useState<string | null>(null);
-	const [bookingSubmitted, setBookingSubmitted] = useState(false);
+const ActivitiesView = ({ t }: { t: (key: string) => string }) => {
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [bookingSubmitted, setBookingSubmitted] = useState(false);
 
-	const categoryLabels = {
-		nature: "自然",
-		culture: "文化",
-		wellness: "癒し",
-		adventure: "冒険",
-	};
+  const categoryLabels: Record<Activity["category"], string> = {
+    nature: t("activities.categoryNature"),
+    culture: t("activities.categoryCulture"),
+    wellness: t("activities.categoryWellness"),
+    adventure: t("activities.categoryAdventure"),
+  };
 
-	const handleBookingSubmit = () => {
-		setBookingSubmitted(true);
-	};
+  const handleBookingSubmit = () => {
+    setBookingSubmitted(true);
+  };
 
-	return (
-		<div className="fade-in">
-			<div className="section-header">
-				<h2 className="section-title">体験・アクティビティ</h2>
-				<p className="section-subtitle">熱海ならではの特別な体験を</p>
-			</div>
+  return (
+    <div className="fade-in">
+      <div className="section-header">
+        <h2 className="section-title">{t("activities.title")}</h2>
+        <p className="section-subtitle">{t("activities.subtitle")}</p>
+      </div>
 
-			<div className="activity-grid">
-				{mockActivities.map((activity) => (
-					<div
-						key={activity.id}
-						className="activity-card"
-						onClick={() => setSelectedActivity(activity)}
-					>
-						<div className="activity-image">{activity.image}</div>
-						<div className="activity-info">
-							<div className="activity-name">{activity.name}</div>
-							<div className="activity-meta">
-								<span className="activity-duration">{activity.duration}</span>
-								<span className="activity-price">
-									¥{activity.price.toLocaleString()}
-								</span>
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
+      <div className="activity-grid">
+        {mockActivities.map((activity) => (
+          <div
+            key={activity.id}
+            className="activity-card"
+            onClick={() => setSelectedActivity(activity)}
+          >
+            <div className="activity-image">{activity.image}</div>
+            <div className="activity-info">
+              <div className="activity-name">{activity.name}</div>
+              <div className="activity-meta">
+                <span className="activity-duration">{activity.duration}</span>
+                <span className="activity-price">¥{activity.price.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-			{selectedActivity && (
-				<div
-					className="modal-overlay"
-					onClick={() => {
-						setSelectedActivity(null);
-						setBookingSubmitted(false);
-						setSelectedTime(null);
-					}}
-				>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">{selectedActivity.name}</h3>
-							<button
-								className="modal-close"
-								onClick={() => {
-									setSelectedActivity(null);
-									setBookingSubmitted(false);
-									setSelectedTime(null);
-								}}
-							>
-								×
-							</button>
-						</div>
-						{bookingSubmitted ? (
-							<div className="success-state">
-								<div className="success-icon">✓</div>
-								<div className="success-title">ご予約を承りました</div>
-								<div className="success-message">
-									{selectedActivity.name}
-									<br />
-									{selectedTime} ～<br />
-									<br />
-									詳細はお部屋にご連絡いたします。
-								</div>
-							</div>
-						) : (
-							<>
-								<div className="modal-body">
-									<div
-										style={{
-											fontSize: "48px",
-											textAlign: "center",
-											marginBottom: "16px",
-										}}
-									>
-										{selectedActivity.image}
-									</div>
-									<div style={{ marginBottom: "16px" }}>
-										<span
-											className="card-badge badge-matcha"
-											style={{ marginRight: "8px" }}
-										>
-											{categoryLabels[selectedActivity.category]}
-										</span>
-										<span className="card-badge badge-kon">
-											{selectedActivity.duration}
-										</span>
-									</div>
-									<p
-										style={{
-											fontSize: "14px",
-											color: "#2d2d2d",
-											lineHeight: 1.7,
-											marginBottom: "20px",
-										}}
-									>
-										{selectedActivity.description}
-									</p>
-									<div
-										style={{
-											fontSize: "20px",
-											fontWeight: "600",
-											color: "#c4a35a",
-											marginBottom: "20px",
-										}}
-									>
-										¥{selectedActivity.price.toLocaleString()}
-										<span
-											style={{
-												fontSize: "12px",
-												color: "#666",
-												marginLeft: "4px",
-											}}
-										>
-											/お一人様
-										</span>
-									</div>
-									<p
-										style={{
-											fontSize: "13px",
-											fontWeight: "500",
-											color: "#1a2744",
-											marginBottom: "12px",
-										}}
-									>
-										ご希望のお時間
-									</p>
-									<div className="time-picker">
-										{selectedActivity.availableTimes.map((time) => (
-											<button
-												key={time}
-												className={`time-option ${selectedTime === time ? "selected" : ""}`}
-												onClick={() => setSelectedTime(time)}
-											>
-												{time}
-											</button>
-										))}
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button
-										className="btn btn-gold"
-										onClick={handleBookingSubmit}
-										disabled={!selectedTime}
-										style={{ opacity: selectedTime ? 1 : 0.5 }}
-									>
-										予約する
-									</button>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+      {selectedActivity && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setSelectedActivity(null);
+            setBookingSubmitted(false);
+            setSelectedTime(null);
+          }}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{selectedActivity.name}</h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setSelectedActivity(null);
+                  setBookingSubmitted(false);
+                  setSelectedTime(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            {bookingSubmitted ? (
+              <div className="success-state">
+                <div className="success-icon">✓</div>
+                <div className="success-title">{t("activities.booked")}</div>
+                <div className="success-message">
+                  {selectedActivity.name}
+                  <br />
+                  {selectedTime} ～<br />
+                  <br />
+                  {t("activities.bookedMessage")}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <div
+                    style={{
+                      fontSize: "48px",
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {selectedActivity.image}
+                  </div>
+                  <div style={{ marginBottom: "16px" }}>
+                    <span className="card-badge badge-matcha" style={{ marginRight: "8px" }}>
+                      {categoryLabels[selectedActivity.category]}
+                    </span>
+                    <span className="card-badge badge-kon">{selectedActivity.duration}</span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#2d2d2d",
+                      lineHeight: 1.7,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    {selectedActivity.description}
+                  </p>
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "600",
+                      color: "#c4a35a",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    ¥{selectedActivity.price.toLocaleString()}
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#666",
+                        marginLeft: "4px",
+                      }}
+                    >
+                      {t("activities.perPerson")}
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      color: "#1a2744",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    {t("activities.selectTime")}
+                  </p>
+                  <div className="time-picker">
+                    {selectedActivity.availableTimes.map((time) => (
+                      <button
+                        key={time}
+                        className={`time-option ${selectedTime === time ? "selected" : ""}`}
+                        onClick={() => setSelectedTime(time)}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-gold"
+                    onClick={handleBookingSubmit}
+                    disabled={!selectedTime}
+                    style={{ opacity: selectedTime ? 1 : 0.5 }}
+                  >
+                    {t("activities.book")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
-const RequestsView = () => {
-	const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
-	const [showRequestForm, setShowRequestForm] = useState(false);
-	const [requestSubmitted, setRequestSubmitted] = useState(false);
-	const [requestNote, setRequestNote] = useState("");
+const RequestsView = ({ t }: { t: (key: string) => string }) => {
+  const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
+  const [requestNote, setRequestNote] = useState("");
 
-	const requestTypes = [
-		{ id: "checkout", icon: "🕐", label: "チェックアウト\n時間変更" },
-		{ id: "no-cleaning", icon: "🚫", label: "清掃不要" },
-		{ id: "amenity", icon: "🧴", label: "アメニティ\n追加" },
-		{ id: "towel", icon: "🛁", label: "タオル\n追加" },
-		{ id: "meal", icon: "🍽️", label: "お食事\nリクエスト" },
-		{ id: "other", icon: "💬", label: "その他\nご要望" },
-	];
+  const requestTypes = [
+    { id: "checkout", icon: "🕐", labelKey: "requests.checkoutTimeChange" },
+    { id: "no-cleaning", icon: "🚫", labelKey: "requests.noCleaning" },
+    { id: "amenity", icon: "🧴", labelKey: "requests.amenityAdd" },
+    { id: "towel", icon: "🛁", labelKey: "requests.towelAdd" },
+    { id: "meal", icon: "🍽️", labelKey: "requests.mealRequest" },
+    { id: "other", icon: "💬", labelKey: "requests.otherRequest" },
+  ];
 
-	const handleRequestSubmit = () => {
-		setRequestSubmitted(true);
-	};
+  const handleRequestSubmit = () => {
+    setRequestSubmitted(true);
+  };
 
-	return (
-		<div className="fade-in">
-			<div className="section-header">
-				<h2 className="section-title">ご依頼</h2>
-				<p className="section-subtitle">お気軽にお申し付けください</p>
-			</div>
+  return (
+    <div className="fade-in">
+      <div className="section-header">
+        <h2 className="section-title">{t("requests.title")}</h2>
+        <p className="section-subtitle">{t("requests.subtitle")}</p>
+      </div>
 
-			<div className="request-grid">
-				{requestTypes.map((request) => (
-					<div
-						key={request.id}
-						className={`request-card ${selectedRequest === request.id ? "selected" : ""}`}
-						onClick={() => {
-							setSelectedRequest(request.id);
-							setShowRequestForm(true);
-						}}
-					>
-						<div className="request-icon">{request.icon}</div>
-						<div className="request-label" style={{ whiteSpace: "pre-line" }}>
-							{request.label}
-						</div>
-					</div>
-				))}
-			</div>
+      <div className="request-grid">
+        {requestTypes.map((request) => (
+          <div
+            key={request.id}
+            className={`request-card ${selectedRequest === request.id ? "selected" : ""}`}
+            onClick={() => {
+              setSelectedRequest(request.id);
+              setShowRequestForm(true);
+            }}
+          >
+            <div className="request-icon">{request.icon}</div>
+            <div className="request-label" style={{ whiteSpace: "pre-line" }}>
+              {t(request.labelKey)}
+            </div>
+          </div>
+        ))}
+      </div>
 
-			{showRequestForm && (
-				<div
-					className="modal-overlay"
-					onClick={() => {
-						setShowRequestForm(false);
-						setRequestSubmitted(false);
-						setRequestNote("");
-					}}
-				>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">
-								{requestTypes
-									.find((r) => r.id === selectedRequest)
-									?.label.replace("\n", "")}
-							</h3>
-							<button
-								className="modal-close"
-								onClick={() => {
-									setShowRequestForm(false);
-									setRequestSubmitted(false);
-									setRequestNote("");
-								}}
-							>
-								×
-							</button>
-						</div>
-						{requestSubmitted ? (
-							<div className="success-state">
-								<div className="success-icon">✓</div>
-								<div className="success-title">ご依頼を承りました</div>
-								<div className="success-message">
-									担当スタッフが対応いたします。
-									<br />
-									しばらくお待ちくださいませ。
-								</div>
-							</div>
-						) : (
-							<>
-								<div className="modal-body">
-									<div
-										style={{
-											fontSize: "48px",
-											textAlign: "center",
-											marginBottom: "24px",
-										}}
-									>
-										{requestTypes.find((r) => r.id === selectedRequest)?.icon}
-									</div>
-									<div className="form-group" style={{ margin: 0 }}>
-										<label className="form-label">ご要望・備考</label>
-										<textarea
-											className="form-input form-textarea"
-											placeholder="詳細をご記入ください（任意）"
-											value={requestNote}
-											onChange={(e) => setRequestNote(e.target.value)}
-										/>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button
-										className="btn btn-primary"
-										onClick={handleRequestSubmit}
-									>
-										送信する
-									</button>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+      {showRequestForm && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setShowRequestForm(false);
+            setRequestSubmitted(false);
+            setRequestNote("");
+          }}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {t(requestTypes.find((r) => r.id === selectedRequest)?.labelKey || "").replace(
+                  "\n",
+                  "",
+                )}
+              </h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowRequestForm(false);
+                  setRequestSubmitted(false);
+                  setRequestNote("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+            {requestSubmitted ? (
+              <div className="success-state">
+                <div className="success-icon">✓</div>
+                <div className="success-title">{t("requests.submitted")}</div>
+                <div className="success-message">
+                  {t("requests.submittedMessage")
+                    .split("\n")
+                    .map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        {i === 0 && <br />}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <div
+                    style={{
+                      fontSize: "48px",
+                      textAlign: "center",
+                      marginBottom: "24px",
+                    }}
+                  >
+                    {requestTypes.find((r) => r.id === selectedRequest)?.icon}
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">{t("requests.noteLabel")}</label>
+                    <textarea
+                      className="form-input form-textarea"
+                      placeholder={t("requests.notePlaceholder")}
+                      value={requestNote}
+                      onChange={(e) => setRequestNote(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-primary" onClick={handleRequestSubmit}>
+                    {t("requests.submit")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
-const CelebrationView = () => {
-	const [showAddRequest, setShowAddRequest] = useState(false);
-	const [additionalRequest, setAdditionalRequest] = useState("");
-	const [requestSubmitted, setRequestSubmitted] = useState(false);
+const CelebrationView = ({ t }: { t: (key: string) => string }) => {
+  const [showAddRequest, setShowAddRequest] = useState(false);
+  const [additionalRequest, setAdditionalRequest] = useState("");
+  const [requestSubmitted, setRequestSubmitted] = useState(false);
 
-	const handleRequestSubmit = () => {
-		setRequestSubmitted(true);
-	};
+  const handleRequestSubmit = () => {
+    setRequestSubmitted(true);
+  };
 
-	return (
-		<div className="fade-in">
-			<div className="celebration-header">
-				<div className="celebration-icon">💐</div>
-				<div className="celebration-type">{mockCelebration.type}</div>
-				<div className="celebration-message">{mockCelebration.details}</div>
-			</div>
+  return (
+    <div className="fade-in">
+      <div className="celebration-header">
+        <div className="celebration-icon">💐</div>
+        <div className="celebration-type">{mockCelebration.type}</div>
+        <div className="celebration-message">{mockCelebration.details}</div>
+      </div>
 
-			<div className="section-header">
-				<h2 className="section-title">ご準備内容</h2>
-				<p className="section-subtitle">当日ご用意させていただきます</p>
-			</div>
+      <div className="section-header">
+        <h2 className="section-title">{t("celebration.preparation")}</h2>
+        <p className="section-subtitle">{t("celebration.preparationSubtitle")}</p>
+      </div>
 
-			<div className="card">
-				<div className="card-body">
-					{mockCelebration.requests.map((request, index) => (
-						<div
-							key={index}
-							className="card-detail"
-							style={{ marginTop: index === 0 ? 0 : 12 }}
-						>
-							<span className="card-detail-icon">✦</span>
-							{request}
-						</div>
-					))}
-				</div>
-			</div>
+      <div className="card">
+        <div className="card-body">
+          {mockCelebration.requests.map((request, index) => (
+            <div key={index} className="card-detail" style={{ marginTop: index === 0 ? 0 : 12 }}>
+              <span className="card-detail-icon">✦</span>
+              {request}
+            </div>
+          ))}
+        </div>
+      </div>
 
-			<div style={{ padding: "0 16px", marginTop: "24px" }}>
-				<button
-					className="btn btn-outline"
-					onClick={() => setShowAddRequest(true)}
-				>
-					✨ 追加のご要望
-				</button>
-			</div>
+      <div style={{ padding: "0 16px", marginTop: "24px" }}>
+        <button className="btn btn-outline" onClick={() => setShowAddRequest(true)}>
+          ✨ {t("celebration.additionalRequest")}
+        </button>
+      </div>
 
-			{showAddRequest && (
-				<div
-					className="modal-overlay"
-					onClick={() => {
-						setShowAddRequest(false);
-						setRequestSubmitted(false);
-						setAdditionalRequest("");
-					}}
-				>
-					<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-						<div className="modal-header">
-							<h3 className="modal-title">追加のご要望</h3>
-							<button
-								className="modal-close"
-								onClick={() => {
-									setShowAddRequest(false);
-									setRequestSubmitted(false);
-									setAdditionalRequest("");
-								}}
-							>
-								×
-							</button>
-						</div>
-						{requestSubmitted ? (
-							<div className="success-state">
-								<div className="success-icon">✓</div>
-								<div className="success-title">ご要望を承りました</div>
-								<div className="success-message">
-									特別な一日になりますよう
-									<br />
-									心を込めてご準備いたします。
-								</div>
-							</div>
-						) : (
-							<>
-								<div className="modal-body">
-									<p
-										style={{
-											fontSize: "14px",
-											color: "#2d2d2d",
-											marginBottom: "16px",
-											lineHeight: 1.7,
-										}}
-									>
-										お祝いに関する追加のご要望がございましたら、お気軽にお申し付けください。
-									</p>
-									<div className="form-group" style={{ margin: 0 }}>
-										<label className="form-label">ご要望内容</label>
-										<textarea
-											className="form-input form-textarea"
-											placeholder="例：サプライズ演出のタイミング、追加のお花など"
-											value={additionalRequest}
-											onChange={(e) => setAdditionalRequest(e.target.value)}
-										/>
-									</div>
-								</div>
-								<div className="modal-footer">
-									<button
-										className="btn btn-gold"
-										onClick={handleRequestSubmit}
-										disabled={!additionalRequest.trim()}
-										style={{ opacity: additionalRequest.trim() ? 1 : 0.5 }}
-									>
-										送信する
-									</button>
-								</div>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-		</div>
-	);
+      {showAddRequest && (
+        <div
+          className="modal-overlay"
+          onClick={() => {
+            setShowAddRequest(false);
+            setRequestSubmitted(false);
+            setAdditionalRequest("");
+          }}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">{t("celebration.additionalRequest")}</h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowAddRequest(false);
+                  setRequestSubmitted(false);
+                  setAdditionalRequest("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+            {requestSubmitted ? (
+              <div className="success-state">
+                <div className="success-icon">✓</div>
+                <div className="success-title">{t("celebration.requestSubmitted")}</div>
+                <div className="success-message">
+                  {t("celebration.requestSubmittedMessage")
+                    .split("\n")
+                    .map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        {i === 0 && <br />}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      color: "#2d2d2d",
+                      marginBottom: "16px",
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {t("celebration.aboutCelebration")}
+                  </p>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">{t("celebration.requestLabel")}</label>
+                    <textarea
+                      className="form-input form-textarea"
+                      placeholder={t("celebration.requestPlaceholder")}
+                      value={additionalRequest}
+                      onChange={(e) => setAdditionalRequest(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-gold"
+                    onClick={handleRequestSubmit}
+                    disabled={!additionalRequest.trim()}
+                    style={{ opacity: additionalRequest.trim() ? 1 : 0.5 }}
+                  >
+                    {t("common.submit")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 // Main Component
 export const GuestPortal = () => {
-	const [currentView, setCurrentView] = useState<GuestView>("home");
+  const { t } = useTranslation("guest");
+  const [currentView, setCurrentView] = useState<GuestView>("home");
 
-	const renderView = () => {
-		switch (currentView) {
-			case "home":
-				return <HomeView onNavigate={setCurrentView} />;
-			case "shuttle":
-				return <ShuttleView />;
-			case "dining":
-				return <DiningView />;
-			case "activities":
-				return <ActivitiesView />;
-			case "requests":
-				return <RequestsView />;
-			case "celebration":
-				return <CelebrationView />;
-			default:
-				return <HomeView onNavigate={setCurrentView} />;
-		}
-	};
+  const renderView = () => {
+    switch (currentView) {
+      case "home":
+        return <HomeView onNavigate={setCurrentView} t={t} />;
+      case "shuttle":
+        return <ShuttleView t={t} />;
+      case "dining":
+        return <DiningView t={t} />;
+      case "activities":
+        return <ActivitiesView t={t} />;
+      case "requests":
+        return <RequestsView t={t} />;
+      case "celebration":
+        return <CelebrationView t={t} />;
+      default:
+        return <HomeView onNavigate={setCurrentView} t={t} />;
+    }
+  };
 
-	return (
-		<>
-			<style>{styles}</style>
-			<div className="guest-portal">
-				<div className="portal-content">
-					<header className="portal-header">
-						<div className="header-content">
-							<div className="brand-mark">ふふ熱海</div>
-							<div className="room-info">離れ 月見 ・ ROOM 201</div>
-							<div className="guest-name">山田様</div>
-						</div>
-					</header>
+  return (
+    <>
+      <style>{styles}</style>
+      <div className="guest-portal">
+        <div className="portal-content">
+          <header className="portal-header">
+            <div
+              className="header-content"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+              }}
+            >
+              <div>
+                <div className="brand-mark">ふふ熱海</div>
+                <div className="room-info">離れ 月見 ・ ROOM 201</div>
+                <div className="guest-name">山田様</div>
+              </div>
+              <LanguageSwitcher variant="compact" className="text-white" />
+            </div>
+          </header>
 
-					{renderView()}
-				</div>
+          {renderView()}
+        </div>
 
-				<nav className="portal-nav">
-					<button
-						className={`nav-item ${currentView === "home" ? "active" : ""}`}
-						onClick={() => setCurrentView("home")}
-					>
-						<span className="nav-icon">🏠</span>
-						<span className="nav-label">ホーム</span>
-					</button>
-					<button
-						className={`nav-item ${currentView === "shuttle" ? "active" : ""}`}
-						onClick={() => setCurrentView("shuttle")}
-					>
-						<span className="nav-icon">🚐</span>
-						<span className="nav-label">送迎</span>
-					</button>
-					<button
-						className={`nav-item ${currentView === "dining" ? "active" : ""}`}
-						onClick={() => setCurrentView("dining")}
-					>
-						<span className="nav-icon">🍽️</span>
-						<span className="nav-label">お食事</span>
-					</button>
-					<button
-						className={`nav-item ${currentView === "activities" ? "active" : ""}`}
-						onClick={() => setCurrentView("activities")}
-					>
-						<span className="nav-icon">🌸</span>
-						<span className="nav-label">体験</span>
-					</button>
-					<button
-						className={`nav-item ${currentView === "celebration" ? "active" : ""}`}
-						onClick={() => setCurrentView("celebration")}
-					>
-						<span className="nav-icon">🎉</span>
-						<span className="nav-label">お祝い</span>
-					</button>
-				</nav>
-			</div>
-		</>
-	);
+        <nav className="portal-nav">
+          <button
+            className={`nav-item ${currentView === "home" ? "active" : ""}`}
+            onClick={() => setCurrentView("home")}
+          >
+            <span className="nav-icon">🏠</span>
+            <span className="nav-label">{t("nav.home")}</span>
+          </button>
+          <button
+            className={`nav-item ${currentView === "shuttle" ? "active" : ""}`}
+            onClick={() => setCurrentView("shuttle")}
+          >
+            <span className="nav-icon">🚐</span>
+            <span className="nav-label">{t("nav.shuttle")}</span>
+          </button>
+          <button
+            className={`nav-item ${currentView === "dining" ? "active" : ""}`}
+            onClick={() => setCurrentView("dining")}
+          >
+            <span className="nav-icon">🍽️</span>
+            <span className="nav-label">{t("nav.dining")}</span>
+          </button>
+          <button
+            className={`nav-item ${currentView === "activities" ? "active" : ""}`}
+            onClick={() => setCurrentView("activities")}
+          >
+            <span className="nav-icon">🌸</span>
+            <span className="nav-label">{t("nav.activities")}</span>
+          </button>
+          <button
+            className={`nav-item ${currentView === "celebration" ? "active" : ""}`}
+            onClick={() => setCurrentView("celebration")}
+          >
+            <span className="nav-icon">🎉</span>
+            <span className="nav-label">{t("nav.celebration")}</span>
+          </button>
+        </nav>
+      </div>
+    </>
+  );
 };
 
 export default GuestPortal;

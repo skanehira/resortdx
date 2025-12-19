@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { UnifiedTask, CelebrationItemCheck } from "../../../types";
 import { CELEBRATION_TYPE_LABELS, CELEBRATION_ITEM_LABELS } from "../../../types";
 import {
@@ -12,6 +13,7 @@ import {
   CheckCircleIcon,
 } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
+import { MemoSection, MemoDisplay } from "../../shared/MemoSection";
 
 // アイテムアイコンのマッピング
 const ITEM_ICONS: Record<string, React.FC<{ size?: number; className?: string }>> = {
@@ -22,11 +24,14 @@ const ITEM_ICONS: Record<string, React.FC<{ size?: number; className?: string }>
   message_card: MessageCardIcon,
 };
 
+type MemoType = "personal" | "shared";
+
 interface CelebrationCardProps {
   task: UnifiedTask;
   onStatusChange: (taskId: string, newStatus: UnifiedTask["status"]) => void;
   onToggleCelebrationItem?: (taskId: string, item: CelebrationItemCheck["item"]) => void;
   onCompletionReport?: (taskId: string, report: string) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
 }
 
 export const CelebrationCard = ({
@@ -34,7 +39,9 @@ export const CelebrationCard = ({
   onStatusChange,
   onToggleCelebrationItem,
   onCompletionReport,
+  onMemoChange,
 }: CelebrationCardProps) => {
+  const { t } = useTranslation("staff");
   const [isExpanded, setIsExpanded] = useState(false);
   const [completionNote, setCompletionNote] = useState("");
   const celebration = task.celebration;
@@ -290,6 +297,25 @@ export const CelebrationCard = ({
             </div>
           </>
         )}
+
+        {/* Memo Section */}
+        <div className="mt-4 space-y-3">
+          {/* Admin Memo (read-only) */}
+          <MemoDisplay title={t("memo.fromAdmin")} value={task.adminMemo} variant="admin" />
+
+          {/* Shared Memo (read-only) */}
+          <MemoDisplay title={t("memo.sharedMemo")} value={task.sharedMemo} variant="shared" />
+
+          {/* Personal Memo (editable) */}
+          <MemoSection
+            title={t("memo.personalMemo")}
+            value={task.personalMemo}
+            onSave={(value) => onMemoChange?.(task.id, "personal", value)}
+            placeholder={t("memo.placeholder")}
+            editable={true}
+            variant="personal"
+          />
+        </div>
       </div>
     </TaskCardBase>
   );

@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import type {
   UnifiedTask,
   UnifiedTaskStatus,
@@ -12,14 +13,14 @@ import type {
   RoomAmenity,
   RoomEquipment,
 } from "../../types";
-import { TaskIcon, HelpIcon, FilterIcon } from "../ui/Icons";
+import { TaskIcon } from "../ui/Icons";
 import { HousekeepingCard } from "./cards/HousekeepingCard";
 import { MealCard } from "./cards/MealCard";
 import { ShuttleCard } from "./cards/ShuttleCard";
 import { CelebrationCard } from "./cards/CelebrationCard";
 import { HelpRequestCard } from "./cards/HelpRequestCard";
 import { EquipmentReportModal } from "./modals/EquipmentReportModal";
-import { HelpRequestModal } from "./modals/HelpRequestModal";
+import { SwipeHint } from "./SwipeHint";
 
 // カテゴリフィルター（清掃と点検を分離）
 type CategoryFilter =
@@ -59,6 +60,7 @@ interface CategoryTabsProps {
 }
 
 const CategoryTabs = ({ selected, onChange, counts }: CategoryTabsProps) => {
+  const { t } = useTranslation("staff");
   const categories: CategoryFilter[] = [
     "all",
     "cleaning",
@@ -68,6 +70,11 @@ const CategoryTabs = ({ selected, onChange, counts }: CategoryTabsProps) => {
     "celebration",
     "help_request",
   ];
+
+  const getCategoryLabel = (cat: CategoryFilter) => {
+    const key = cat === "help_request" ? "help" : cat;
+    return t(`categories.${key}`);
+  };
 
   return (
     <div className="flex gap-1 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
@@ -80,7 +87,7 @@ const CategoryTabs = ({ selected, onChange, counts }: CategoryTabsProps) => {
           }`}
           style={selected === cat ? { backgroundColor: CATEGORY_CONFIG[cat].color } : undefined}
         >
-          {CATEGORY_CONFIG[cat].label}
+          {getCategoryLabel(cat)}
           <span
             className={`ml-1 text-xs ${selected === cat ? "text-white/80" : "text-[var(--nezumi-light)]"}`}
           >
@@ -100,11 +107,12 @@ interface StatusTabsProps {
 }
 
 const StatusTabs = ({ selected, onChange, counts }: StatusTabsProps) => {
-  const tabs: { key: UnifiedTaskStatus | "all"; label: string }[] = [
-    { key: "all", label: "すべて" },
-    { key: "pending", label: "未着手" },
-    { key: "in_progress", label: "作業中" },
-    { key: "completed", label: "完了" },
+  const { t } = useTranslation("staff");
+  const tabs: { key: UnifiedTaskStatus | "all"; labelKey: string }[] = [
+    { key: "all", labelKey: "status.all" },
+    { key: "pending", labelKey: "status.pending" },
+    { key: "in_progress", labelKey: "status.inProgress" },
+    { key: "completed", labelKey: "status.completed" },
   ];
 
   return (
@@ -119,7 +127,7 @@ const StatusTabs = ({ selected, onChange, counts }: StatusTabsProps) => {
               : "text-[var(--nezumi)] hover:text-[var(--sumi)]"
           }`}
         >
-          {tab.label}
+          {t(tab.labelKey)}
           <span
             className={`ml-1 text-xs ${
               selected === tab.key ? "text-[var(--ai)]" : "text-[var(--nezumi-light)]"
@@ -135,16 +143,18 @@ const StatusTabs = ({ selected, onChange, counts }: StatusTabsProps) => {
 
 // 進捗サマリー
 const ProgressSummary = ({ tasks }: { tasks: UnifiedTask[] }) => {
-  const completed = tasks.filter((t) => t.status === "completed").length;
+  const { t } = useTranslation("staff");
+  const completed = tasks.filter((task) => task.status === "completed").length;
   const total = tasks.length;
   const percentage = total > 0 ? (completed / total) * 100 : 0;
 
   return (
     <div className="shoji-panel p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-[var(--nezumi)]">本日の進捗</span>
+        <span className="text-sm text-[var(--nezumi)]">{t("taskList.todaysProgress")}</span>
         <span className="font-display font-semibold text-[var(--sumi)]">
-          {completed}/{total}件完了
+          {completed}/{total}
+          {t("taskList.tasksCompleted")}
         </span>
       </div>
       <div className="h-2 bg-[var(--shironeri-warm)] rounded-full overflow-hidden">
@@ -156,6 +166,9 @@ const ProgressSummary = ({ tasks }: { tasks: UnifiedTask[] }) => {
     </div>
   );
 };
+
+// メモ更新タイプ
+type MemoType = "personal" | "shared";
 
 // メインコンポーネントのProps
 interface UnifiedTaskListProps {
@@ -180,6 +193,7 @@ interface UnifiedTaskListProps {
     message: string;
     relatedTaskId?: string;
   }) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
   // カテゴリフィルターの状態保持用
   categoryFilter?: CategoryFilter;
   onCategoryFilterChange?: (category: CategoryFilter) => void;
@@ -188,7 +202,7 @@ interface UnifiedTaskListProps {
 export const UnifiedTaskList = ({
   tasks,
   currentStaff,
-  allStaff,
+  allStaff: _allStaff,
   roomAmenities,
   roomEquipment,
   onStatusChange,
@@ -202,10 +216,12 @@ export const UnifiedTaskList = ({
   onCompleteHelp,
   onCancelHelp,
   onEquipmentReport,
-  onCreateHelpRequest,
+  onCreateHelpRequest: _onCreateHelpRequest,
+  onMemoChange,
   categoryFilter: externalCategoryFilter,
   onCategoryFilterChange,
 }: UnifiedTaskListProps) => {
+  const { t } = useTranslation("staff");
   // 外部から渡されたカテゴリフィルターがあればそれを使う（状態保持用）
   const [internalCategoryFilter, setInternalCategoryFilter] = useState<CategoryFilter>(
     externalCategoryFilter ?? "all",
@@ -217,19 +233,12 @@ export const UnifiedTaskList = ({
   };
 
   const [statusFilter, setStatusFilter] = useState<UnifiedTaskStatus | "all">("all");
-  const [showFilters, setShowFilters] = useState(false);
 
   // Equipment report modal state
   const [equipmentReportModal, setEquipmentReportModal] = useState<{
     isOpen: boolean;
     roomId: string;
     taskId: string;
-  } | null>(null);
-
-  // Help request modal state
-  const [helpRequestModal, setHelpRequestModal] = useState<{
-    isOpen: boolean;
-    relatedTaskId?: string;
   } | null>(null);
 
   // 現在のスタッフに割り当てられたタスク + 全員宛ヘルプ依頼を取得
@@ -331,25 +340,6 @@ export const UnifiedTaskList = ({
     [equipmentReportModal, onEquipmentReport, onStatusChange],
   );
 
-  // ヘルプ依頼モーダルを開く
-  const handleOpenHelpRequest = useCallback((relatedTaskId?: string) => {
-    setHelpRequestModal({ isOpen: true, relatedTaskId });
-  }, []);
-
-  // ヘルプ依頼の送信
-  const handleHelpRequestSubmit = useCallback(
-    (data: { targetStaffIds: string[] | "all"; message: string; relatedTaskId?: string }) => {
-      onCreateHelpRequest?.(data);
-      setHelpRequestModal(null);
-    },
-    [onCreateHelpRequest],
-  );
-
-  const currentTime = new Date().toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
   // タスクカードのレンダリング
   const renderTaskCard = (task: UnifiedTask) => {
     switch (task.type) {
@@ -361,6 +351,7 @@ export const UnifiedTaskList = ({
             onStatusChange={onStatusChange}
             onToggleCleaningItem={onToggleCleaningItem}
             onRequestEquipmentReport={handleHousekeepingComplete}
+            onMemoChange={onMemoChange}
           />
         );
       case "meal":
@@ -370,6 +361,7 @@ export const UnifiedTaskList = ({
             task={task}
             onStatusChange={onStatusChange}
             onMealStatusChange={onMealStatusChange}
+            onMemoChange={onMemoChange}
           />
         );
       case "shuttle":
@@ -382,6 +374,7 @@ export const UnifiedTaskList = ({
             onStatusChange={onStatusChange}
             onShuttleStatusChange={onShuttleStatusChange}
             onSendShuttleMessage={onSendShuttleMessage}
+            onMemoChange={onMemoChange}
           />
         );
       case "celebration":
@@ -392,6 +385,7 @@ export const UnifiedTaskList = ({
             onStatusChange={onStatusChange}
             onToggleCelebrationItem={onToggleCelebrationItem}
             onCompletionReport={onCelebrationReport}
+            onMemoChange={onMemoChange}
           />
         );
       case "help_request":
@@ -404,6 +398,7 @@ export const UnifiedTaskList = ({
             onAcceptHelp={onAcceptHelp}
             onCompleteHelp={onCompleteHelp}
             onCancelHelp={onCancelHelp}
+            onMemoChange={onMemoChange}
           />
         );
       default:
@@ -416,42 +411,6 @@ export const UnifiedTaskList = ({
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[var(--shironeri)] border-b border-[rgba(45,41,38,0.06)]">
         <div className="p-4">
-          {/* Top bar */}
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-[var(--nezumi)]">こんにちは</p>
-              <h1 className="text-xl font-display font-semibold text-[var(--sumi)]">
-                {currentStaff.name}さん
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Help request button */}
-              <button
-                onClick={() => handleOpenHelpRequest()}
-                className="p-2 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
-                title="ヘルプを依頼"
-              >
-                <HelpIcon size={20} />
-              </button>
-              {/* Filter toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`p-2 rounded-lg transition-colors ${
-                  showFilters
-                    ? "bg-[var(--ai)] text-white"
-                    : "bg-[var(--shironeri-warm)] text-[var(--nezumi)]"
-                }`}
-                title="フィルター"
-              >
-                <FilterIcon size={20} />
-              </button>
-              {/* Time */}
-              <div className="text-right">
-                <p className="text-2xl font-display text-[var(--ai)]">{currentTime}</p>
-              </div>
-            </div>
-          </div>
-
           {/* Category filter (always visible) */}
           <CategoryTabs
             selected={categoryFilter}
@@ -459,16 +418,10 @@ export const UnifiedTaskList = ({
             counts={categoryCounts}
           />
 
-          {/* Status filter (collapsible) */}
-          {showFilters && (
-            <div className="mt-3 animate-fade-in">
-              <StatusTabs
-                selected={statusFilter}
-                onChange={setStatusFilter}
-                counts={statusCounts}
-              />
-            </div>
-          )}
+          {/* Status filter (always visible below category tabs) */}
+          <div className="mt-3">
+            <StatusTabs selected={statusFilter} onChange={setStatusFilter} counts={statusCounts} />
+          </div>
         </div>
       </div>
 
@@ -476,6 +429,9 @@ export const UnifiedTaskList = ({
       <div className="p-4 space-y-4">
         {/* Progress Summary */}
         <ProgressSummary tasks={myTasks} />
+
+        {/* Swipe Hint - shown once for new users */}
+        <SwipeHint />
 
         {/* Task List */}
         <div className="space-y-3">
@@ -490,14 +446,14 @@ export const UnifiedTaskList = ({
               <TaskIcon size={48} className="mx-auto text-[var(--nezumi-light)] mb-4" />
               <p className="text-[var(--nezumi)]">
                 {categoryFilter !== "all"
-                  ? `${CATEGORY_CONFIG[categoryFilter].label}のタスクはありません`
+                  ? `${t(`categories.${categoryFilter === "help_request" ? "help" : categoryFilter}`)}${t("taskList.noTasksCategory")}`
                   : statusFilter === "completed"
-                    ? "完了したタスクはありません"
+                    ? t("taskList.noTasksCompleted")
                     : statusFilter === "pending"
-                      ? "未着手のタスクはありません"
+                      ? t("taskList.noTasksPending")
                       : statusFilter === "in_progress"
-                        ? "作業中のタスクはありません"
-                        : "割り当てられたタスクはありません"}
+                        ? t("taskList.noTasksInProgress")
+                        : t("taskList.noTasksAssigned")}
               </p>
             </div>
           )}
@@ -513,17 +469,6 @@ export const UnifiedTaskList = ({
           staffId={currentStaff.id}
           onSubmit={handleEquipmentReportSubmit}
           onClose={() => setEquipmentReportModal(null)}
-        />
-      )}
-
-      {/* Help Request Modal */}
-      {helpRequestModal?.isOpen && (
-        <HelpRequestModal
-          currentStaffId={currentStaff.id}
-          allStaff={allStaff}
-          relatedTaskId={helpRequestModal.relatedTaskId}
-          onSubmit={handleHelpRequestSubmit}
-          onClose={() => setHelpRequestModal(null)}
         />
       )}
     </div>

@@ -179,7 +179,8 @@ export type StaffRole =
   | "kitchen" // 調理場スタッフ
   | "driver" // 送迎ドライバー
   | "concierge" // コンシェルジュ
-  | "manager"; // マネージャー
+  | "manager" // マネージャー
+  | "front"; // フロント
 
 export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   cleaning: "清掃",
@@ -188,6 +189,7 @@ export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   driver: "送迎",
   concierge: "コンシェルジュ",
   manager: "マネージャー",
+  front: "フロント",
 };
 
 // スタッフステータス（5段階）
@@ -766,6 +768,10 @@ export interface UnifiedTask {
   completedAt?: string | null;
   createdAt?: string;
   notes?: string | null;
+  // メモフィールド
+  adminMemo?: string | null; // 管理者用メモ（管理画面のみ表示）
+  personalMemo?: string | null; // 担当者個人メモ（担当者のみ表示）
+  sharedMemo?: string | null; // 全スタッフ共有メモ（引継ぎ用）
   // タイプ固有データ（1つのみ設定）
   housekeeping?: HousekeepingData;
   meal?: MealData;
@@ -895,4 +901,18 @@ export interface ChatMessage {
   content: string;
   sentAt: string;
   readBy: string[];
+}
+
+// === Staff Shared Notes (スタッフ共有メモ) ===
+
+// 全スタッフ向け共有メモ（引継ぎ・伝達用）
+export interface StaffSharedNote {
+  id: string;
+  content: string;
+  createdBy: string; // スタッフID
+  createdByName: string; // スタッフ名
+  createdAt: string;
+  updatedAt?: string;
+  isImportant: boolean; // 重要フラグ
+  expiresAt?: string | null; // 有効期限（nullの場合は無期限）
 }

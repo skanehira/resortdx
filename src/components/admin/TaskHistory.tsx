@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   mockTasks,
   mockTaskTemplates,
@@ -29,21 +30,27 @@ import {
 import { Modal } from "../ui/Modal";
 
 // Status Badge Component
-const StatusBadge = ({ status }: { status: TaskStatus }) => {
+const StatusBadge = ({ status, t }: { status: TaskStatus; t: (key: string) => string }) => {
   const config = {
-    pending: { label: "未着手", class: "badge-pending" },
-    in_progress: { label: "作業中", class: "badge-in-progress" },
-    completed: { label: "完了", class: "badge-completed" },
+    pending: { label: t("status.pending"), class: "badge-pending" },
+    in_progress: { label: t("status.inProgress"), class: "badge-in-progress" },
+    completed: { label: t("status.completed"), class: "badge-completed" },
   };
   return <span className={`badge ${config[status].class}`}>{config[status].label}</span>;
 };
 
 // Priority Badge Component
-const PriorityBadge = ({ priority }: { priority: Task["priority"] }) => {
+const PriorityBadge = ({
+  priority,
+  t,
+}: {
+  priority: Task["priority"];
+  t: (key: string) => string;
+}) => {
   if (priority === "normal") return null;
   const config = {
-    high: { label: "優先", class: "badge-anniversary" },
-    urgent: { label: "緊急", class: "badge-urgent" },
+    high: { label: t("priority.high"), class: "badge-anniversary" },
+    urgent: { label: t("priority.urgent"), class: "badge-urgent" },
   };
   return <span className={`badge ${config[priority].class}`}>{config[priority].label}</span>;
 };
@@ -53,14 +60,15 @@ interface FilterTabsProps {
   selected: TaskStatus | "all";
   onChange: (status: TaskStatus | "all") => void;
   counts: Record<TaskStatus | "all", number>;
+  t: (key: string) => string;
 }
 
-const FilterTabs = ({ selected, onChange, counts }: FilterTabsProps) => {
+const FilterTabs = ({ selected, onChange, counts, t }: FilterTabsProps) => {
   const tabs: { key: TaskStatus | "all"; label: string }[] = [
-    { key: "all", label: "すべて" },
-    { key: "pending", label: "未着手" },
-    { key: "in_progress", label: "作業中" },
-    { key: "completed", label: "完了" },
+    { key: "all", label: t("common.all") },
+    { key: "pending", label: t("status.pending") },
+    { key: "in_progress", label: t("status.inProgress") },
+    { key: "completed", label: t("status.completed") },
   ];
 
   return (
@@ -95,6 +103,7 @@ const TaskDetailModal = ({
   isOpen,
   onClose,
   onSave,
+  t,
 }: {
   task: Task | null;
   isOpen: boolean;
@@ -103,6 +112,7 @@ const TaskDetailModal = ({
     taskId: string,
     updates: { scheduledTime: string; assignedStaffId: string | null },
   ) => void;
+  t: (key: string) => string;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTime, setEditedTime] = useState(task?.scheduledTime || "");
@@ -146,19 +156,19 @@ const TaskDetailModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="タスク詳細" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("taskDetail.title")} size="md">
       <div className="space-y-4">
         {/* Task Title and Status */}
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">{task.title}</h3>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <StatusBadge status={task.status} />
-              <PriorityBadge priority={task.priority} />
+              <StatusBadge status={task.status} t={t} />
+              <PriorityBadge priority={task.priority} t={t} />
               {task.isAnniversaryRelated && (
                 <span className="badge badge-anniversary">
                   <CelebrationIcon size={12} />
-                  記念日関連
+                  {t("taskDetail.anniversaryRelated")}
                 </span>
               )}
             </div>
@@ -167,7 +177,7 @@ const TaskDetailModal = ({
             <button
               onClick={() => setIsEditing(true)}
               className="btn btn-ghost p-2"
-              aria-label="編集"
+              aria-label={t("taskDetail.edit")}
             >
               <EditIcon size={16} />
             </button>
@@ -179,7 +189,7 @@ const TaskDetailModal = ({
           <div className="space-y-4 p-4 bg-[var(--shironeri-warm)] rounded border border-[rgba(45,41,38,0.1)]">
             <div>
               <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-                予定時刻
+                {t("taskDetail.scheduledTime")}
               </label>
               <input
                 type="time"
@@ -190,14 +200,14 @@ const TaskDetailModal = ({
             </div>
             <div>
               <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-                担当者
+                {t("taskDetail.assignee")}
               </label>
               <select
                 value={editedStaffId || ""}
                 onChange={(e) => setEditedStaffId(e.target.value || null)}
                 className="input w-full"
               >
-                <option value="">未割当</option>
+                <option value="">{t("taskDetail.unassigned")}</option>
                 {mockStaff
                   .filter((s) => s.status === "on_duty")
                   .map((s) => (
@@ -209,10 +219,10 @@ const TaskDetailModal = ({
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={handleCancel} className="btn btn-secondary">
-                キャンセル
+                {t("common.cancel")}
               </button>
               <button onClick={handleSave} className="btn btn-primary">
-                保存
+                {t("common.save")}
               </button>
             </div>
           </div>
@@ -221,23 +231,26 @@ const TaskDetailModal = ({
           <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[rgba(45,41,38,0.06)]">
             <div className="flex items-center gap-2 text-sm">
               <ClockIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">予定時刻:</span>
+              <span className="text-[var(--nezumi)]">{t("taskDetail.scheduledTime")}:</span>
               <span className="font-medium">{task.scheduledTime}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <RoomIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">部屋:</span>
+              <span className="text-[var(--nezumi)]">{t("taskDetail.room")}:</span>
               <span className="font-medium">{getRoomName(task.roomId)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <TaskIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">カテゴリ:</span>
+              <span className="text-[var(--nezumi)]">{t("taskDetail.category")}:</span>
               <span className="font-medium">{TASK_CATEGORY_LABELS[task.category]}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <TimelineIcon size={16} className="text-[var(--nezumi)]" />
-              <span className="text-[var(--nezumi)]">所要時間:</span>
-              <span className="font-medium">{task.estimatedDuration}分</span>
+              <span className="text-[var(--nezumi)]">{t("taskDetail.duration")}:</span>
+              <span className="font-medium">
+                {task.estimatedDuration}
+                {t("taskDetail.minutes")}
+              </span>
             </div>
           </div>
         )}
@@ -248,7 +261,7 @@ const TaskDetailModal = ({
             <div className="flex items-center gap-2">
               <CheckIcon size={16} className="text-[var(--aotake)]" />
               <span className="text-sm text-[var(--aotake)] font-medium">
-                完了時刻: {task.completedAt}
+                {t("taskDetail.completedAt")}: {task.completedAt}
               </span>
             </div>
           </div>
@@ -258,7 +271,7 @@ const TaskDetailModal = ({
         {template && (
           <div className="flex items-center gap-2 p-3 bg-[var(--shironeri-warm)] rounded">
             <TemplateIcon size={16} className="text-[var(--ai)]" />
-            <span className="text-sm text-[var(--nezumi)]">テンプレート:</span>
+            <span className="text-sm text-[var(--nezumi)]">{t("taskDetail.template")}:</span>
             <span className="text-sm font-medium text-[var(--sumi)]">{template.name}</span>
           </div>
         )}
@@ -266,14 +279,14 @@ const TaskDetailModal = ({
         {/* Description */}
         {task.description && (
           <div>
-            <p className="text-xs text-[var(--nezumi)] mb-1">説明</p>
+            <p className="text-xs text-[var(--nezumi)] mb-1">{t("taskDetail.description")}</p>
             <p className="text-sm text-[var(--sumi-light)]">{task.description}</p>
           </div>
         )}
 
         {/* Assigned Staff */}
         <div>
-          <p className="text-xs text-[var(--nezumi)] mb-2">担当者</p>
+          <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.assignee")}</p>
           {staff ? (
             <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded">
               <div
@@ -288,23 +301,26 @@ const TaskDetailModal = ({
               </div>
             </div>
           ) : (
-            <p className="text-sm text-[var(--nezumi-light)]">未割当</p>
+            <p className="text-sm text-[var(--nezumi-light)]">{t("taskDetail.unassigned")}</p>
           )}
         </div>
 
         {/* Guest Info */}
         {reservation && (
           <div>
-            <p className="text-xs text-[var(--nezumi)] mb-2">ゲスト情報</p>
+            <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.guestInfo")}</p>
             <div className="p-3 bg-[var(--shironeri-warm)] rounded">
               <p className="font-medium">{reservation.guestName}</p>
               <p className="text-sm text-[var(--nezumi)]">
-                {reservation.numberOfGuests}名 ・ {ROOM_TYPE_LABELS[reservation.roomType]}
+                {reservation.numberOfGuests}
+                {t("dashboard.guestCount")} ・ {ROOM_TYPE_LABELS[reservation.roomType]}
               </p>
               {reservation.anniversary && (
                 <div className="mt-2 p-2 bg-[rgba(184,134,11,0.1)] rounded">
                   <p className="text-sm text-[var(--kincha)] font-medium">
-                    {reservation.anniversary.type === "birthday" ? "誕生日" : "結婚記念日"}
+                    {reservation.anniversary.type === "birthday"
+                      ? t("anniversary.birthday")
+                      : t("anniversary.weddingAnniversary")}
                   </p>
                   <p className="text-xs text-[var(--sumi-light)]">
                     {reservation.anniversary.description}
@@ -317,25 +333,25 @@ const TaskDetailModal = ({
 
         {/* Related Task Stats */}
         <div>
-          <p className="text-xs text-[var(--nezumi)] mb-2">この予約のタスク進捗</p>
+          <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.reservationProgress")}</p>
           <div className="grid grid-cols-3 gap-2">
             <div className="p-2 bg-[var(--shironeri-warm)] rounded text-center">
               <p className="text-lg font-display font-semibold text-[var(--aotake)]">
                 {relatedTaskStats.completed}
               </p>
-              <p className="text-xs text-[var(--nezumi)]">完了</p>
+              <p className="text-xs text-[var(--nezumi)]">{t("status.completed")}</p>
             </div>
             <div className="p-2 bg-[var(--shironeri-warm)] rounded text-center">
               <p className="text-lg font-display font-semibold text-[var(--ai)]">
                 {relatedTaskStats.in_progress}
               </p>
-              <p className="text-xs text-[var(--nezumi)]">作業中</p>
+              <p className="text-xs text-[var(--nezumi)]">{t("status.inProgress")}</p>
             </div>
             <div className="p-2 bg-[var(--shironeri-warm)] rounded text-center">
               <p className="text-lg font-display font-semibold text-[var(--nezumi)]">
                 {relatedTaskStats.pending}
               </p>
-              <p className="text-xs text-[var(--nezumi)]">未着手</p>
+              <p className="text-xs text-[var(--nezumi)]">{t("status.pending")}</p>
             </div>
           </div>
         </div>
@@ -348,16 +364,17 @@ const TaskDetailModal = ({
 interface TaskRowProps {
   task: Task;
   onClick: (task: Task) => void;
+  t: (key: string) => string;
 }
 
-const TaskRow = ({ task, onClick }: TaskRowProps) => {
+const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
   const reservation = getReservationById(task.reservationId);
 
   const priorityLabels = {
-    normal: "通常",
-    high: "優先",
-    urgent: "緊急",
+    normal: t("priority.normal"),
+    high: t("priority.high"),
+    urgent: t("priority.urgent"),
   };
 
   return (
@@ -409,7 +426,7 @@ const TaskRow = ({ task, onClick }: TaskRowProps) => {
             <span className="text-sm">{staff.name}</span>
           </div>
         ) : (
-          <span className="text-[var(--nezumi-light)]">未割当</span>
+          <span className="text-[var(--nezumi-light)]">{t("taskDetail.unassigned")}</span>
         )}
       </td>
       <td>
@@ -418,7 +435,7 @@ const TaskRow = ({ task, onClick }: TaskRowProps) => {
         )}
       </td>
       <td>
-        <StatusBadge status={task.status} />
+        <StatusBadge status={task.status} t={t} />
       </td>
     </tr>
   );
@@ -426,6 +443,7 @@ const TaskRow = ({ task, onClick }: TaskRowProps) => {
 
 // Main Task List Component
 export const TaskHistory = () => {
+  const { t } = useTranslation("admin");
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<TaskCategory | "all">("all");
@@ -439,22 +457,22 @@ export const TaskHistory = () => {
 
     // Status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter((t) => t.status === statusFilter);
+      filtered = filtered.filter((task) => task.status === statusFilter);
     }
 
     // Category filter
     if (categoryFilter !== "all") {
-      filtered = filtered.filter((t) => t.category === categoryFilter);
+      filtered = filtered.filter((task) => task.category === categoryFilter);
     }
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (t) =>
-          t.title.toLowerCase().includes(query) ||
-          getRoomName(t.roomId).toLowerCase().includes(query) ||
-          t.description?.toLowerCase().includes(query),
+        (task) =>
+          task.title.toLowerCase().includes(query) ||
+          getRoomName(task.roomId).toLowerCase().includes(query) ||
+          task.description?.toLowerCase().includes(query),
       );
     }
 
@@ -471,7 +489,7 @@ export const TaskHistory = () => {
     taskId: string,
     updates: { scheduledTime: string; assignedStaffId: string | null },
   ) => {
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t)));
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, ...updates } : task)));
     // Update selectedTask to reflect changes
     if (selectedTask?.id === taskId) {
       setSelectedTask({ ...selectedTask, ...updates });
@@ -481,23 +499,23 @@ export const TaskHistory = () => {
   // Stats
   const counts: Record<TaskStatus | "all", number> = {
     all: tasks.length,
-    pending: tasks.filter((t) => t.status === "pending").length,
-    in_progress: tasks.filter((t) => t.status === "in_progress").length,
-    completed: tasks.filter((t) => t.status === "completed").length,
+    pending: tasks.filter((task) => task.status === "pending").length,
+    in_progress: tasks.filter((task) => task.status === "in_progress").length,
+    completed: tasks.filter((task) => task.status === "completed").length,
   };
 
   const urgentCount = tasks.filter(
-    (t) => t.priority === "urgent" && t.status !== "completed",
+    (task) => task.priority === "urgent" && task.status !== "completed",
   ).length;
 
   const categories: { key: TaskCategory | "all"; label: string }[] = [
-    { key: "all", label: "すべて" },
-    { key: "cleaning", label: "清掃" },
-    { key: "meal_service", label: "食事" },
-    { key: "bath", label: "温泉" },
-    { key: "pickup", label: "送迎" },
-    { key: "celebration", label: "記念日" },
-    { key: "turndown", label: "ターンダウン" },
+    { key: "all", label: t("category.all") },
+    { key: "cleaning", label: t("category.cleaning") },
+    { key: "meal_service", label: t("category.mealService") },
+    { key: "bath", label: t("category.bath") },
+    { key: "pickup", label: t("category.pickup") },
+    { key: "celebration", label: t("category.celebration") },
+    { key: "turndown", label: t("category.turndown") },
   ];
 
   return (
@@ -506,11 +524,9 @@ export const TaskHistory = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-semibold text-[var(--sumi)] ink-stroke inline-block">
-            タスク一覧
+            {t("taskManagement.taskList")}
           </h1>
-          <p className="text-sm text-[var(--nezumi)] mt-2">
-            本日のすべてのタスクを確認・管理します
-          </p>
+          <p className="text-sm text-[var(--nezumi)] mt-2">{t("taskManagement.description")}</p>
         </div>
       </div>
 
@@ -521,9 +537,12 @@ export const TaskHistory = () => {
             <AlertIcon size={20} className="text-[var(--shu)]" />
             <div>
               <p className="font-display font-medium text-[var(--shu)]">
-                緊急タスク: {urgentCount}件
+                {t("taskManagement.urgentTasksAlert")}: {urgentCount}
+                {t("taskManagement.urgentTasksAlertItems")}
               </p>
-              <p className="text-sm text-[var(--sumi-light)]">対応が必要な緊急タスクがあります</p>
+              <p className="text-sm text-[var(--sumi-light)]">
+                {t("taskManagement.urgentNeedsAttention")}
+              </p>
             </div>
           </div>
         </div>
@@ -533,30 +552,30 @@ export const TaskHistory = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--ai)]">
           <p className="text-2xl font-display font-semibold text-[var(--sumi)]">{counts.all}</p>
-          <p className="text-sm text-[var(--nezumi)]">総タスク数</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("taskManagement.totalTasks")}</p>
         </div>
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--nezumi-light)]">
           <p className="text-2xl font-display font-semibold text-[var(--sumi)]">{counts.pending}</p>
-          <p className="text-sm text-[var(--nezumi)]">未着手</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("status.pending")}</p>
         </div>
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--ai)]">
           <p className="text-2xl font-display font-semibold text-[var(--ai)]">
             {counts.in_progress}
           </p>
-          <p className="text-sm text-[var(--nezumi)]">作業中</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("status.inProgress")}</p>
         </div>
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--aotake)]">
           <p className="text-2xl font-display font-semibold text-[var(--aotake)]">
             {counts.completed}
           </p>
-          <p className="text-sm text-[var(--nezumi)]">完了</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("status.completed")}</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="space-y-4">
         {/* Status Filter */}
-        <FilterTabs selected={statusFilter} onChange={setStatusFilter} counts={counts} />
+        <FilterTabs selected={statusFilter} onChange={setStatusFilter} counts={counts} t={t} />
 
         {/* Category and Search */}
         <div className="flex flex-col md:flex-row gap-4">
@@ -585,7 +604,7 @@ export const TaskHistory = () => {
             />
             <input
               type="text"
-              placeholder="タスクを検索..."
+              placeholder={t("taskManagement.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-sm border border-[rgba(45,41,38,0.12)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--ai)] focus:border-transparent"
@@ -600,18 +619,18 @@ export const TaskHistory = () => {
           <table>
             <thead>
               <tr>
-                <th className="w-20">時刻</th>
-                <th className="w-24">部屋</th>
-                <th>タスク</th>
-                <th className="w-20">優先度</th>
-                <th className="w-36">担当者</th>
-                <th className="w-32">ゲスト</th>
-                <th className="w-24">ステータス</th>
+                <th className="w-20">{t("table.time")}</th>
+                <th className="w-24">{t("table.room")}</th>
+                <th>{t("table.task")}</th>
+                <th className="w-20">{t("table.priority")}</th>
+                <th className="w-36">{t("table.assignee")}</th>
+                <th className="w-32">{t("table.guest")}</th>
+                <th className="w-24">{t("table.status")}</th>
               </tr>
             </thead>
             <tbody>
               {filteredTasks.map((task) => (
-                <TaskRow key={task.id} task={task} onClick={handleTaskClick} />
+                <TaskRow key={task.id} task={task} onClick={handleTaskClick} t={t} />
               ))}
             </tbody>
           </table>
@@ -620,7 +639,9 @@ export const TaskHistory = () => {
             <div className="text-center py-12">
               <TaskIcon size={48} className="mx-auto text-[var(--nezumi-light)] mb-4" />
               <p className="text-[var(--nezumi)]">
-                {searchQuery ? "検索条件に一致するタスクがありません" : "タスクがありません"}
+                {searchQuery
+                  ? t("taskManagement.noTasksMatchSearch")
+                  : t("taskManagement.noTasksFound")}
               </p>
             </div>
           )}
@@ -633,6 +654,7 @@ export const TaskHistory = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         onSave={handleTaskUpdate}
+        t={t}
       />
     </div>
   );

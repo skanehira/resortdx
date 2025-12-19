@@ -1,0 +1,69 @@
+{
+  "app": {
+    "title": "ResortDX",
+    "subtitle": "Ryokan Task Management"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "staff": "Staff",
+    "settings": "Settings",
+    "logout": "Logout",
+    "mypage": "My Page"
+  },
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "all": "All"
+  },
+  "priority": {
+    "urgent": "Urgent",
+    "high": "High",
+    "normal": "Normal",
+    "low": "Low"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "refresh": "Refresh",
+    "view": "View",
+    "details": "Details"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved successfully",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "confirmDelete": "Are you sure you want to delete?",
+    "success": "Success"
+  },
+  "time": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "now": "Now"
+  },
+  "labels": {
+    "room": "Room",
+    "guest": "Guest",
+    "staff": "Staff",
+    "time": "Time",
+    "date": "Date",
+    "memo": "Memo",
+    "notes": "Notes",
+    "description": "Description"
+  }
+}

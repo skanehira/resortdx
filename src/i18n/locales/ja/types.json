@@ -1,0 +1,100 @@
+{
+  "staffRole": {
+    "cleaning": "清掃",
+    "service": "接客",
+    "kitchen": "厨房",
+    "driver": "送迎",
+    "concierge": "コンシェルジュ",
+    "manager": "マネージャー",
+    "front": "フロント"
+  },
+  "staffStatus": {
+    "on_duty": "勤務中",
+    "on_break": "休憩中",
+    "out": "退勤"
+  },
+  "taskStatus": {
+    "pending": "未着手",
+    "in_progress": "作業中",
+    "completed": "完了"
+  },
+  "taskType": {
+    "housekeeping": "客室清掃",
+    "meal": "配膳",
+    "shuttle": "送迎",
+    "celebration": "お祝い"
+  },
+  "housekeepingCategory": {
+    "cleaning": "清掃",
+    "inspection": "点検",
+    "turndown": "ターンダウン",
+    "bath": "露天風呂"
+  },
+  "mealType": {
+    "breakfast": "朝食",
+    "dinner": "夕食",
+    "room_service": "ルームサービス",
+    "special": "特別食"
+  },
+  "courseType": {
+    "standard": "スタンダード",
+    "premium": "プレミアム",
+    "kaiseki": "会席"
+  },
+  "mealStatus": {
+    "preparing": "準備中",
+    "ready": "配膳準備完了",
+    "serving": "配膳中",
+    "needs_check": "確認必要",
+    "completed": "完了"
+  },
+  "shuttleStatus": {
+    "not_departed": "未出発",
+    "heading": "移動中",
+    "arrived": "到着",
+    "completed": "完了"
+  },
+  "shuttleDirection": {
+    "pickup": "お迎え",
+    "dropoff": "お送り"
+  },
+  "celebrationType": {
+    "birthday": "誕生日",
+    "wedding_anniversary": "結婚記念日",
+    "other": "その他"
+  },
+  "celebrationItem": {
+    "cake": "ケーキ",
+    "flowers": "花束",
+    "champagne": "シャンパン",
+    "decoration": "装飾",
+    "message_card": "メッセージカード"
+  },
+  "priority": {
+    "urgent": "緊急",
+    "high": "高",
+    "normal": "通常",
+    "low": "低"
+  },
+  "dietaryRestriction": {
+    "shellfish": "甲殻類",
+    "dairy": "乳製品",
+    "wheat": "小麦",
+    "eggs": "卵",
+    "nuts": "ナッツ類",
+    "fish": "魚介類",
+    "soy": "大豆",
+    "vegetarian": "ベジタリアン",
+    "vegan": "ヴィーガン"
+  },
+  "cleaningItem": {
+    "bed_making": "ベッドメイク",
+    "floor_cleaning": "床清掃",
+    "bathroom_cleaning": "バスルーム清掃",
+    "amenity_check": "アメニティ確認",
+    "garbage_collection": "ゴミ回収",
+    "outdoor_bath_cleaning": "露天風呂清掃",
+    "window_cleaning": "窓清掃",
+    "special_cleaning": "特別清掃"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { UnifiedTask, MealStatus } from "../../../types";
 import {
   MEAL_TYPE_LABELS,
@@ -8,6 +9,7 @@ import {
 } from "../../../types";
 import { AlertIcon, UserIcon } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
+import { MemoSection, MemoDisplay } from "../../shared/MemoSection";
 
 // 配膳ステータスの進捗表示
 const MealProgressIndicator = ({ status }: { status: MealStatus }) => {
@@ -41,13 +43,22 @@ const MealProgressIndicator = ({ status }: { status: MealStatus }) => {
   );
 };
 
+type MemoType = "personal" | "shared";
+
 interface MealCardProps {
   task: UnifiedTask;
   onStatusChange: (taskId: string, newStatus: UnifiedTask["status"]) => void;
   onMealStatusChange?: (taskId: string, newMealStatus: MealStatus) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
 }
 
-export const MealCard = ({ task, onStatusChange, onMealStatusChange }: MealCardProps) => {
+export const MealCard = ({
+  task,
+  onStatusChange,
+  onMealStatusChange,
+  onMemoChange,
+}: MealCardProps) => {
+  const { t } = useTranslation("staff");
   const [isExpanded, setIsExpanded] = useState(false);
   const meal = task.meal;
 
@@ -159,6 +170,25 @@ export const MealCard = ({ task, onStatusChange, onMealStatusChange }: MealCardP
                 : "確認完了"}
           </button>
         )}
+
+        {/* Memo Section */}
+        <div className="mt-4 space-y-3">
+          {/* Admin Memo (read-only) */}
+          <MemoDisplay title={t("memo.fromAdmin")} value={task.adminMemo} variant="admin" />
+
+          {/* Shared Memo (read-only) */}
+          <MemoDisplay title={t("memo.sharedMemo")} value={task.sharedMemo} variant="shared" />
+
+          {/* Personal Memo (editable) */}
+          <MemoSection
+            title={t("memo.personalMemo")}
+            value={task.personalMemo}
+            onSave={(value) => onMemoChange?.(task.id, "personal", value)}
+            placeholder={t("memo.placeholder")}
+            editable={true}
+            variant="personal"
+          />
+        </div>
       </div>
     </TaskCardBase>
   );

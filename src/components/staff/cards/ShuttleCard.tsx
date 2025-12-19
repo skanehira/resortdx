@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { UnifiedTask, ShuttleStatus, ShuttleMessageType } from "../../../types";
 import { SHUTTLE_STATUS_LABELS } from "../../../types";
 import { LocationIcon, UserIcon, ArrowRightIcon, CarIcon, MessageIcon } from "../../ui/Icons";
 import { TaskCardBase } from "./TaskCardBase";
 import { ShuttleMessagePanel } from "../../shuttle/ShuttleMessagePanel";
 import { ShuttleQuickMessages } from "../../shuttle/ShuttleQuickMessages";
+import { MemoSection, MemoDisplay } from "../../shared/MemoSection";
 
 // 送迎ステータスの進捗表示（5段階）
 const ShuttleProgressIndicator = ({ status }: { status: ShuttleStatus }) => {
@@ -38,6 +40,8 @@ const ShuttleProgressIndicator = ({ status }: { status: ShuttleStatus }) => {
   );
 };
 
+type MemoType = "personal" | "shared";
+
 interface ShuttleCardProps {
   task: UnifiedTask;
   currentStaffId: string;
@@ -45,6 +49,7 @@ interface ShuttleCardProps {
   onStatusChange: (taskId: string, newStatus: UnifiedTask["status"]) => void;
   onShuttleStatusChange?: (taskId: string, newShuttleStatus: ShuttleStatus) => void;
   onSendShuttleMessage?: (taskId: string, content: string, messageType: ShuttleMessageType) => void;
+  onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
 }
 
 export const ShuttleCard = ({
@@ -54,7 +59,9 @@ export const ShuttleCard = ({
   onStatusChange,
   onShuttleStatusChange,
   onSendShuttleMessage,
+  onMemoChange,
 }: ShuttleCardProps) => {
+  const { t } = useTranslation("staff");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const shuttle = task.shuttle;
@@ -222,6 +229,25 @@ export const ShuttleCard = ({
             {getActionButtonLabel()}
           </button>
         )}
+
+        {/* Memo Section */}
+        <div className="mt-4 space-y-3">
+          {/* Admin Memo (read-only) */}
+          <MemoDisplay title={t("memo.fromAdmin")} value={task.adminMemo} variant="admin" />
+
+          {/* Shared Memo (read-only) */}
+          <MemoDisplay title={t("memo.sharedMemo")} value={task.sharedMemo} variant="shared" />
+
+          {/* Personal Memo (editable) */}
+          <MemoSection
+            title={t("memo.personalMemo")}
+            value={task.personalMemo}
+            onSave={(value) => onMemoChange?.(task.id, "personal", value)}
+            placeholder={t("memo.placeholder")}
+            editable={true}
+            variant="personal"
+          />
+        </div>
       </div>
     </TaskCardBase>
   );

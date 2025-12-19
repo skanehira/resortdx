@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { mockStaff, mockTasks, getTasksByStaff, getRoomName } from "../../data/mock";
 import {
   STAFF_ROLE_LABELS,
@@ -64,20 +65,25 @@ const StatusChangeModal = ({
   isOpen,
   onClose,
   onStatusChange,
+  t,
 }: {
   staff: Staff | null;
   isOpen: boolean;
   onClose: () => void;
   onStatusChange: (staffId: string, newStatus: StaffStatus) => void;
+  t: (key: string) => string;
 }) => {
   if (!staff) return null;
 
   const statuses: StaffStatus[] = ["on_duty", "on_break", "day_off", "absent", "out"];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="ステータス変更" size="sm">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("staffManagement.statusChange")} size="sm">
       <div className="space-y-3">
-        <p className="text-sm text-[var(--nezumi)]">{staff.name} さんのステータスを選択</p>
+        <p className="text-sm text-[var(--nezumi)]">
+          {staff.name}
+          {t("staffManagement.selectStatus")}
+        </p>
         <div className="space-y-2">
           {statuses.map((s) => (
             <button
@@ -109,11 +115,13 @@ const EmergencyContactModal = ({
   isOpen,
   onClose,
   onSave,
+  t,
 }: {
   staff: Staff | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (staffId: string, contact: EmergencyContact) => void;
+  t: (key: string) => string;
 }) => {
   const [phone, setPhone] = useState("");
   const [relationship, setRelationship] = useState("");
@@ -134,37 +142,47 @@ const EmergencyContactModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="緊急連絡先" size="sm">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("staffManagement.emergencyContact")}
+      size="sm"
+    >
       <div className="space-y-4">
-        <p className="text-sm text-[var(--nezumi)]">{staff.name} さんの緊急連絡先</p>
+        <p className="text-sm text-[var(--nezumi)]">
+          {staff.name}
+          {t("staffManagement.emergencyContactFor")}
+        </p>
         <div>
           <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-            電話番号
+            {t("staffManagement.phoneNumber")}
           </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="090-1234-5678"
+            placeholder={t("staffManagement.phonePlaceholder")}
             className="input w-full"
           />
         </div>
         <div>
-          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">続柄</label>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            {t("staffManagement.relationship")}
+          </label>
           <input
             type="text"
             value={relationship}
             onChange={(e) => setRelationship(e.target.value)}
-            placeholder="母、配偶者、など"
+            placeholder={t("staffManagement.relationshipPlaceholder")}
             className="input w-full"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <button onClick={onClose} className="btn btn-secondary">
-            キャンセル
+            {t("common.cancel")}
           </button>
           <button onClick={handleSave} className="btn btn-primary">
-            保存
+            {t("common.save")}
           </button>
         </div>
       </div>
@@ -191,16 +209,16 @@ const StaffAvatar = ({ staff, size = "md" }: { staff: Staff; size?: "sm" | "md" 
 };
 
 // Task Badge Component
-const TaskBadge = ({ status }: { status: Task["status"] }) => {
+const TaskBadge = ({ status, t }: { status: Task["status"]; t: (key: string) => string }) => {
   const styles = {
     pending: "badge badge-pending",
     in_progress: "badge badge-in-progress",
     completed: "badge badge-completed",
   };
   const labels = {
-    pending: "未着手",
-    in_progress: "作業中",
-    completed: "完了",
+    pending: t("status.pending"),
+    in_progress: t("status.inProgress"),
+    completed: t("status.completed"),
   };
   return <span className={styles[status]}>{labels[status]}</span>;
 };
@@ -213,6 +231,7 @@ interface StaffCardProps {
   onSelect: () => void;
   onStatusChange: (staff: Staff) => void;
   onEmergencyContact: (staff: Staff) => void;
+  t: (key: string) => string;
 }
 
 const StaffCard = ({
@@ -222,10 +241,11 @@ const StaffCard = ({
   onSelect,
   onStatusChange,
   onEmergencyContact,
+  t,
 }: StaffCardProps) => {
-  const activeTasks = tasks.filter((t) => t.status !== "completed");
-  const completedTasks = tasks.filter((t) => t.status === "completed");
-  const inProgressTask = tasks.find((t) => t.status === "in_progress");
+  const activeTasks = tasks.filter((task) => task.status !== "completed");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
+  const inProgressTask = tasks.find((task) => task.status === "in_progress");
 
   return (
     <div
@@ -262,8 +282,8 @@ const StaffCard = ({
           >
             <PhoneIcon size={12} />
             {staff.emergencyContact
-              ? `緊急連絡先: ${staff.emergencyContact.relationship}`
-              : "緊急連絡先を登録"}
+              ? `${t("staffManagement.emergencyContact")}: ${staff.emergencyContact.relationship}`
+              : t("staffManagement.registerEmergencyContact")}
           </button>
         </div>
       </div>
@@ -271,7 +291,9 @@ const StaffCard = ({
       {/* Current Task */}
       {inProgressTask && (
         <div className="mb-4 p-3 bg-[rgba(27,73,101,0.05)] rounded border-l-2 border-[var(--ai)]">
-          <p className="text-xs text-[var(--ai)] font-display mb-1">作業中</p>
+          <p className="text-xs text-[var(--ai)] font-display mb-1">
+            {t("staffManagement.currentTask")}
+          </p>
           <p className="text-sm font-medium text-[var(--sumi)]">{inProgressTask.title}</p>
           <p className="text-xs text-[var(--nezumi)] mt-1">
             {inProgressTask.scheduledTime} - {getRoomName(inProgressTask.roomId)}
@@ -285,25 +307,31 @@ const StaffCard = ({
           <p className="text-lg font-display font-semibold text-[var(--nezumi)]">
             {activeTasks.length}
           </p>
-          <p className="text-[10px] text-[var(--nezumi-light)]">残タスク</p>
+          <p className="text-[10px] text-[var(--nezumi-light)]">
+            {t("staffManagement.remainingTasks")}
+          </p>
         </div>
         <div className="py-2 bg-[var(--shironeri-warm)] rounded">
           <p className="text-lg font-display font-semibold text-[var(--ai)]">
-            {tasks.filter((t) => t.status === "in_progress").length}
+            {tasks.filter((task) => task.status === "in_progress").length}
           </p>
-          <p className="text-[10px] text-[var(--nezumi-light)]">作業中</p>
+          <p className="text-[10px] text-[var(--nezumi-light)]">
+            {t("staffManagement.currentTask")}
+          </p>
         </div>
         <div className="py-2 bg-[var(--shironeri-warm)] rounded">
           <p className="text-lg font-display font-semibold text-[var(--aotake)]">
             {completedTasks.length}
           </p>
-          <p className="text-[10px] text-[var(--nezumi-light)]">完了</p>
+          <p className="text-[10px] text-[var(--nezumi-light)]">
+            {t("staffManagement.completedTasks")}
+          </p>
         </div>
       </div>
 
       {/* Skills */}
       <div className="mt-4 pt-3 border-t border-[rgba(45,41,38,0.06)]">
-        <p className="text-xs text-[var(--nezumi)] mb-2">対応可能業務</p>
+        <p className="text-xs text-[var(--nezumi)] mb-2">{t("staffManagement.availableSkills")}</p>
         <div className="flex flex-wrap gap-1">
           {staff.skills.map((skill) => (
             <span
@@ -327,6 +355,7 @@ interface ReassignModalProps {
   currentStaff: Staff | null;
   availableStaff: Staff[];
   onReassign: (taskId: string, newStaffId: string) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
 const ReassignModal = ({
@@ -336,6 +365,7 @@ const ReassignModal = ({
   currentStaff,
   availableStaff,
   onReassign,
+  t,
 }: ReassignModalProps) => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
 
@@ -355,26 +385,29 @@ const ReassignModal = ({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="タスク再割当" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("staffManagement.taskReassign")} size="md">
       {/* Task Info */}
       <div className="p-4 bg-[var(--shironeri-warm)] rounded mb-4">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-lg font-display font-semibold text-[var(--ai)]">
             {task.scheduledTime}
           </span>
-          <TaskBadge status={task.status} />
+          <TaskBadge status={task.status} t={t} />
         </div>
         <h4 className="font-medium text-[var(--sumi)]">{task.title}</h4>
         <p className="text-sm text-[var(--nezumi)] mt-1">
           {TASK_CATEGORY_LABELS[task.category]} ・ {getRoomName(task.roomId)} ・{" "}
-          {task.estimatedDuration}分
+          {task.estimatedDuration}
+          {t("taskDetail.minutes")}
         </p>
       </div>
 
       {/* Current Assignment */}
       {currentStaff && (
         <div className="mb-4">
-          <p className="text-xs text-[var(--nezumi)] mb-2">現在の担当者</p>
+          <p className="text-xs text-[var(--nezumi)] mb-2">
+            {t("staffManagement.currentAssignee")}
+          </p>
           <div className="flex items-center gap-3 p-3 border border-[rgba(45,41,38,0.1)] rounded">
             <StaffAvatar staff={currentStaff} size="sm" />
             <div>
@@ -387,11 +420,15 @@ const ReassignModal = ({
 
       {/* Staff Selection */}
       <div className="mb-4">
-        <p className="text-xs text-[var(--nezumi)] mb-2">新しい担当者を選択</p>
+        <p className="text-xs text-[var(--nezumi)] mb-2">
+          {t("staffManagement.selectNewAssignee")}
+        </p>
         <div className="space-y-2 max-h-60 overflow-y-auto">
           {qualifiedStaff.map((s) => {
             const staffTasks = getTasksByStaff(s.id);
-            const activeTasks = staffTasks.filter((t) => t.status !== "completed").length;
+            const activeTaskCount = staffTasks.filter(
+              (taskItem) => taskItem.status !== "completed",
+            ).length;
             const isSelected = selectedStaffId === s.id;
 
             return (
@@ -411,7 +448,10 @@ const ReassignModal = ({
                     <StatusIndicator status={s.status} />
                   </div>
                   <p className="text-xs text-[var(--nezumi)]">
-                    {STAFF_ROLE_LABELS[s.role]} ・ 残{activeTasks}件
+                    {STAFF_ROLE_LABELS[s.role]} ・{" "}
+                    {t("staffManagement.remainingCount", {
+                      count: activeTaskCount,
+                    })}
                   </p>
                 </div>
                 {isSelected && <CheckIcon size={18} className="text-[var(--ai)]" />}
@@ -421,7 +461,7 @@ const ReassignModal = ({
 
           {qualifiedStaff.length === 0 && (
             <div className="p-4 text-center text-[var(--nezumi)]">
-              <p>対応可能なスタッフがいません</p>
+              <p>{t("staffManagement.noAvailableStaff")}</p>
             </div>
           )}
         </div>
@@ -430,7 +470,7 @@ const ReassignModal = ({
       {/* Actions */}
       <div className="flex gap-3">
         <button onClick={onClose} className="flex-1 btn btn-secondary">
-          キャンセル
+          {t("common.cancel")}
         </button>
         <button
           onClick={handleReassign}
@@ -439,7 +479,7 @@ const ReassignModal = ({
             !selectedStaffId ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          再割当する
+          {t("staffManagement.doReassign")}
         </button>
       </div>
     </Modal>
@@ -451,9 +491,10 @@ interface StaffTaskListProps {
   staff: Staff;
   tasks: Task[];
   onReassign: (task: Task) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }
 
-const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
+const StaffTaskList = ({ staff, tasks, onReassign, t }: StaffTaskListProps) => {
   const sortedTasks = [...tasks].sort((a, b) => {
     const statusOrder = { in_progress: 0, pending: 1, completed: 2 };
     if (statusOrder[a.status] !== statusOrder[b.status]) {
@@ -469,9 +510,11 @@ const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
           <StaffAvatar staff={staff} />
           <div>
             <h3 className="font-display font-medium text-[var(--sumi)]">
-              {staff.name}のタスク一覧
+              {t("staffManagement.staffTaskList", { name: staff.name })}
             </h3>
-            <p className="text-sm text-[var(--nezumi)]">{tasks.length}件のタスク</p>
+            <p className="text-sm text-[var(--nezumi)]">
+              {t("staffManagement.taskCount", { count: tasks.length })}
+            </p>
           </div>
         </div>
       </div>
@@ -494,13 +537,16 @@ const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
                   <span className="text-sm font-display text-[var(--ai)]">
                     {task.scheduledTime}
                   </span>
-                  <TaskBadge status={task.status} />
-                  {task.priority === "urgent" && <span className="badge badge-urgent">緊急</span>}
+                  <TaskBadge status={task.status} t={t} />
+                  {task.priority === "urgent" && (
+                    <span className="badge badge-urgent">{t("priority.urgent")}</span>
+                  )}
                 </div>
                 <p className="font-medium text-[var(--sumi)]">{task.title}</p>
                 <p className="text-sm text-[var(--nezumi)] mt-1">
                   {TASK_CATEGORY_LABELS[task.category]} ・ {getRoomName(task.roomId)} ・{" "}
-                  {task.estimatedDuration}分
+                  {task.estimatedDuration}
+                  {t("taskDetail.minutes")}
                 </p>
                 {task.description && (
                   <p className="text-sm text-[var(--sumi-light)] mt-2 p-2 bg-[var(--shironeri-warm)] rounded">
@@ -511,7 +557,7 @@ const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
               {task.status !== "completed" && (
                 <button onClick={() => onReassign(task)} className="btn btn-ghost text-xs px-3">
                   <RefreshIcon size={14} />
-                  再割当
+                  {t("staffManagement.reassign")}
                 </button>
               )}
             </div>
@@ -521,7 +567,7 @@ const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
         {sortedTasks.length === 0 && (
           <div className="p-8 text-center">
             <TaskIcon size={32} className="mx-auto text-[var(--nezumi-light)] mb-2" />
-            <p className="text-[var(--nezumi)]">割り当てられたタスクはありません</p>
+            <p className="text-[var(--nezumi)]">{t("staffManagement.noAssignedTasks")}</p>
           </div>
         )}
       </div>
@@ -530,14 +576,14 @@ const StaffTaskList = ({ staff, tasks, onReassign }: StaffTaskListProps) => {
 };
 
 // Workload Chart Component
-const WorkloadChart = ({ staff }: { staff: Staff[] }) => {
+const WorkloadChart = ({ staff, t }: { staff: Staff[]; t: (key: string) => string }) => {
   const maxTasks = Math.max(...staff.map((s) => getTasksByStaff(s.id).length), 1);
 
   return (
     <div className="shoji-panel p-5">
       <h3 className="font-display font-medium text-[var(--sumi)] mb-4 flex items-center gap-2">
         <TimelineIcon size={18} />
-        負荷バランス
+        {t("staffManagement.workloadBalance")}
       </h3>
       <div className="space-y-3">
         {staff.map((s) => {
@@ -545,7 +591,7 @@ const WorkloadChart = ({ staff }: { staff: Staff[] }) => {
           const percentage = (tasks.length / maxTasks) * 100;
           const completedPercentage =
             tasks.length > 0
-              ? (tasks.filter((t) => t.status === "completed").length / tasks.length) * 100
+              ? (tasks.filter((task) => task.status === "completed").length / tasks.length) * 100
               : 0;
 
           return (
@@ -566,7 +612,8 @@ const WorkloadChart = ({ staff }: { staff: Staff[] }) => {
                 />
               </div>
               <div className="w-12 text-right text-sm font-display text-[var(--sumi)]">
-                {tasks.length}件
+                {tasks.length}
+                {t("staffManagement.items")}
               </div>
             </div>
           );
@@ -575,11 +622,11 @@ const WorkloadChart = ({ staff }: { staff: Staff[] }) => {
       <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[rgba(45,41,38,0.06)] text-xs text-[var(--nezumi)]">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-[var(--aotake)] rounded" />
-          完了
+          {t("status.completed")}
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-[var(--nezumi-light)] rounded" />
-          未完了
+          {t("staffManagement.incomplete")}
         </div>
       </div>
     </div>
@@ -590,9 +637,10 @@ const WorkloadChart = ({ staff }: { staff: Staff[] }) => {
 interface RoleFilterProps {
   selected: StaffRole | "all";
   onChange: (role: StaffRole | "all") => void;
+  t: (key: string) => string;
 }
 
-const RoleFilter = ({ selected, onChange }: RoleFilterProps) => {
+const RoleFilter = ({ selected, onChange, t }: RoleFilterProps) => {
   const roles: (StaffRole | "all")[] = [
     "all",
     "cleaning",
@@ -600,6 +648,8 @@ const RoleFilter = ({ selected, onChange }: RoleFilterProps) => {
     "kitchen",
     "driver",
     "concierge",
+    "manager",
+    "front",
   ];
 
   return (
@@ -614,7 +664,7 @@ const RoleFilter = ({ selected, onChange }: RoleFilterProps) => {
               : "bg-[var(--shironeri-warm)] text-[var(--sumi-light)] hover:bg-[rgba(45,41,38,0.08)]"
           }`}
         >
-          {role === "all" ? "すべて" : STAFF_ROLE_LABELS[role]}
+          {role === "all" ? t("staffManagement.allRoles") : STAFF_ROLE_LABELS[role]}
         </button>
       ))}
     </div>
@@ -623,6 +673,7 @@ const RoleFilter = ({ selected, onChange }: RoleFilterProps) => {
 
 // Main Staff Monitor Component
 export const StaffMonitor = () => {
+  const { t } = useTranslation("admin");
   const [staffList, setStaffList] = useState<Staff[]>(mockStaff);
   const [roleFilter, setRoleFilter] = useState<StaffRole | "all">("all");
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
@@ -676,11 +727,9 @@ export const StaffMonitor = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-semibold text-[var(--sumi)] ink-stroke inline-block">
-            スタッフ管理
+            {t("staffManagement.title")}
           </h1>
-          <p className="text-sm text-[var(--nezumi)] mt-2">
-            スタッフの稼働状況とタスク割当を管理します
-          </p>
+          <p className="text-sm text-[var(--nezumi)] mt-2">{t("staffManagement.description")}</p>
         </div>
       </div>
 
@@ -690,19 +739,19 @@ export const StaffMonitor = () => {
           <p className="text-2xl font-display font-semibold text-[var(--sumi)]">
             {onDutyStaff.length}
           </p>
-          <p className="text-sm text-[var(--nezumi)]">出勤中スタッフ</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("staffManagement.onDutyStaff")}</p>
         </div>
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--ai)]">
           <p className="text-2xl font-display font-semibold text-[var(--sumi)]">
             {totalActiveTasks}
           </p>
-          <p className="text-sm text-[var(--nezumi)]">アクティブタスク</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("staffManagement.activeTasks")}</p>
         </div>
         <div className="shoji-panel p-4 border-l-3 border-l-[var(--kincha)]">
           <p className="text-2xl font-display font-semibold text-[var(--sumi)]">
-            {mockTasks.filter((t) => t.status === "in_progress").length}
+            {mockTasks.filter((task) => task.status === "in_progress").length}
           </p>
-          <p className="text-sm text-[var(--nezumi)]">作業中タスク</p>
+          <p className="text-sm text-[var(--nezumi)]">{t("staffManagement.inProgressTasks")}</p>
         </div>
         {unassignedTasks.length > 0 ? (
           <div className="shoji-panel p-4 border-l-3 border-l-[var(--shu)] bg-[rgba(199,62,58,0.02)]">
@@ -712,7 +761,7 @@ export const StaffMonitor = () => {
                 {unassignedTasks.length}
               </p>
             </div>
-            <p className="text-sm text-[var(--nezumi)]">未割当タスク</p>
+            <p className="text-sm text-[var(--nezumi)]">{t("staffManagement.unassignedTasks")}</p>
           </div>
         ) : (
           <div className="shoji-panel p-4 border-l-3 border-l-[var(--aotake)]">
@@ -720,14 +769,14 @@ export const StaffMonitor = () => {
               <CheckIcon size={18} className="text-[var(--aotake)]" />
               <p className="text-2xl font-display font-semibold text-[var(--aotake)]">0</p>
             </div>
-            <p className="text-sm text-[var(--nezumi)]">未割当タスク</p>
+            <p className="text-sm text-[var(--nezumi)]">{t("staffManagement.unassignedTasks")}</p>
           </div>
         )}
       </div>
 
       {/* Role Filter */}
       <div className="shoji-panel p-4">
-        <RoleFilter selected={roleFilter} onChange={setRoleFilter} />
+        <RoleFilter selected={roleFilter} onChange={setRoleFilter} t={t} />
       </div>
 
       {/* Main Content */}
@@ -744,6 +793,7 @@ export const StaffMonitor = () => {
                 onSelect={() => setSelectedStaffId(selectedStaffId === staff.id ? null : staff.id)}
                 onStatusChange={(s) => setStatusChangeStaff(s)}
                 onEmergencyContact={(s) => setEmergencyContactStaff(s)}
+                t={t}
               />
             ))}
           </div>
@@ -752,12 +802,13 @@ export const StaffMonitor = () => {
         {/* Side Panel */}
         <div className="space-y-4">
           {/* Workload Chart */}
-          <WorkloadChart staff={onDutyStaff} />
+          <WorkloadChart staff={onDutyStaff} t={t} />
 
           {/* Selected Staff Tasks */}
           {selectedStaff && (
             <StaffTaskList
               staff={selectedStaff}
+              t={t}
               tasks={selectedStaffTasks}
               onReassign={handleOpenReassignModal}
             />
@@ -766,11 +817,7 @@ export const StaffMonitor = () => {
           {!selectedStaff && (
             <div className="shoji-panel p-8 text-center">
               <StaffIcon size={48} className="mx-auto text-[var(--nezumi-light)] mb-4" />
-              <p className="text-[var(--nezumi)]">
-                スタッフを選択して
-                <br />
-                詳細を表示
-              </p>
+              <p className="text-[var(--nezumi)]">{t("staffManagement.selectStaffToView")}</p>
             </div>
           )}
         </div>
@@ -784,6 +831,7 @@ export const StaffMonitor = () => {
         currentStaff={selectedStaff || null}
         availableStaff={onDutyStaff}
         onReassign={handleReassign}
+        t={t}
       />
 
       {/* Status Change Modal */}
@@ -792,6 +840,7 @@ export const StaffMonitor = () => {
         isOpen={statusChangeStaff !== null}
         onClose={() => setStatusChangeStaff(null)}
         onStatusChange={handleStatusChange}
+        t={t}
       />
 
       {/* Emergency Contact Modal */}
@@ -800,6 +849,7 @@ export const StaffMonitor = () => {
         isOpen={emergencyContactStaff !== null}
         onClose={() => setEmergencyContactStaff(null)}
         onSave={handleSaveEmergencyContact}
+        t={t}
       />
     </div>
   );

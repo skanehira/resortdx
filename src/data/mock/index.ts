@@ -104,3 +104,23 @@ export {
   getChatRoomById,
   getDMPartnerId,
 } from "./chat";
+
+// === Authentication ===
+export {
+  mockCredentials,
+  validateCredentials,
+  updatePassword,
+  updateLoginId,
+  getLoginIdByStaffId,
+} from "./auth";
+export type { StaffCredentials } from "./auth";
+
+// === Staff Shared Notes ===
+export {
+  mockStaffNotes,
+  getActiveNotes,
+  getImportantNotes,
+  addStaffNote,
+  updateStaffNote,
+  deleteStaffNote,
+} from "./staffNotes";

@@ -489,6 +489,9 @@ export const mockUnifiedTasks: UnifiedTask[] = [
     status: "completed",
     assignedStaffId: "STF001",
     priority: "high",
+    adminMemo: "結婚記念日のお客様のため、特に丁寧に対応をお願いします",
+    personalMemo: "バスルームの鏡に曇り止め処理済み",
+    sharedMemo: null,
     housekeeping: {
       category: "cleaning",
       reservationId: "RSV001",
@@ -577,6 +580,8 @@ export const mockUnifiedTasks: UnifiedTask[] = [
     status: "pending",
     assignedStaffId: "STF001",
     priority: "high",
+    adminMemo: "結婚記念日のお客様。デザート時にサプライズケーキ提供あり",
+    sharedMemo: "甲殻類アレルギーのため、エビ・カニ完全除去。厨房確認済み",
     meal: {
       reservationId: "RSV001",
       guestName: "山田 太郎",
@@ -840,6 +845,9 @@ export const mockUnifiedTasks: UnifiedTask[] = [
     status: "in_progress",
     assignedStaffId: "STF001",
     priority: "urgent",
+    adminMemo: "誕生日サプライズがあるため14:00までに必ず完了させること",
+    personalMemo: "露天風呂の温度確認済み。花びら浮かべは14:00に実施予定",
+    sharedMemo: "ベッドメイクは特別仕様で。バラの花びらを敷く準備あり",
     housekeeping: {
       category: "cleaning",
       reservationId: "RSV004",

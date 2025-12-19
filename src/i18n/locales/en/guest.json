@@ -1,0 +1,126 @@
+{
+  "portal": {
+    "title": "Guest Portal",
+    "welcome": "Welcome",
+    "roomInfo": "Room Information",
+    "services": "Services"
+  },
+  "nav": {
+    "home": "Home",
+    "shuttle": "Shuttle",
+    "dining": "Dining",
+    "activities": "Activities",
+    "celebration": "Celebration",
+    "requests": "Requests"
+  },
+  "menu": {
+    "home": "Home",
+    "requests": "Requests",
+    "info": "Facility Info",
+    "chat": "Chat"
+  },
+  "home": {
+    "todaysShuttle": "Today's Shuttle",
+    "todaysMeal": "Today's Meal",
+    "scheduled": "Scheduled"
+  },
+  "requests": {
+    "title": "Requests",
+    "subtitle": "Please feel free to ask",
+    "amenities": "Amenities",
+    "roomService": "Room Service",
+    "shuttle": "Shuttle",
+    "cleaning": "Cleaning",
+    "other": "Other",
+    "checkoutTimeChange": "Checkout\nTime Change",
+    "noCleaning": "No Cleaning",
+    "amenityAdd": "Additional\nAmenities",
+    "towelAdd": "Additional\nTowels",
+    "mealRequest": "Meal\nRequest",
+    "otherRequest": "Other\nRequests",
+    "noteLabel": "Notes & Requests",
+    "notePlaceholder": "Please enter details (optional)",
+    "submit": "Submit",
+    "submitted": "Request Received",
+    "submittedMessage": "Our staff will assist you shortly.\nPlease wait a moment."
+  },
+  "shuttle": {
+    "title": "Shuttle Schedule",
+    "subtitle": "Today's pickup and dropoff schedule",
+    "pickup": "Pickup",
+    "dropoff": "Dropoff",
+    "status": "Status",
+    "driverMessage": "Message from Driver",
+    "estimatedArrival": "Estimated Arrival",
+    "vehicle": "Vehicle",
+    "statusScheduled": "Scheduled",
+    "statusDeparting": "Departed",
+    "statusArriving": "Arriving Soon",
+    "statusArrived": "Arrived",
+    "statusCompleted": "Completed",
+    "notifyArrival": "Notify Arrival",
+    "arrivedNow": "I've arrived",
+    "arrivalNotification": "Arrival Notification",
+    "arrivalThanks": "Thank you for your notification",
+    "arrivalConfirmed": "We have notified the driver.\nWe will pick you up shortly.",
+    "arrivalInstructions": "When you arrive at Atami Station East Exit Rotary,\nplease press the button below. The driver will come to pick you up.",
+    "flow": "Shuttle Flow",
+    "flowStep1": "Please wait at Atami Station East Exit Rotary",
+    "flowStep2": "Vehicle arrival & name confirmation",
+    "flowStep3": "Expected arrival at Fufu Atami"
+  },
+  "meal": {
+    "title": "Dining",
+    "subtitle": "Your meal schedule during stay",
+    "breakfast": "Breakfast",
+    "dinner": "Dinner",
+    "roomService": "Room Service",
+    "additionalOrder": "Additional Order",
+    "timeChange": "Time Change",
+    "dietaryRestrictions": "Allergies & Dietary Restrictions",
+    "allergyInfo": "Allergy Information",
+    "detail": "Details",
+    "timeChangeRequest": "Request Time Change",
+    "timeChangeTitle": "Time Change Request",
+    "selectTime": "Please select your preferred time",
+    "requestChange": "Request Change",
+    "changeRequested": "Request Received",
+    "changeRequestedMessage": "We will adjust to your preferred time.\nWe will notify you once confirmed."
+  },
+  "activities": {
+    "title": "Activities",
+    "subtitle": "Special experiences unique to Atami",
+    "categoryNature": "Nature",
+    "categoryCulture": "Culture",
+    "categoryWellness": "Wellness",
+    "categoryAdventure": "Adventure",
+    "perPerson": "/per person",
+    "selectTime": "Preferred Time",
+    "book": "Book",
+    "booked": "Booking Confirmed",
+    "bookedMessage": "We will contact your room with details."
+  },
+  "celebration": {
+    "title": "Celebration",
+    "preparation": "Preparation",
+    "preparationSubtitle": "We will prepare for your special day",
+    "additionalRequest": "Additional Request",
+    "requestLabel": "Request Details",
+    "requestPlaceholder": "e.g., Surprise timing, additional flowers, etc.",
+    "aboutCelebration": "If you have any additional requests for your celebration, please feel free to let us know.",
+    "requestSubmitted": "Request Received",
+    "requestSubmittedMessage": "We will prepare with care\nto make your special day memorable."
+  },
+  "info": {
+    "facilityInfo": "Facility Information",
+    "spa": "Spa",
+    "restaurant": "Restaurant",
+    "amenities": "Amenities",
+    "wifi": "Wi-Fi",
+    "checkout": "Checkout"
+  },
+  "common": {
+    "submit": "Submit",
+    "close": "Close"
+  }
+}

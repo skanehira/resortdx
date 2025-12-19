@@ -1,0 +1,110 @@
+{
+  "nav": {
+    "tasks": "タスク",
+    "messages": "メッセージ",
+    "chat": "チャット",
+    "admin": "管理",
+    "staffMode": "スタッフモード"
+  },
+  "taskList": {
+    "title": "タスク",
+    "myTasks": "マイタスク",
+    "allTasks": "すべてのタスク",
+    "todaysSchedule": "本日のスケジュール",
+    "timeline": "タイムライン",
+    "allStaffSchedule": "全スタッフスケジュール",
+    "greeting": "こんにちは",
+    "staffSuffix": "さん",
+    "todaysProgress": "本日の進捗",
+    "tasksCompleted": "件完了",
+    "filter": "フィルター",
+    "requestHelp": "ヘルプを依頼",
+    "noTasksCategory": "のタスクはありません",
+    "noTasksCompleted": "完了したタスクはありません",
+    "noTasksPending": "未着手のタスクはありません",
+    "noTasksInProgress": "作業中のタスクはありません",
+    "noTasksAssigned": "割り当てられたタスクはありません"
+  },
+  "status": {
+    "all": "すべて",
+    "pending": "未着手",
+    "inProgress": "作業中",
+    "completed": "完了"
+  },
+  "categories": {
+    "all": "すべて",
+    "cleaning": "清掃",
+    "meal": "配膳",
+    "shuttle": "送迎",
+    "celebration": "お祝い",
+    "help": "ヘルプ",
+    "inspection": "点検",
+    "turndown": "ターンダウン",
+    "bath": "露天風呂"
+  },
+  "taskCard": {
+    "startTask": "開始",
+    "completeTask": "完了",
+    "pauseTask": "中断",
+    "resumeTask": "再開",
+    "viewDetails": "詳細を見る",
+    "scheduledTime": "予定時間",
+    "assignedTo": "担当",
+    "room": "客室",
+    "guest": "ゲスト"
+  },
+  "memo": {
+    "personalMemo": "個人メモ",
+    "sharedMemo": "共有メモ",
+    "addMemo": "メモを追加",
+    "editMemo": "メモを編集",
+    "placeholder": "メモを入力...",
+    "fromAdmin": "管理者より"
+  },
+  "sharedNotes": {
+    "title": "スタッフ共有メモ",
+    "subtitle": "全スタッフ向け",
+    "addNote": "メモを追加",
+    "editNote": "メモを編集",
+    "important": "重要",
+    "markImportant": "重要マーク",
+    "expiresAt": "有効期限",
+    "setExpiry": "有効期限を設定",
+    "createdBy": "作成者",
+    "noNotes": "共有メモはありません",
+    "inputPlaceholder": "メモ内容を入力...",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "deleteConfirm": "このメモを削除しますか？",
+    "updated": "更新"
+  },
+  "messages": {
+    "title": "メッセージ",
+    "chat": "チャット",
+    "notifications": "通知",
+    "unread": "未読"
+  },
+  "help": {
+    "title": "ヘルプ要請",
+    "requestHelp": "ヘルプを要請",
+    "respondToHelp": "ヘルプに応答"
+  },
+  "schedule": {
+    "morning": "午前",
+    "afternoon": "午後",
+    "evening": "夕方",
+    "night": "夜間",
+    "noTasksScheduled": "予定されているタスクはありません",
+    "today": "今日",
+    "overallProgress": "全体の進捗",
+    "itemsCompleted": "件完了",
+    "itemsInProgress": "件作業中",
+    "selfLabel": "(自分)",
+    "noStaffSchedule": "スタッフのスケジュールがありません"
+  },
+  "swipeHint": {
+    "title": "スワイプでステータス変更",
+    "description": "カードを左にスワイプで「開始」「完了」、右にスワイプで「戻す」",
+    "dismiss": "閉じる"
+  }
+}
