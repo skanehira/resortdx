@@ -1,12 +1,40 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
+type UserRole = "admin" | "staff" | "guest";
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean; // 管理者のみアクセス可能かどうか
+  requiredRole?: UserRole; // 必要なロール
+  requireAdmin?: boolean; // 後方互換性のため残す（非推奨）
 }
 
-export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+// ユーザーの実際のロールを判定
+const getUserRole = (user: { isAdmin?: boolean; isGuest?: boolean } | null): UserRole | null => {
+  if (!user) return null;
+  if (user.isAdmin) return "admin";
+  if (user.isGuest) return "guest";
+  return "staff";
+};
+
+// ロールに応じたデフォルトのリダイレクト先
+const getDefaultRoute = (role: UserRole): string => {
+  switch (role) {
+    case "admin":
+      return "/admin/dashboard";
+    case "guest":
+      return "/guest/portal";
+    case "staff":
+    default:
+      return "/staff/tasks";
+  }
+};
+
+export const ProtectedRoute = ({
+  children,
+  requiredRole,
+  requireAdmin = false,
+}: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, currentUser } = useAuth();
   const location = useLocation();
 
@@ -27,9 +55,16 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 管理者専用ルートの場合、管理者でなければスタッフページにリダイレクト
-  if (requireAdmin && !currentUser?.isAdmin) {
-    return <Navigate to="/staff/tasks" replace />;
+  const userRole = getUserRole(currentUser);
+
+  // 後方互換性: requireAdmin が true の場合は requiredRole='admin' として扱う
+  const effectiveRequiredRole = requiredRole || (requireAdmin ? "admin" : undefined);
+
+  // 特定のロールが必要な場合、ロールが一致しなければリダイレクト
+  if (effectiveRequiredRole && userRole !== effectiveRequiredRole) {
+    // ユーザーのロールに応じた適切なページにリダイレクト
+    const redirectTo = getDefaultRoute(userRole!);
+    return <Navigate to={redirectTo} replace />;
   }
 
   return <>{children}</>;

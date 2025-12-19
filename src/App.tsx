@@ -894,6 +894,18 @@ const GuestMealPage = () => {
   return <GuestMealStatus taskId={taskId} />;
 };
 
+// Guest Pages Wrapper
+const GuestPages = () => {
+  return (
+    <Routes>
+      <Route path="shuttle" element={<GuestShuttlePage />} />
+      <Route path="meal" element={<GuestMealPage />} />
+      <Route path="portal" element={<GuestPortal />} />
+      <Route path="*" element={<Navigate to="portal" replace />} />
+    </Routes>
+  );
+};
+
 // Main App Component
 function App() {
   return (
@@ -912,14 +924,19 @@ function App() {
           <Route
             path="/staff/*"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="staff">
                 <StaffPages />
               </ProtectedRoute>
             }
           />
-          <Route path="/guest/shuttle" element={<GuestShuttlePage />} />
-          <Route path="/guest/meal" element={<GuestMealPage />} />
-          <Route path="/guest/portal" element={<GuestPortal />} />
+          <Route
+            path="/guest/*"
+            element={
+              <ProtectedRoute requiredRole="guest">
+                <GuestPages />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </HashRouter>
