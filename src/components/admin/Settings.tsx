@@ -18,10 +18,12 @@ import {
   AmenityIcon,
   EquipmentIcon,
   CheckIcon,
+  TemplateIcon,
 } from "../ui/Icons";
+import { TaskTemplates } from "./TaskTemplates";
 
 // Tab types
-type SettingsTab = "rooms" | "amenities" | "equipment" | "dev";
+type SettingsTab = "templates" | "rooms" | "amenities" | "equipment" | "dev";
 
 // === Room Management Section ===
 interface RoomModalProps {
@@ -329,7 +331,7 @@ const EquipmentTypeModal = ({
 
 // === Main Settings Component ===
 export const Settings = () => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("rooms");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("templates");
 
   // Room state
   const [rooms, setRooms] = useState<Room[]>(mockRooms);
@@ -419,6 +421,11 @@ export const Settings = () => {
   };
 
   const tabs: { key: SettingsTab; label: string; icon: React.ReactNode }[] = [
+    {
+      key: "templates",
+      label: "タスクテンプレート",
+      icon: <TemplateIcon size={18} />,
+    },
     { key: "rooms", label: "客室タイプ", icon: <RoomIcon size={18} /> },
     {
       key: "amenities",
@@ -473,7 +480,10 @@ export const Settings = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="shoji-panel">
+      {/* Templates Tab - rendered outside shoji-panel to use its own styling */}
+      {activeTab === "templates" && <TaskTemplates />}
+
+      <div className={activeTab === "templates" ? "hidden" : "shoji-panel"}>
         {/* Rooms Tab */}
         {activeTab === "rooms" && (
           <div>

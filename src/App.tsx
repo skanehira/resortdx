@@ -17,7 +17,6 @@ import type {
 } from "./types";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Dashboard } from "./components/admin/Dashboard";
-import { TaskTemplates } from "./components/admin/TaskTemplates";
 import { StaffMonitor } from "./components/admin/StaffMonitor";
 import { EquipmentManagement } from "./components/admin/EquipmentManagement";
 import { ShuttleManagement } from "./components/admin/ShuttleManagement";
@@ -47,7 +46,6 @@ import {
 } from "./data/mock";
 import {
   DashboardIcon,
-  TemplateIcon,
   StaffIcon,
   EquipmentIcon,
   HistoryIcon,
@@ -83,11 +81,6 @@ const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) =
     icon: React.ReactNode;
   }[] = [
     { page: "dashboard", labelKey: "nav.dashboard", icon: <DashboardIcon /> },
-    {
-      page: "templates",
-      labelKey: "nav.templates",
-      icon: <TemplateIcon />,
-    },
     {
       page: "staff_monitor",
       labelKey: "nav.staffMonitor",
@@ -262,7 +255,6 @@ const AdminPages = () => {
 
   const getCurrentPage = (): AdminPage => {
     const path = location.pathname;
-    if (path.includes("templates")) return "templates";
     if (path.includes("staff_monitor")) return "staff_monitor";
     if (path.includes("equipment")) return "equipment";
     if (path.includes("shuttle")) return "shuttle";
@@ -281,7 +273,6 @@ const AdminPages = () => {
     <AdminLayout currentPage={getCurrentPage()} onPageChange={handlePageChange}>
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="templates" element={<TaskTemplates />} />
         <Route path="staff_monitor" element={<StaffMonitor />} />
         <Route path="equipment" element={<EquipmentManagement />} />
         <Route path="shuttle" element={<ShuttleManagement />} />
