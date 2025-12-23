@@ -620,6 +620,13 @@ const StaffPages = () => {
     );
   }, []);
 
+  // 担当者変更
+  const handleAssigneeChange = useCallback((taskId: string, staffId: string | null) => {
+    setUnifiedTasks((prev) =>
+      prev.map((task) => (task.id === taskId ? { ...task, assignedStaffId: staffId } : task)),
+    );
+  }, []);
+
   // 設備報告
   const handleEquipmentReport = useCallback((roomId: string, report: EquipmentReport) => {
     console.log("Equipment report submitted:", roomId, report);
@@ -790,6 +797,7 @@ const StaffPages = () => {
                 categoryFilter={categoryFilter}
                 onCategoryFilterChange={setCategoryFilter}
                 onMemoChange={handleMemoChange}
+                onAssigneeChange={handleAssigneeChange}
               />
             }
           />

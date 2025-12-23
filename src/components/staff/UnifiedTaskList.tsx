@@ -194,6 +194,7 @@ interface UnifiedTaskListProps {
     relatedTaskId?: string;
   }) => void;
   onMemoChange?: (taskId: string, memoType: MemoType, value: string | null) => void;
+  onAssigneeChange?: (taskId: string, staffId: string | null) => void;
   // カテゴリフィルターの状態保持用
   categoryFilter?: CategoryFilter;
   onCategoryFilterChange?: (category: CategoryFilter) => void;
@@ -218,6 +219,7 @@ export const UnifiedTaskList = ({
   onEquipmentReport,
   onCreateHelpRequest: _onCreateHelpRequest,
   onMemoChange,
+  onAssigneeChange: _onAssigneeChange,
   categoryFilter: externalCategoryFilter,
   onCategoryFilterChange,
 }: UnifiedTaskListProps) => {

@@ -21,6 +21,7 @@ import {
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 import { InlineTimeEdit } from "./shared/TimeEditForm";
+import { StaffSelector } from "../shared/StaffSelector";
 
 // Status Badge Component
 const StatusBadge = ({ status, t }: { status: Task["status"]; t: (key: string) => string }) => {
@@ -145,16 +146,17 @@ const TaskDetailModal = ({
   onClose,
   t,
   onTimeChange,
+  onAssigneeChange,
 }: {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
   t: (key: string) => string;
   onTimeChange?: (taskId: string, newTime: string) => void;
+  onAssigneeChange?: (taskId: string, staffId: string | null) => void;
 }) => {
   if (!task) return null;
 
-  const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
   const reservation = getReservationById(task.reservationId);
 
   return (
@@ -220,22 +222,12 @@ const TaskDetailModal = ({
         {/* Assigned Staff */}
         <div>
           <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.assignee")}</p>
-          {staff ? (
-            <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium"
-                style={{ backgroundColor: staff.avatarColor }}
-              >
-                {staff.name.charAt(0)}
-              </div>
-              <div>
-                <p className="font-medium">{staff.name}</p>
-                <p className="text-xs text-[var(--nezumi)]">{staff.role}</p>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--nezumi-light)]">{t("taskDetail.unassigned")}</p>
-          )}
+          <StaffSelector
+            value={task.assignedStaffId}
+            onChange={(staffId) => onAssigneeChange?.(task.id, staffId)}
+            showUnassigned
+            ariaLabel="担当者を選択"
+          />
         </div>
 
         {/* Guest Info */}
@@ -349,6 +341,12 @@ export const Dashboard = () => {
     setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, scheduledTime: newTime } : t)));
     // Also update the selected task if it's the one being edited
     setSelectedTask((prev) => (prev?.id === taskId ? { ...prev, scheduledTime: newTime } : prev));
+  };
+
+  const handleAssigneeChange = (taskId: string, staffId: string | null) => {
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, assignedStaffId: staffId } : t)));
+    // Also update the selected task if it's the one being edited
+    setSelectedTask((prev) => (prev?.id === taskId ? { ...prev, assignedStaffId: staffId } : prev));
   };
 
   const todayReservations = mockReservations.filter(
@@ -511,6 +509,7 @@ export const Dashboard = () => {
         onClose={() => setIsDetailModalOpen(false)}
         t={t}
         onTimeChange={handleTimeChange}
+        onAssigneeChange={handleAssigneeChange}
       />
     </div>
   );

@@ -30,6 +30,7 @@ import {
   PlusIcon,
 } from "../ui/Icons";
 import { EditableTimeDisplay } from "./shared/TimeEditForm";
+import { StaffSelector } from "../shared/StaffSelector";
 
 // Filter type for celebration tasks
 type FilterType = "all" | "birthday" | "wedding_anniversary" | "other" | "pending";
@@ -321,6 +322,7 @@ const TaskDetailModal = ({
   onItemToggle,
   onCompletionReportChange,
   onTimeChange,
+  onAssigneeChange,
 }: {
   task: CelebrationTask;
   onClose: () => void;
@@ -328,9 +330,9 @@ const TaskDetailModal = ({
   onItemToggle: (taskId: string, itemIndex: number) => void;
   onCompletionReportChange: (taskId: string, report: string) => void;
   onTimeChange: (taskId: string, newTime: string) => void;
+  onAssigneeChange: (taskId: string, staffId: string | null) => void;
 }) => {
   const [report, setReport] = useState(task.completionReport || "");
-  const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
 
   const getNextStatus = (current: TaskStatus): TaskStatus | null => {
     const flow: Record<TaskStatus, TaskStatus | null> = {
@@ -458,19 +460,12 @@ const TaskDetailModal = ({
               <UserIcon size={18} className="text-[var(--ai)]" />
               <span className="font-display font-semibold text-[var(--sumi)]">担当スタッフ</span>
             </div>
-            {staff ? (
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                  style={{ backgroundColor: staff.avatarColor }}
-                >
-                  {staff.name.charAt(0)}
-                </div>
-                <span className="font-medium text-[var(--sumi)]">{staff.name}</span>
-              </div>
-            ) : (
-              <span className="text-[var(--shu)]">未割当</span>
-            )}
+            <StaffSelector
+              value={task.assignedStaffId}
+              onChange={(staffId) => onAssigneeChange(task.id, staffId)}
+              showUnassigned
+              ariaLabel="担当者を選択"
+            />
           </div>
 
           {/* Notes */}
@@ -955,6 +950,12 @@ export const CelebrationManagement = () => {
     );
   };
 
+  const handleAssigneeChange = (taskId: string, staffId: string | null) => {
+    setCelebrationTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, assignedStaffId: staffId } : t)),
+    );
+  };
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -1067,6 +1068,7 @@ export const CelebrationManagement = () => {
           onItemToggle={handleItemToggle}
           onCompletionReportChange={handleCompletionReportChange}
           onTimeChange={handleTimeChange}
+          onAssigneeChange={handleAssigneeChange}
         />
       )}
 

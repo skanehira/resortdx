@@ -22,6 +22,7 @@ import {
   getRoomName,
   mockRooms,
 } from "../../data/mock";
+import { StaffSelector } from "../shared/StaffSelector";
 import {
   MealIcon,
   ClockIcon,
@@ -567,8 +568,6 @@ const CreateMealModal = ({
     notes: "",
   });
 
-  const availableStaff = mockStaff.filter((s) => s.role === "service" && s.status === "on_duty");
-
   const dietaryOptions: DietaryRestriction[] = [
     "shellfish",
     "egg",
@@ -818,23 +817,17 @@ const CreateMealModal = ({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm text-[var(--nezumi)] mb-1">担当スタッフ</label>
-                <select
-                  value={formData.assignedStaffId}
-                  onChange={(e) =>
+                <StaffSelector
+                  value={formData.assignedStaffId || null}
+                  onChange={(staffId) =>
                     setFormData({
                       ...formData,
-                      assignedStaffId: e.target.value,
+                      assignedStaffId: staffId ?? "",
                     })
                   }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  <option value="">未割当</option>
-                  {availableStaff.map((staff) => (
-                    <option key={staff.id} value={staff.id}>
-                      {staff.name}
-                    </option>
-                  ))}
-                </select>
+                  showUnassigned
+                  ariaLabel="担当スタッフを選択"
+                />
               </div>
               <div>
                 <label className="block text-sm text-[var(--nezumi)] mb-1">優先度</label>

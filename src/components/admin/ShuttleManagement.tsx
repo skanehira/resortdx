@@ -24,6 +24,7 @@ import {
   PlusIcon,
 } from "../ui/Icons";
 import { EditableTimeDisplay } from "./shared/TimeEditForm";
+import { StaffSelector } from "../shared/StaffSelector";
 
 // Filter type for shuttle tasks
 type FilterType = "all" | "pickup" | "dropoff" | "unassigned";
@@ -520,15 +521,16 @@ const TaskDetailModal = ({
   onStatusChange,
   onOpenAssignment,
   onTimeChange,
+  onDriverChange,
 }: {
   task: ShuttleTask;
   onClose: () => void;
   onStatusChange: (taskId: string, newStatus: ShuttleStatus) => void;
   onOpenAssignment: () => void;
   onTimeChange: (taskId: string, newTime: string) => void;
+  onDriverChange: (taskId: string, driverId: string | null) => void;
 }) => {
   const vehicle = task.assignedVehicleId ? getVehicleById(task.assignedVehicleId) : null;
-  const driver = task.assignedDriverId ? getStaffById(task.assignedDriverId) : null;
 
   const getNextStatus = (current: ShuttleStatus): ShuttleStatus | null => {
     const flow: Record<ShuttleStatus, ShuttleStatus | null> = {
@@ -640,7 +642,7 @@ const TaskDetailModal = ({
                 変更
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-[var(--nezumi)] w-16">車両:</span>
                 {vehicle ? (
@@ -651,13 +653,14 @@ const TaskDetailModal = ({
                   <span className="text-[var(--shu)]">未割当</span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[var(--nezumi)] w-16">ドライバー:</span>
-                {driver ? (
-                  <span className="font-medium text-[var(--sumi)]">{driver.name}</span>
-                ) : (
-                  <span className="text-[var(--shu)]">未割当</span>
-                )}
+              <div>
+                <span className="text-sm text-[var(--nezumi)] block mb-1">ドライバー:</span>
+                <StaffSelector
+                  value={task.assignedDriverId}
+                  onChange={(driverId) => onDriverChange(task.id, driverId)}
+                  showUnassigned
+                  ariaLabel="ドライバーを選択"
+                />
               </div>
             </div>
           </div>
@@ -1136,6 +1139,12 @@ export const ShuttleManagement = () => {
     );
   };
 
+  const handleDriverChange = (taskId: string, driverId: string | null) => {
+    setShuttleTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, assignedDriverId: driverId } : t)),
+    );
+  };
+
   // Drivers list
   const drivers = mockStaff.filter((s) => s.role === "driver");
 
@@ -1267,6 +1276,7 @@ export const ShuttleManagement = () => {
           onStatusChange={handleStatusChange}
           onOpenAssignment={() => setShowAssignmentModal(true)}
           onTimeChange={handleTimeChange}
+          onDriverChange={handleDriverChange}
         />
       )}
 
