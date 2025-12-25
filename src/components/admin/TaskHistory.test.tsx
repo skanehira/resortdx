@@ -70,8 +70,8 @@ describe("TaskHistory担当者変更", () => {
     const user = userEvent.setup();
     render(<TaskHistory />);
 
-    // タスク行をクリックしてモーダルを開く
-    const taskRow = screen.getByText("Test Task");
+    // タスク行をクリックしてモーダルを開く（部屋名で識別）
+    const taskRow = screen.getByText("客室101");
     await user.click(taskRow);
 
     // モーダルが開いたことを確認
@@ -85,8 +85,8 @@ describe("TaskHistory担当者変更", () => {
     const user = userEvent.setup();
     render(<TaskHistory />);
 
-    // タスク行をクリックしてモーダルを開く
-    const taskRow = screen.getByText("Test Task");
+    // タスク行をクリックしてモーダルを開く（部屋名で識別）
+    const taskRow = screen.getByText("客室101");
     await user.click(taskRow);
 
     // StaffSelectorを見つける

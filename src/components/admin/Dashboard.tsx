@@ -136,6 +136,7 @@ interface TaskRowProps {
 
 const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
+  const roomName = getRoomName(task.roomId);
 
   const priorityLabels = {
     normal: t("priority.normal"),
@@ -150,11 +151,13 @@ const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
     >
       <td className="font-display">{task.scheduledTime}</td>
       <td>
+        <span className="font-medium whitespace-nowrap">{roomName}</span>
+      </td>
+      <td>
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded">
+          <span className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded whitespace-nowrap">
             {TASK_CATEGORY_LABELS[task.category]}
           </span>
-          <span className="font-medium">{task.title}</span>
           {task.isAnniversaryRelated && (
             <CelebrationIcon size={14} className="text-[var(--kincha)]" />
           )}
@@ -361,6 +364,7 @@ export const Dashboard = () => {
             <thead>
               <tr>
                 <th className="w-20 whitespace-nowrap">{t("table.time")}</th>
+                <th className="w-52 whitespace-nowrap">{t("table.room")}</th>
                 <th className="whitespace-nowrap">{t("table.task")}</th>
                 <th className="w-20 whitespace-nowrap">{t("table.priority")}</th>
                 <th className="w-36 whitespace-nowrap">{t("table.assignee")}</th>

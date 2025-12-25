@@ -343,8 +343,6 @@ const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
   const reservation = getReservationById(task.reservationId);
   const roomName = getRoomName(task.roomId);
-  // Remove room name from task title
-  const titleWithoutRoom = task.title.replace(` ${roomName}`, "").replace(roomName, "");
 
   const priorityLabels = {
     normal: t("priority.normal"),
@@ -370,7 +368,6 @@ const TaskRow = ({ task, onClick, t }: TaskRowProps) => {
           <span className="text-xs px-2 py-0.5 bg-[var(--shironeri-warm)] rounded whitespace-nowrap">
             {TASK_CATEGORY_LABELS[task.category]}
           </span>
-          <span className="font-medium">{titleWithoutRoom}</span>
           {task.isAnniversaryRelated && (
             <CelebrationIcon size={14} className="text-[var(--kincha)]" />
           )}
