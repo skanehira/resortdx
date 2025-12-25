@@ -95,6 +95,139 @@ vi.mock("../../data/mock", () => ({
 // Import after mocking
 import { ShuttleManagement } from "./ShuttleManagement";
 
+describe("TaskDetailModalの共通Modal移行", () => {
+  it("TaskDetailModalが共通Modalのrole=dialogを持つ", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    // 共通Modalを使用している場合、role="dialog"が設定される
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("TaskDetailModalのコンテンツ領域がスクロール可能", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    // 共通Modalを使用している場合、modal-contentにoverflow-y-autoが設定される
+    const content = screen.getByTestId("modal-content");
+    expect(content).toHaveClass("overflow-y-auto");
+  });
+
+  it("ESCキーでTaskDetailModalが閉じる", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
+describe("AssignmentModalの共通Modal移行", () => {
+  it("AssignmentModalが共通Modalのrole=dialogを持つ", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    // タスクカードをクリックしてTaskDetailModalを開く
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    // 「変更」リンクをクリックしてAssignmentModalを開く
+    const changeButton = screen.getByText("変更");
+    await user.click(changeButton);
+
+    // 共通Modalを使用している場合、role="dialog"が設定される
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    // AssignmentModalのタイトルが表示される
+    expect(screen.getByText("割当変更")).toBeInTheDocument();
+  });
+
+  it("AssignmentModalのコンテンツ領域がスクロール可能", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    const changeButton = screen.getByText("変更");
+    await user.click(changeButton);
+
+    // 共通Modalを使用している場合、modal-contentにoverflow-y-autoが設定される
+    const content = screen.getByTestId("modal-content");
+    expect(content).toHaveClass("overflow-y-auto");
+  });
+
+  it("AssignmentModalにフッターが表示される", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const taskCard = screen.getByText("テストゲスト様");
+    await user.click(taskCard);
+
+    const changeButton = screen.getByText("変更");
+    await user.click(changeButton);
+
+    // 共通Modalを使用している場合、フッターがdata-testidで識別できる
+    const footer = screen.getByTestId("modal-footer");
+    expect(footer).toBeInTheDocument();
+    expect(screen.getByText("キャンセル")).toBeInTheDocument();
+    expect(screen.getByText("割当を保存")).toBeInTheDocument();
+  });
+});
+
+describe("CreateShuttleModalの共通Modal移行", () => {
+  it("CreateShuttleModalが共通Modalのrole=dialogを持つ", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    // 「新規作成」ボタンをクリックしてCreateShuttleModalを開く
+    const createButton = screen.getByText("新規作成");
+    await user.click(createButton);
+
+    // 共通Modalを使用している場合、role="dialog"が設定される
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    // CreateShuttleModalのタイトルが表示される（見出しとして）
+    expect(screen.getByRole("heading", { name: "送迎を追加" })).toBeInTheDocument();
+  });
+
+  it("CreateShuttleModalのコンテンツ領域がスクロール可能", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const createButton = screen.getByText("新規作成");
+    await user.click(createButton);
+
+    // 共通Modalを使用している場合、modal-contentにoverflow-y-autoが設定される
+    const content = screen.getByTestId("modal-content");
+    expect(content).toHaveClass("overflow-y-auto");
+  });
+
+  it("ESCキーでCreateShuttleModalが閉じる", async () => {
+    const user = userEvent.setup();
+    render(<ShuttleManagement />);
+
+    const createButton = screen.getByText("新規作成");
+    await user.click(createButton);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
 describe("ShuttleManagement担当者変更", () => {
   it("タスク詳細モーダル内でStaffSelectorが表示される", async () => {
     const user = userEvent.setup();

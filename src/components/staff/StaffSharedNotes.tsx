@@ -9,8 +9,8 @@ import {
   EditIcon,
   TrashIcon,
   CheckIcon,
-  CloseIcon,
 } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 
 interface StaffSharedNotesProps {
   notes: StaffSharedNote[];
@@ -162,107 +162,13 @@ const NoteEditorModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-[var(--shironeri-warm)]">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">
-              {note ? t("sharedNotes.editNote") : t("sharedNotes.addNote")}
-            </h3>
-            <button onClick={onCancel} className="p-2 text-[var(--nezumi)]">
-              <CloseIcon size={20} />
-            </button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-4">
-          {/* Text area */}
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={t("sharedNotes.inputPlaceholder")}
-            className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-            rows={4}
-            autoFocus
-          />
-
-          {/* Important toggle */}
-          <button
-            onClick={() => setIsImportant(!isImportant)}
-            className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
-              isImportant
-                ? "bg-[var(--shu)]/10 border-[var(--shu)]/30"
-                : "bg-[var(--shironeri-warm)] border-transparent"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <AlertIcon
-                size={18}
-                className={isImportant ? "text-[var(--shu)]" : "text-[var(--nezumi)]"}
-              />
-              <span className={isImportant ? "text-[var(--shu)]" : "text-[var(--sumi)]"}>
-                {t("sharedNotes.markImportant")}
-              </span>
-            </span>
-            <div
-              className={`w-10 h-6 rounded-full transition-colors ${
-                isImportant ? "bg-[var(--shu)]" : "bg-[var(--nezumi)]/30"
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${
-                  isImportant ? "translate-x-[18px]" : "translate-x-0.5"
-                }`}
-              />
-            </div>
-          </button>
-
-          {/* Expiry toggle and date */}
-          <div className="space-y-2">
-            <button
-              onClick={() => setHasExpiry(!hasExpiry)}
-              className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                hasExpiry
-                  ? "bg-[var(--kincha)]/10 border-[var(--kincha)]/30"
-                  : "bg-[var(--shironeri-warm)] border-transparent"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <ClockIcon
-                  size={18}
-                  className={hasExpiry ? "text-[var(--kincha)]" : "text-[var(--nezumi)]"}
-                />
-                <span className={hasExpiry ? "text-[var(--kincha)]" : "text-[var(--sumi)]"}>
-                  {t("sharedNotes.setExpiry")}
-                </span>
-              </span>
-              <div
-                className={`w-10 h-6 rounded-full transition-colors ${
-                  hasExpiry ? "bg-[var(--kincha)]" : "bg-[var(--nezumi)]/30"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${
-                    hasExpiry ? "translate-x-[18px]" : "translate-x-0.5"
-                  }`}
-                />
-              </div>
-            </button>
-            {hasExpiry && (
-              <input
-                type="datetime-local"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-[var(--shironeri-warm)] flex gap-2">
+    <Modal
+      isOpen={true}
+      onClose={onCancel}
+      title={note ? t("sharedNotes.editNote") : t("sharedNotes.addNote")}
+      size="md"
+      footer={
+        <div className="flex gap-2">
           <button
             onClick={onCancel}
             className="flex-1 py-3 bg-[var(--shironeri-warm)] text-[var(--nezumi)] rounded-lg font-medium"
@@ -282,8 +188,92 @@ const NoteEditorModal = ({
             {t("sharedNotes.save")}
           </button>
         </div>
+      }
+    >
+      <div className="space-y-4">
+        {/* Text area */}
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder={t("sharedNotes.inputPlaceholder")}
+          className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+          rows={4}
+          autoFocus
+        />
+
+        {/* Important toggle */}
+        <button
+          onClick={() => setIsImportant(!isImportant)}
+          className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
+            isImportant
+              ? "bg-[var(--shu)]/10 border-[var(--shu)]/30"
+              : "bg-[var(--shironeri-warm)] border-transparent"
+          }`}
+        >
+          <span className="flex items-center gap-2">
+            <AlertIcon
+              size={18}
+              className={isImportant ? "text-[var(--shu)]" : "text-[var(--nezumi)]"}
+            />
+            <span className={isImportant ? "text-[var(--shu)]" : "text-[var(--sumi)]"}>
+              {t("sharedNotes.markImportant")}
+            </span>
+          </span>
+          <div
+            className={`w-10 h-6 rounded-full transition-colors ${
+              isImportant ? "bg-[var(--shu)]" : "bg-[var(--nezumi)]/30"
+            }`}
+          >
+            <div
+              className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${
+                isImportant ? "translate-x-[18px]" : "translate-x-0.5"
+              }`}
+            />
+          </div>
+        </button>
+
+        {/* Expiry toggle and date */}
+        <div className="space-y-2">
+          <button
+            onClick={() => setHasExpiry(!hasExpiry)}
+            className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
+              hasExpiry
+                ? "bg-[var(--kincha)]/10 border-[var(--kincha)]/30"
+                : "bg-[var(--shironeri-warm)] border-transparent"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <ClockIcon
+                size={18}
+                className={hasExpiry ? "text-[var(--kincha)]" : "text-[var(--nezumi)]"}
+              />
+              <span className={hasExpiry ? "text-[var(--kincha)]" : "text-[var(--sumi)]"}>
+                {t("sharedNotes.setExpiry")}
+              </span>
+            </span>
+            <div
+              className={`w-10 h-6 rounded-full transition-colors ${
+                hasExpiry ? "bg-[var(--kincha)]" : "bg-[var(--nezumi)]/30"
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${
+                  hasExpiry ? "translate-x-[18px]" : "translate-x-0.5"
+                }`}
+              />
+            </div>
+          </button>
+          {hasExpiry && (
+            <input
+              type="datetime-local"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

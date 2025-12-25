@@ -10,7 +10,8 @@ import type {
 } from "../../../types";
 import { AMENITY_TYPE_LABELS, EQUIPMENT_TYPE_LABELS } from "../../../types";
 import { getRoomName } from "../../../data/mock";
-import { CloseIcon, CheckIcon, WrenchIcon, AlertIcon } from "../../ui/Icons";
+import { CheckIcon, WrenchIcon, AlertIcon } from "../../ui/Icons";
+import { Modal } from "../../ui/Modal";
 
 interface EquipmentReportModalProps {
   roomId: string;
@@ -175,109 +176,13 @@ export const EquipmentReportModal = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--shironeri-warm)]">
-          <div>
-            <h2 className="text-lg font-display font-bold text-[var(--sumi)]">
-              設備・アメニティ確認
-            </h2>
-            <p className="text-sm text-[var(--nezumi)]">{getRoomName(roomId)}</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--shironeri-warm)]">
-            <CloseIcon size={20} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {/* Amenities section */}
-          <div>
-            <h3 className="text-sm font-medium text-[var(--sumi)] mb-3">アメニティ</h3>
-            <div className="space-y-3">
-              {amenities.map((amenity) => (
-                <div
-                  key={amenity.id}
-                  className="flex items-center justify-between p-3 bg-[var(--shironeri-warm)] rounded-lg"
-                >
-                  <span className="text-sm text-[var(--sumi)]">
-                    {AMENITY_TYPE_LABELS[amenity.type]}
-                  </span>
-                  <StockLevelSelector
-                    currentLevel={amenityStates[amenity.id]}
-                    onChange={(level) =>
-                      setAmenityStates((prev) => ({
-                        ...prev,
-                        [amenity.id]: level,
-                      }))
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Equipment section */}
-          <div>
-            <h3 className="text-sm font-medium text-[var(--sumi)] mb-3">設備</h3>
-            <div className="space-y-3">
-              {equipment.map((eq) => (
-                <div key={eq.id} className="p-3 bg-[var(--shironeri-warm)] rounded-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[var(--sumi)]">
-                      {EQUIPMENT_TYPE_LABELS[eq.type]}
-                    </span>
-                  </div>
-                  <EquipmentStatusSelector
-                    currentStatus={equipmentStates[eq.id]?.status || eq.status}
-                    onChange={(status) =>
-                      setEquipmentStates((prev) => ({
-                        ...prev,
-                        [eq.id]: { ...prev[eq.id], status },
-                      }))
-                    }
-                  />
-                  {equipmentStates[eq.id]?.status !== "working" && (
-                    <input
-                      type="text"
-                      placeholder="問題の詳細..."
-                      value={equipmentStates[eq.id]?.notes || ""}
-                      onChange={(e) =>
-                        setEquipmentStates((prev) => ({
-                          ...prev,
-                          [eq.id]: { ...prev[eq.id], notes: e.target.value },
-                        }))
-                      }
-                      className="w-full p-2 text-sm border border-[var(--nezumi)]/30 rounded"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* General notes */}
-          <div>
-            <h3 className="text-sm font-medium text-[var(--sumi)] mb-2">メモ（任意）</h3>
-            <textarea
-              value={generalNotes}
-              onChange={(e) => setGeneralNotes(e.target.value)}
-              placeholder="その他気づいた点..."
-              className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm resize-none"
-              rows={2}
-            />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-[var(--shironeri-warm)] flex gap-3">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="設備・アメニティ確認"
+      size="lg"
+      footer={
+        <div className="flex gap-3">
           <button
             onClick={handleNoChanges}
             className="flex-1 py-3 bg-[var(--nezumi)]/20 text-[var(--sumi)] rounded-lg font-medium"
@@ -291,7 +196,89 @@ export const EquipmentReportModal = ({
             報告
           </button>
         </div>
+      }
+    >
+      {/* Subtitle */}
+      <p className="text-sm text-[var(--nezumi)] -mt-2 mb-4">{getRoomName(roomId)}</p>
+
+      <div className="space-y-6">
+        {/* Amenities section */}
+        <div>
+          <h3 className="text-sm font-medium text-[var(--sumi)] mb-3">アメニティ</h3>
+          <div className="space-y-3">
+            {amenities.map((amenity) => (
+              <div
+                key={amenity.id}
+                className="flex items-center justify-between p-3 bg-[var(--shironeri-warm)] rounded-lg"
+              >
+                <span className="text-sm text-[var(--sumi)]">
+                  {AMENITY_TYPE_LABELS[amenity.type]}
+                </span>
+                <StockLevelSelector
+                  currentLevel={amenityStates[amenity.id]}
+                  onChange={(level) =>
+                    setAmenityStates((prev) => ({
+                      ...prev,
+                      [amenity.id]: level,
+                    }))
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Equipment section */}
+        <div>
+          <h3 className="text-sm font-medium text-[var(--sumi)] mb-3">設備</h3>
+          <div className="space-y-3">
+            {equipment.map((eq) => (
+              <div key={eq.id} className="p-3 bg-[var(--shironeri-warm)] rounded-lg space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--sumi)]">
+                    {EQUIPMENT_TYPE_LABELS[eq.type]}
+                  </span>
+                </div>
+                <EquipmentStatusSelector
+                  currentStatus={equipmentStates[eq.id]?.status || eq.status}
+                  onChange={(status) =>
+                    setEquipmentStates((prev) => ({
+                      ...prev,
+                      [eq.id]: { ...prev[eq.id], status },
+                    }))
+                  }
+                />
+                {equipmentStates[eq.id]?.status !== "working" && (
+                  <input
+                    type="text"
+                    placeholder="問題の詳細..."
+                    value={equipmentStates[eq.id]?.notes || ""}
+                    onChange={(e) =>
+                      setEquipmentStates((prev) => ({
+                        ...prev,
+                        [eq.id]: { ...prev[eq.id], notes: e.target.value },
+                      }))
+                    }
+                    className="w-full p-2 text-sm border border-[var(--nezumi)]/30 rounded"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* General notes */}
+        <div>
+          <h3 className="text-sm font-medium text-[var(--sumi)] mb-2">メモ（任意）</h3>
+          <textarea
+            value={generalNotes}
+            onChange={(e) => setGeneralNotes(e.target.value)}
+            placeholder="その他気づいた点..."
+            className="w-full p-3 border border-[var(--nezumi)]/30 rounded-lg text-sm resize-none"
+            rows={2}
+          />
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 };

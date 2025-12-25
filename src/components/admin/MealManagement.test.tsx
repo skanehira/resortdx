@@ -4,26 +4,28 @@ import { describe, it, expect, vi } from "vitest";
 
 // Mock data
 vi.mock("../../data/mock", () => ({
-  mockCelebrationTasks: [
+  mockMealTasks: [
     {
-      id: "CELEB001",
+      id: "MEAL001",
       reservationId: "RES001",
       guestName: "テストゲスト",
       guestNameKana: "テストゲスト",
       roomId: "room-1",
-      celebrationType: "birthday",
-      celebrationDescription: "誕生日のお祝い",
-      items: [{ item: "cake", isChecked: false }],
-      executionTime: "18:00",
-      status: "pending",
+      mealType: "dinner",
+      courseType: "kaiseki",
+      servingTime: "18:00",
+      numberOfGuests: 2,
+      status: "preparing",
       assignedStaffId: "STF001",
       priority: "normal",
+      dietaryRestrictions: [],
+      specialRequests: null,
       notes: null,
-      completionReport: null,
       completedAt: null,
-      createdAt: "2025-12-23",
+      createdAt: "2025-12-25",
     },
   ],
+  mockMealOrderNotifications: [],
   mockStaff: [
     {
       id: "STF001",
@@ -59,12 +61,12 @@ vi.mock("../../data/mock", () => ({
 }));
 
 // Import after mocking
-import { CelebrationManagement } from "./CelebrationManagement";
+import { MealManagement } from "./MealManagement";
 
 describe("TaskDetailModalの共通Modal移行", () => {
   it("TaskDetailModalが共通Modalのrole=dialogを持つ", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const taskCard = screen.getByText("テストゲスト様");
     await user.click(taskCard);
@@ -75,7 +77,7 @@ describe("TaskDetailModalの共通Modal移行", () => {
 
   it("TaskDetailModalのコンテンツ領域がスクロール可能", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const taskCard = screen.getByText("テストゲスト様");
     await user.click(taskCard);
@@ -87,7 +89,7 @@ describe("TaskDetailModalの共通Modal移行", () => {
 
   it("ESCキーでTaskDetailModalが閉じる", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const taskCard = screen.getByText("テストゲスト様");
     await user.click(taskCard);
@@ -100,22 +102,22 @@ describe("TaskDetailModalの共通Modal移行", () => {
   });
 });
 
-describe("CreateCelebrationModalの共通Modal移行", () => {
-  it("CreateCelebrationModalが共通Modalのrole=dialogを持つ", async () => {
+describe("CreateMealModalの共通Modal移行", () => {
+  it("CreateMealModalが共通Modalのrole=dialogを持つ", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const createButton = screen.getByText("新規作成");
     await user.click(createButton);
 
     // 共通Modalを使用している場合、role="dialog"が設定される
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "お祝い対応を追加" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "配膳を追加" })).toBeInTheDocument();
   });
 
-  it("CreateCelebrationModalのコンテンツ領域がスクロール可能", async () => {
+  it("CreateMealModalのコンテンツ領域がスクロール可能", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const createButton = screen.getByText("新規作成");
     await user.click(createButton);
@@ -125,9 +127,9 @@ describe("CreateCelebrationModalの共通Modal移行", () => {
     expect(content).toHaveClass("overflow-y-auto");
   });
 
-  it("ESCキーでCreateCelebrationModalが閉じる", async () => {
+  it("ESCキーでCreateMealModalが閉じる", async () => {
     const user = userEvent.setup();
-    render(<CelebrationManagement />);
+    render(<MealManagement />);
 
     const createButton = screen.getByText("新規作成");
     await user.click(createButton);
@@ -137,41 +139,5 @@ describe("CreateCelebrationModalの共通Modal移行", () => {
     await user.keyboard("{Escape}");
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-});
-
-describe("CelebrationManagement担当者変更", () => {
-  it("タスク詳細モーダル内でStaffSelectorが表示される", async () => {
-    const user = userEvent.setup();
-    render(<CelebrationManagement />);
-
-    // タスクカードをクリックしてモーダルを開く
-    const taskCard = screen.getByText("テストゲスト様");
-    await user.click(taskCard);
-
-    // モーダルが開いたことを確認
-    expect(screen.getByText("お祝い詳細")).toBeInTheDocument();
-
-    // StaffSelectorが表示されていることを確認（aria-labelで識別）
-    expect(screen.getByLabelText("担当者を選択")).toBeInTheDocument();
-  });
-
-  it("StaffSelectorで担当者を変更できる", async () => {
-    const user = userEvent.setup();
-    render(<CelebrationManagement />);
-
-    // タスクカードをクリックしてモーダルを開く
-    const taskCard = screen.getByText("テストゲスト様");
-    await user.click(taskCard);
-
-    // StaffSelectorを見つける
-    const selector = screen.getByLabelText("担当者を選択");
-    expect(selector).toHaveValue("STF001");
-
-    // 別のスタッフを選択
-    await user.selectOptions(selector, "STF002");
-
-    // 選択が反映されていることを確認
-    expect(selector).toHaveValue("STF002");
   });
 });

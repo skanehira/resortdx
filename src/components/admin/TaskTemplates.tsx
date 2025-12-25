@@ -235,154 +235,13 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="shoji-panel w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
-        <div className="p-5 border-b border-[rgba(45,41,38,0.08)]">
-          <h2 className="text-lg font-display font-medium text-[var(--sumi)]">
-            {isEdit ? "テンプレート編集" : "新規テンプレート作成"}
-          </h2>
-        </div>
-
-        <div className="p-5 space-y-5">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              テンプレート名
-            </label>
-            <input
-              type="text"
-              className="input"
-              value={formData.name || ""}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="例: 客室清掃（スタンダード）"
-            />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              カテゴリ
-            </label>
-            <select
-              className="input select"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  category: e.target.value as TaskCategory,
-                })
-              }
-            >
-              {Object.entries(TASK_CATEGORY_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">説明</label>
-            <textarea
-              className="input min-h-[80px] resize-none"
-              value={formData.description || ""}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="タスクの詳細説明"
-            />
-          </div>
-
-          {/* Duration */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              標準所要時間（分）
-            </label>
-            <input
-              type="number"
-              className="input w-32"
-              value={formData.defaultDuration || 30}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  defaultDuration: parseInt(e.target.value) || 30,
-                })
-              }
-              min="5"
-              step="5"
-            />
-          </div>
-
-          {/* Applicable Room Types */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              対象部屋タイプ
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {roomTypes.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => handleRoomTypeToggle(type)}
-                  className={`px-3 py-1.5 text-sm rounded transition-all ${
-                    formData.applicableRoomTypes?.includes(type)
-                      ? "bg-[var(--ai)] text-white"
-                      : "bg-[var(--shironeri-warm)] text-[var(--sumi-light)]"
-                  }`}
-                >
-                  {ROOM_TYPE_LABELS[type]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Timing Reference */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              基準タイミング
-            </label>
-            <select
-              className="input select"
-              value={formData.relativeTime?.reference}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  relativeTime: {
-                    ...formData.relativeTime!,
-                    reference: e.target.value as "check_in" | "check_out",
-                  },
-                })
-              }
-            >
-              <option value="check_in">チェックイン</option>
-              <option value="check_out">チェックアウト</option>
-            </select>
-          </div>
-
-          {/* Offset Minutes */}
-          <div>
-            <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
-              オフセット（分） - 負の値は事前、正の値は事後
-            </label>
-            <input
-              type="number"
-              className="input w-40"
-              value={formData.relativeTime?.offsetMinutes || 0}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  relativeTime: {
-                    ...formData.relativeTime!,
-                    offsetMinutes: parseInt(e.target.value) || 0,
-                  },
-                })
-              }
-              step="30"
-            />
-            <p className="text-xs text-[var(--nezumi)] mt-1">例: -120 = 2時間前、180 = 3時間後</p>
-          </div>
-        </div>
-
-        <div className="p-5 border-t border-[rgba(45,41,38,0.08)] flex justify-end gap-3">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={isEdit ? "テンプレート編集" : "新規テンプレート作成"}
+      size="md"
+      footer={
+        <div className="flex justify-end gap-3">
           <button onClick={onClose} className="btn btn-secondary">
             キャンセル
           </button>
@@ -398,8 +257,147 @@ const TemplateForm = ({ template, onClose, onSave }: TemplateFormProps) => {
             {isEdit ? "更新" : "作成"}
           </button>
         </div>
+      }
+    >
+      <div className="space-y-5">
+        {/* Name */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            テンプレート名
+          </label>
+          <input
+            type="text"
+            className="input"
+            value={formData.name || ""}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="例: 客室清掃（スタンダード）"
+          />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            カテゴリ
+          </label>
+          <select
+            className="input select"
+            value={formData.category}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                category: e.target.value as TaskCategory,
+              })
+            }
+          >
+            {Object.entries(TASK_CATEGORY_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">説明</label>
+          <textarea
+            className="input min-h-[80px] resize-none"
+            value={formData.description || ""}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="タスクの詳細説明"
+          />
+        </div>
+
+        {/* Duration */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            標準所要時間（分）
+          </label>
+          <input
+            type="number"
+            className="input w-32"
+            value={formData.defaultDuration || 30}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                defaultDuration: parseInt(e.target.value) || 30,
+              })
+            }
+            min="5"
+            step="5"
+          />
+        </div>
+
+        {/* Applicable Room Types */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            対象部屋タイプ
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {roomTypes.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleRoomTypeToggle(type)}
+                className={`px-3 py-1.5 text-sm rounded transition-all ${
+                  formData.applicableRoomTypes?.includes(type)
+                    ? "bg-[var(--ai)] text-white"
+                    : "bg-[var(--shironeri-warm)] text-[var(--sumi-light)]"
+                }`}
+              >
+                {ROOM_TYPE_LABELS[type]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Timing Reference */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            基準タイミング
+          </label>
+          <select
+            className="input select"
+            value={formData.relativeTime?.reference}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                relativeTime: {
+                  ...formData.relativeTime!,
+                  reference: e.target.value as "check_in" | "check_out",
+                },
+              })
+            }
+          >
+            <option value="check_in">チェックイン</option>
+            <option value="check_out">チェックアウト</option>
+          </select>
+        </div>
+
+        {/* Offset Minutes */}
+        <div>
+          <label className="block text-sm font-display text-[var(--sumi-light)] mb-2">
+            オフセット（分） - 負の値は事前、正の値は事後
+          </label>
+          <input
+            type="number"
+            className="input w-40"
+            value={formData.relativeTime?.offsetMinutes || 0}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                relativeTime: {
+                  ...formData.relativeTime!,
+                  offsetMinutes: parseInt(e.target.value) || 0,
+                },
+              })
+            }
+            step="30"
+          />
+          <p className="text-xs text-[var(--nezumi)] mt-1">例: -120 = 2時間前、180 = 3時間後</p>
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

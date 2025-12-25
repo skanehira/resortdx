@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { RoomCleaningStatus, Task, Staff } from "../../types";
 import { ROOM_CLEANING_STATUS_LABELS } from "../../types";
 import { getRoomName } from "../../data/mock";
-import { RoomIcon, ClockIcon, CloseIcon } from "../ui/Icons";
+import { RoomIcon, ClockIcon } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 
 // フロア別部屋配置 (roomId based)
 const FLOOR_LAYOUT: Record<string, string[]> = {
@@ -109,74 +110,58 @@ const RoomDetailModal = ({ room, onClose }: { room: RoomStatusInfo; onClose: () 
   const roomName = getRoomName(room.roomId);
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-6 animate-slide-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* ヘッダー */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${colors.bg} ${colors.border} border`}>
-              <RoomIcon size={24} className={colors.text} />
+    <Modal isOpen={true} onClose={onClose} title={roomName} size="md">
+      {/* ステータスバッジ */}
+      <div className="flex items-center gap-3 -mt-2 mb-4">
+        <div className={`p-2 rounded-lg ${colors.bg} ${colors.border} border`}>
+          <RoomIcon size={24} className={colors.text} />
+        </div>
+        <span className={`text-sm font-medium ${colors.text}`}>
+          {ROOM_CLEANING_STATUS_LABELS[room.status]}
+        </span>
+      </div>
+
+      {/* 詳細情報 */}
+      <div className="space-y-3">
+        {/* 担当者 */}
+        {room.assignedStaff && (
+          <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded-lg">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: room.assignedStaff.avatarColor }}
+            >
+              {room.assignedStaff.name.charAt(0)}
             </div>
             <div>
-              <h3 className="text-xl font-display font-bold text-[var(--sumi)]">{roomName}</h3>
-              <span className={`text-sm font-medium ${colors.text}`}>
-                {ROOM_CLEANING_STATUS_LABELS[room.status]}
-              </span>
+              <p className="text-xs text-[var(--nezumi)]">担当スタッフ</p>
+              <p className="font-medium text-[var(--sumi)]">{room.assignedStaff.name}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--shironeri-warm)]">
-            <CloseIcon size={20} />
-          </button>
-        </div>
+        )}
 
-        {/* 詳細情報 */}
-        <div className="space-y-3">
-          {/* 担当者 */}
-          {room.assignedStaff && (
-            <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded-lg">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: room.assignedStaff.avatarColor }}
-              >
-                {room.assignedStaff.name.charAt(0)}
-              </div>
-              <div>
-                <p className="text-xs text-[var(--nezumi)]">担当スタッフ</p>
-                <p className="font-medium text-[var(--sumi)]">{room.assignedStaff.name}</p>
-              </div>
+        {/* 予定時間 */}
+        {room.cleaningTask && (
+          <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded-lg">
+            <ClockIcon size={20} className="text-[var(--nezumi)]" />
+            <div>
+              <p className="text-xs text-[var(--nezumi)]">予定時間</p>
+              <p className="font-medium text-[var(--sumi)]">
+                {room.cleaningTask.scheduledTime} 〜（
+                {room.cleaningTask.estimatedDuration}分）
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* 予定時間 */}
-          {room.cleaningTask && (
-            <div className="flex items-center gap-3 p-3 bg-[var(--shironeri-warm)] rounded-lg">
-              <ClockIcon size={20} className="text-[var(--nezumi)]" />
-              <div>
-                <p className="text-xs text-[var(--nezumi)]">予定時間</p>
-                <p className="font-medium text-[var(--sumi)]">
-                  {room.cleaningTask.scheduledTime} 〜（
-                  {room.cleaningTask.estimatedDuration}分）
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* タスク説明 */}
-          {room.cleaningTask?.description && (
-            <div className="p-3 bg-[var(--shironeri-warm)] rounded-lg">
-              <p className="text-xs text-[var(--nezumi)] mb-1">メモ</p>
-              <p className="text-sm text-[var(--sumi)]">{room.cleaningTask.description}</p>
-            </div>
-          )}
-        </div>
+        {/* タスク説明 */}
+        {room.cleaningTask?.description && (
+          <div className="p-3 bg-[var(--shironeri-warm)] rounded-lg">
+            <p className="text-xs text-[var(--nezumi)] mb-1">メモ</p>
+            <p className="text-sm text-[var(--sumi)]">{room.cleaningTask.description}</p>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 };
 

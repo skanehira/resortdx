@@ -27,7 +27,6 @@ import {
   MealIcon,
   ClockIcon,
   AlertIcon,
-  CloseIcon,
   UserIcon,
   AllergyIcon,
   NotificationBadgeIcon,
@@ -36,6 +35,7 @@ import {
   PassengerIcon,
   PlusIcon,
 } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 import { EditableTimeDisplay } from "./shared/TimeEditForm";
 
 // Filter type for meal tasks
@@ -393,154 +393,146 @@ const TaskDetailModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">配膳詳細</h3>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="配膳詳細"
+      size="lg"
+      footer={
+        nextStatus && task.mealStatus !== "completed" ? (
           <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
+            onClick={() => onStatusChange(task.id, nextStatus)}
+            className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
           >
-            <CloseIcon size={20} />
+            {statusButtonLabels[task.mealStatus]}
           </button>
+        ) : undefined
+      }
+    >
+      <div className="space-y-4">
+        {/* Status and progress */}
+        <div className="text-center">
+          <MealStatusBadge status={task.needsCheck ? "needs_check" : task.mealStatus} />
+          <div className="mt-3">
+            <MealProgressIndicator status={task.mealStatus} needsCheck={task.needsCheck} />
+          </div>
         </div>
 
-        <div className="p-4 space-y-4">
-          {/* Status and progress */}
-          <div className="text-center">
-            <MealStatusBadge status={task.needsCheck ? "needs_check" : task.mealStatus} />
-            <div className="mt-3">
-              <MealProgressIndicator status={task.mealStatus} needsCheck={task.needsCheck} />
-            </div>
-          </div>
-
-          {/* Guest info */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <PassengerIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
-              {task.isAnniversaryRelated && (
-                <CelebrationIcon size={16} className="text-[var(--kincha)]" />
-              )}
-            </div>
-            <div className="text-lg font-display font-medium text-[var(--sumi)]">
-              {getRoomName(task.roomId)} {task.guestName}様
-            </div>
-            <div className="text-sm text-[var(--nezumi)]">
-              {task.guestNameKana} / {task.guestCount}名
-            </div>
-          </div>
-
-          {/* Meal info */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <MealIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">食事内容</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-              <div>
-                <span className="text-[var(--nezumi)]">タイプ:</span>
-                <span className="ml-2 font-medium text-[var(--sumi)]">
-                  {MEAL_TYPE_LABELS[task.mealType]}
-                </span>
-              </div>
-              <div>
-                <span className="text-[var(--nezumi)]">コース:</span>
-                <span className="ml-2 font-medium text-[var(--sumi)]">
-                  {COURSE_TYPE_LABELS[task.courseType]}
-                </span>
-              </div>
-            </div>
-            <EditableTimeDisplay
-              value={task.scheduledTime}
-              onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
-              label="配膳予定時刻"
-              size="lg"
-              accentColor="ai"
-            />
-          </div>
-
-          {/* Allergy info */}
-          {(task.dietaryRestrictions.length > 0 || task.dietaryNotes) && (
-            <div className="shoji-panel p-4 border-l-3 border-l-[var(--shu)]">
-              <div className="flex items-center gap-2 mb-2 text-[var(--shu)]">
-                <AllergyIcon size={18} />
-                <span className="font-display font-semibold">アレルギー・食事制限</span>
-              </div>
-              {task.dietaryRestrictions.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {task.dietaryRestrictions.map((r) => (
-                    <span
-                      key={r}
-                      className="px-2 py-1 bg-[var(--shu)]/10 text-[var(--shu)] text-sm rounded"
-                    >
-                      {DIETARY_RESTRICTION_LABELS[r]}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {task.dietaryNotes && (
-                <div className="text-sm text-[var(--sumi)]">{task.dietaryNotes}</div>
-              )}
-            </div>
-          )}
-
-          {/* Staff assignment */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <UserIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">担当スタッフ</span>
-            </div>
-            {staff ? (
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                  style={{ backgroundColor: staff.avatarColor }}
-                >
-                  {staff.name.charAt(0)}
-                </div>
-                <span className="font-medium text-[var(--sumi)]">{staff.name}</span>
-              </div>
-            ) : (
-              <span className="text-[var(--shu)]">未割当</span>
+        {/* Guest info */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <PassengerIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
+            {task.isAnniversaryRelated && (
+              <CelebrationIcon size={16} className="text-[var(--kincha)]" />
             )}
           </div>
+          <div className="text-lg font-display font-medium text-[var(--sumi)]">
+            {getRoomName(task.roomId)} {task.guestName}様
+          </div>
+          <div className="text-sm text-[var(--nezumi)]">
+            {task.guestNameKana} / {task.guestCount}名
+          </div>
+        </div>
 
-          {/* Notes */}
-          {task.notes && (
-            <div className="shoji-panel p-4">
-              <div className="text-sm text-[var(--nezumi)] mb-1">備考</div>
-              <div className="text-[var(--sumi)]">{task.notes}</div>
+        {/* Meal info */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <MealIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">食事内容</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+            <div>
+              <span className="text-[var(--nezumi)]">タイプ:</span>
+              <span className="ml-2 font-medium text-[var(--sumi)]">
+                {MEAL_TYPE_LABELS[task.mealType]}
+              </span>
             </div>
-          )}
+            <div>
+              <span className="text-[var(--nezumi)]">コース:</span>
+              <span className="ml-2 font-medium text-[var(--sumi)]">
+                {COURSE_TYPE_LABELS[task.courseType]}
+              </span>
+            </div>
+          </div>
+          <EditableTimeDisplay
+            value={task.scheduledTime}
+            onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+            label="配膳予定時刻"
+            size="lg"
+            accentColor="ai"
+          />
+        </div>
 
-          {/* Needs check toggle */}
-          {task.mealStatus !== "completed" && (
-            <button
-              onClick={() => onToggleNeedsCheck(task.id)}
-              className={`w-full py-2 rounded-lg font-display text-sm transition-colors ${
-                task.needsCheck
-                  ? "bg-[var(--shu)]/10 text-[var(--shu)] hover:bg-[var(--shu)]/20"
-                  : "bg-[var(--shironeri-warm)] text-[var(--nezumi)] hover:bg-[var(--nezumi)]/10"
-              }`}
-            >
-              {task.needsCheck ? "再確認を解除" : "再確認が必要"}
-            </button>
-          )}
+        {/* Allergy info */}
+        {(task.dietaryRestrictions.length > 0 || task.dietaryNotes) && (
+          <div className="shoji-panel p-4 border-l-3 border-l-[var(--shu)]">
+            <div className="flex items-center gap-2 mb-2 text-[var(--shu)]">
+              <AllergyIcon size={18} />
+              <span className="font-display font-semibold">アレルギー・食事制限</span>
+            </div>
+            {task.dietaryRestrictions.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {task.dietaryRestrictions.map((r) => (
+                  <span
+                    key={r}
+                    className="px-2 py-1 bg-[var(--shu)]/10 text-[var(--shu)] text-sm rounded"
+                  >
+                    {DIETARY_RESTRICTION_LABELS[r]}
+                  </span>
+                ))}
+              </div>
+            )}
+            {task.dietaryNotes && (
+              <div className="text-sm text-[var(--sumi)]">{task.dietaryNotes}</div>
+            )}
+          </div>
+        )}
 
-          {/* Status update button */}
-          {nextStatus && task.mealStatus !== "completed" && (
-            <button
-              onClick={() => onStatusChange(task.id, nextStatus)}
-              className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
-            >
-              {statusButtonLabels[task.mealStatus]}
-            </button>
+        {/* Staff assignment */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <UserIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">担当スタッフ</span>
+          </div>
+          {staff ? (
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                style={{ backgroundColor: staff.avatarColor }}
+              >
+                {staff.name.charAt(0)}
+              </div>
+              <span className="font-medium text-[var(--sumi)]">{staff.name}</span>
+            </div>
+          ) : (
+            <span className="text-[var(--shu)]">未割当</span>
           )}
         </div>
+
+        {/* Notes */}
+        {task.notes && (
+          <div className="shoji-panel p-4">
+            <div className="text-sm text-[var(--nezumi)] mb-1">備考</div>
+            <div className="text-[var(--sumi)]">{task.notes}</div>
+          </div>
+        )}
+
+        {/* Needs check toggle */}
+        {task.mealStatus !== "completed" && (
+          <button
+            onClick={() => onToggleNeedsCheck(task.id)}
+            className={`w-full py-2 rounded-lg font-display text-sm transition-colors ${
+              task.needsCheck
+                ? "bg-[var(--shu)]/10 text-[var(--shu)] hover:bg-[var(--shu)]/20"
+                : "bg-[var(--shironeri-warm)] text-[var(--nezumi)] hover:bg-[var(--nezumi)]/10"
+            }`}
+          >
+            {task.needsCheck ? "再確認を解除" : "再確認が必要"}
+          </button>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 };
 
@@ -622,272 +614,259 @@ const CreateMealModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">配膳を追加</h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
-          >
-            <CloseIcon size={20} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Guest Info */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <PassengerIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  部屋 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <select
-                  value={formData.roomId}
-                  onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                >
-                  <option value="">選択してください</option>
-                  {mockRooms.map((room) => (
-                    <option key={room.id} value={room.id}>
-                      {room.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  人数 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={formData.guestCount}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      guestCount: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  お名前 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.guestName}
-                  onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
-                  placeholder="例: 山田"
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">フリガナ</label>
-                <input
-                  type="text"
-                  value={formData.guestNameKana}
-                  onChange={(e) => setFormData({ ...formData, guestNameKana: e.target.value })}
-                  placeholder="例: ヤマダ"
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                />
-              </div>
-            </div>
+    <Modal isOpen={true} onClose={onClose} title="配膳を追加" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Guest Info */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <PassengerIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
           </div>
-
-          {/* Meal Info */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <MealIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">食事内容</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  食事タイプ <span className="text-[var(--shu)]">*</span>
-                </label>
-                <select
-                  value={formData.mealType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      mealType: e.target.value as MealType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  {Object.entries(MEAL_TYPE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  コース <span className="text-[var(--shu)]">*</span>
-                </label>
-                <select
-                  value={formData.courseType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      courseType: e.target.value as CourseType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  {Object.entries(COURSE_TYPE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                部屋 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <select
+                value={formData.roomId}
+                onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              >
+                <option value="">選択してください</option>
+                {mockRooms.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm text-[var(--nezumi)] mb-1">
-                配膳時刻 <span className="text-[var(--shu)]">*</span>
+                人数 <span className="text-[var(--shu)]">*</span>
               </label>
               <input
-                type="time"
-                value={formData.scheduledTime}
-                onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+                type="number"
+                min="1"
+                max="10"
+                value={formData.guestCount}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    guestCount: parseInt(e.target.value) || 1,
+                  })
+                }
                 className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
                 required
               />
             </div>
           </div>
-
-          {/* Dietary Restrictions */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <AllergyIcon size={18} className="text-[var(--shu)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">
-                アレルギー・食事制限
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {dietaryOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleDietaryToggle(option)}
-                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                    formData.dietaryRestrictions.includes(option)
-                      ? "bg-[var(--shu)] text-white"
-                      : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
-                  }`}
-                >
-                  {DIETARY_RESTRICTION_LABELS[option]}
-                </button>
-              ))}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                お名前 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.guestName}
+                onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
+                placeholder="例: 山田"
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
             </div>
             <div>
-              <label className="block text-sm text-[var(--nezumi)] mb-1">その他の注意事項</label>
-              <textarea
-                value={formData.dietaryNotes}
-                onChange={(e) => setFormData({ ...formData, dietaryNotes: e.target.value })}
-                placeholder="その他のアレルギーや食事制限があれば入力..."
-                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
-                rows={2}
+              <label className="block text-sm text-[var(--nezumi)] mb-1">フリガナ</label>
+              <input
+                type="text"
+                value={formData.guestNameKana}
+                onChange={(e) => setFormData({ ...formData, guestNameKana: e.target.value })}
+                placeholder="例: ヤマダ"
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
               />
             </div>
           </div>
+        </div>
 
-          {/* Options */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <UserIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">オプション</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">担当スタッフ</label>
-                <StaffSelector
-                  value={formData.assignedStaffId || null}
-                  onChange={(staffId) =>
-                    setFormData({
-                      ...formData,
-                      assignedStaffId: staffId ?? "",
-                    })
-                  }
-                  showUnassigned
-                  ariaLabel="担当スタッフを選択"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">優先度</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      priority: e.target.value as "normal" | "high" | "urgent",
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  <option value="normal">通常</option>
-                  <option value="high">優先</option>
-                  <option value="urgent">緊急</option>
-                </select>
-              </div>
+        {/* Meal Info */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MealIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">食事内容</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                食事タイプ <span className="text-[var(--shu)]">*</span>
+              </label>
+              <select
+                value={formData.mealType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    mealType: e.target.value as MealType,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                {Object.entries(MEAL_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isAnniversaryRelated}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      isAnniversaryRelated: e.target.checked,
-                    })
-                  }
-                  className="w-4 h-4 rounded border-[var(--nezumi)]"
-                />
-                <span className="text-sm text-[var(--sumi)]">記念日対応が必要</span>
-                <CelebrationIcon size={16} className="text-[var(--kincha)]" />
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                コース <span className="text-[var(--shu)]">*</span>
               </label>
+              <select
+                value={formData.courseType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    courseType: e.target.value as CourseType,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                {Object.entries(COURSE_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-
-          {/* Notes */}
           <div>
-            <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="特記事項があれば入力..."
-              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
-              rows={3}
+            <label className="block text-sm text-[var(--nezumi)] mb-1">
+              配膳時刻 <span className="text-[var(--shu)]">*</span>
+            </label>
+            <input
+              type="time"
+              value={formData.scheduledTime}
+              onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              required
             />
           </div>
+        </div>
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            className="w-full py-3 bg-[var(--kincha)] text-white rounded-lg font-display font-medium hover:bg-[var(--kincha-deep)] transition-colors"
-          >
-            配膳を追加
-          </button>
-        </form>
-      </div>
-    </div>
+        {/* Dietary Restrictions */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <AllergyIcon size={18} className="text-[var(--shu)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">
+              アレルギー・食事制限
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {dietaryOptions.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleDietaryToggle(option)}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  formData.dietaryRestrictions.includes(option)
+                    ? "bg-[var(--shu)] text-white"
+                    : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+                }`}
+              >
+                {DIETARY_RESTRICTION_LABELS[option]}
+              </button>
+            ))}
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--nezumi)] mb-1">その他の注意事項</label>
+            <textarea
+              value={formData.dietaryNotes}
+              onChange={(e) => setFormData({ ...formData, dietaryNotes: e.target.value })}
+              placeholder="その他のアレルギーや食事制限があれば入力..."
+              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+              rows={2}
+            />
+          </div>
+        </div>
+
+        {/* Options */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <UserIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">オプション</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">担当スタッフ</label>
+              <StaffSelector
+                value={formData.assignedStaffId || null}
+                onChange={(staffId) =>
+                  setFormData({
+                    ...formData,
+                    assignedStaffId: staffId ?? "",
+                  })
+                }
+                showUnassigned
+                ariaLabel="担当スタッフを選択"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">優先度</label>
+              <select
+                value={formData.priority}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    priority: e.target.value as "normal" | "high" | "urgent",
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                <option value="normal">通常</option>
+                <option value="high">優先</option>
+                <option value="urgent">緊急</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isAnniversaryRelated}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    isAnniversaryRelated: e.target.checked,
+                  })
+                }
+                className="w-4 h-4 rounded border-[var(--nezumi)]"
+              />
+              <span className="text-sm text-[var(--sumi)]">記念日対応が必要</span>
+              <CelebrationIcon size={16} className="text-[var(--kincha)]" />
+            </label>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div>
+          <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="特記事項があれば入力..."
+            className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+            rows={3}
+          />
+        </div>
+
+        {/* Submit button */}
+        <button
+          type="submit"
+          className="w-full py-3 bg-[var(--kincha)] text-white rounded-lg font-display font-medium hover:bg-[var(--kincha-deep)] transition-colors"
+        >
+          配膳を追加
+        </button>
+      </form>
+    </Modal>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   mockStaff,
 } from "../../data/mock";
 import { MessageIcon, PlusIcon, SendIcon, ArrowLeftIcon, UserIcon, CheckIcon } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 
 interface StaffChatProps {
   currentStaff: Staff;
@@ -147,26 +148,40 @@ const NewChatModal = ({
     setGroupName("");
   };
 
-  if (!isOpen) return null;
-
   const canSubmit =
     mode === "dm"
       ? selectedStaffIds.length === 1
       : selectedStaffIds.length > 0 && groupName.trim() !== "";
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between p-4 border-b border-[var(--shironeri-warm)]">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="新規チャット"
+      fullscreen
+      showCloseButton={false}
+      closeOnOverlayClick={false}
+      leftAction={
         <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--shironeri-warm)]">
           <ArrowLeftIcon size={20} />
         </button>
-        <h2 className="text-lg font-display font-bold text-[var(--sumi)]">新規チャット</h2>
-        <div className="w-10" /> {/* Spacer for centering */}
-      </div>
-
+      }
+      footer={
+        <button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className={`w-full py-3 rounded-lg font-medium transition-colors ${
+            canSubmit
+              ? "bg-[var(--ai)] text-white"
+              : "bg-[var(--nezumi)]/20 text-[var(--nezumi)] cursor-not-allowed"
+          }`}
+        >
+          チャットを開始
+        </button>
+      }
+    >
       {/* Mode Switch */}
-      <div className="shrink-0 p-4 border-b border-[var(--shironeri-warm)]">
+      <div className="shrink-0 p-4 border-b border-[var(--shironeri-warm)] -mx-4 -mt-4">
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -199,7 +214,7 @@ const NewChatModal = ({
 
       {/* Group Name Input */}
       {mode === "group" && (
-        <div className="shrink-0 p-4 border-b border-[var(--shironeri-warm)]">
+        <div className="shrink-0 p-4 border-b border-[var(--shironeri-warm)] -mx-4">
           <label className="block text-sm font-medium text-[var(--sumi)] mb-2">グループ名</label>
           <input
             type="text"
@@ -212,7 +227,7 @@ const NewChatModal = ({
       )}
 
       {/* Staff List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="pt-4">
         <p className="text-sm text-[var(--nezumi)] mb-3">
           {mode === "dm" ? "スタッフを選択" : "メンバーを選択"}
           {selectedStaffIds.length > 0 && (
@@ -258,22 +273,7 @@ const NewChatModal = ({
           })}
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="shrink-0 p-4 border-t border-[var(--shironeri-warm)] safe-area-pb">
-        <button
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className={`w-full py-3 rounded-lg font-medium transition-colors ${
-            canSubmit
-              ? "bg-[var(--ai)] text-white"
-              : "bg-[var(--nezumi)]/20 text-[var(--nezumi)] cursor-not-allowed"
-          }`}
-        >
-          チャットを開始
-        </button>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

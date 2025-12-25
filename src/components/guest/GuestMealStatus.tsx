@@ -3,6 +3,7 @@ import type { MealTask, MealType } from "../../types";
 import { MEAL_TYPE_LABELS, COURSE_TYPE_LABELS, DIETARY_RESTRICTION_LABELS } from "../../types";
 import { getMealTaskById, getRoomName } from "../../data/mock";
 import { DiningIcon, ClockIcon, CheckIcon, AllergyIcon } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 
 // 食事タイプ別アイコン
 const MealTypeIcon = ({ mealType }: { mealType: MealType }) => {
@@ -94,45 +95,12 @@ const TimeChangeModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* 背景オーバーレイ */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-
-      {/* モーダル本体 */}
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg p-6 pb-safe animate-slide-up">
-        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
-
-        <h3 className="text-xl font-bold text-gray-900 text-center mb-2">時刻変更のリクエスト</h3>
-        <p className="text-sm text-gray-600 text-center mb-6">ご希望の時刻をお選びください</p>
-
-        {/* 時刻選択グリッド */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {availableTimes.map((time) => (
-            <button
-              key={time}
-              onClick={() => setSelectedTime(time)}
-              className={`py-4 px-3 rounded-xl font-bold text-lg transition-all ${
-                selectedTime === time
-                  ? "bg-[var(--ai)] text-white shadow-lg"
-                  : time === currentTime
-                    ? "bg-gray-100 text-gray-400 border-2 border-dashed border-gray-300"
-                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {time}
-              {time === currentTime && <div className="text-xs font-normal mt-1">現在</div>}
-            </button>
-          ))}
-        </div>
-
-        {/* 注意事項 */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
-          <p className="text-sm text-amber-700">
-            ※ 時刻変更はスタッフの確認後に確定します。ご希望に添えない場合もございます。
-          </p>
-        </div>
-
-        {/* ボタン */}
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="時刻変更のリクエスト"
+      size="md"
+      footer={
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -152,8 +120,38 @@ const TimeChangeModal = ({
             リクエスト送信
           </button>
         </div>
+      }
+    >
+      {/* 説明 */}
+      <p className="text-sm text-gray-600 text-center -mt-2 mb-6">ご希望の時刻をお選びください</p>
+
+      {/* 時刻選択グリッド */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {availableTimes.map((time) => (
+          <button
+            key={time}
+            onClick={() => setSelectedTime(time)}
+            className={`py-4 px-3 rounded-xl font-bold text-lg transition-all ${
+              selectedTime === time
+                ? "bg-[var(--ai)] text-white shadow-lg"
+                : time === currentTime
+                  ? "bg-gray-100 text-gray-400 border-2 border-dashed border-gray-300"
+                  : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            {time}
+            {time === currentTime && <div className="text-xs font-normal mt-1">現在</div>}
+          </button>
+        ))}
       </div>
-    </div>
+
+      {/* 注意事項 */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p className="text-sm text-amber-700">
+          ※ 時刻変更はスタッフの確認後に確定します。ご希望に添えない場合もございます。
+        </p>
+      </div>
+    </Modal>
   );
 };
 

@@ -31,7 +31,6 @@ import {
   CheckIcon,
   PackageIcon,
   PlusIcon,
-  CloseIcon,
 } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 
@@ -618,225 +617,208 @@ const CreateItemModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">
-            備品・設備を追加
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
-          >
-            <CloseIcon size={20} />
-          </button>
+    <Modal isOpen={true} onClose={onClose} title="備品・設備を追加" size="md">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Item Type Selection */}
+        <div className="shoji-panel p-4">
+          <label className="block text-sm text-[var(--nezumi)] mb-2">
+            種別 <span className="text-[var(--shu)]">*</span>
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setItemType("amenity")}
+              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                itemType === "amenity"
+                  ? "bg-[var(--ai)] text-white"
+                  : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+              }`}
+            >
+              <AmenityIcon size={18} />
+              アメニティ
+            </button>
+            <button
+              type="button"
+              onClick={() => setItemType("equipment")}
+              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                itemType === "equipment"
+                  ? "bg-[var(--ai)] text-white"
+                  : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+              }`}
+            >
+              <EquipmentIcon size={18} />
+              設備
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Item Type Selection */}
-          <div className="shoji-panel p-4">
-            <label className="block text-sm text-[var(--nezumi)] mb-2">
-              種別 <span className="text-[var(--shu)]">*</span>
-            </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setItemType("amenity")}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                  itemType === "amenity"
-                    ? "bg-[var(--ai)] text-white"
-                    : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
-                }`}
-              >
-                <AmenityIcon size={18} />
-                アメニティ
-              </button>
-              <button
-                type="button"
-                onClick={() => setItemType("equipment")}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                  itemType === "equipment"
-                    ? "bg-[var(--ai)] text-white"
-                    : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
-                }`}
-              >
-                <EquipmentIcon size={18} />
-                設備
-              </button>
-            </div>
+        {/* Room Selection */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <RoomIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">設置先</span>
           </div>
+          <div>
+            <label className="block text-sm text-[var(--nezumi)] mb-1">
+              部屋 <span className="text-[var(--shu)]">*</span>
+            </label>
+            <select
+              value={formData.roomId}
+              onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
+              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              required
+            >
+              {roomIds.map((roomId) => (
+                <option key={roomId} value={roomId}>
+                  {getRoomName(roomId)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-          {/* Room Selection */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <RoomIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">設置先</span>
+        {/* Amenity Options */}
+        {itemType === "amenity" && (
+          <div className="shoji-panel p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <AmenityIcon size={18} className="text-[var(--ai)]" />
+              <span className="font-display font-semibold text-[var(--sumi)]">アメニティ詳細</span>
             </div>
             <div>
               <label className="block text-sm text-[var(--nezumi)] mb-1">
-                部屋 <span className="text-[var(--shu)]">*</span>
+                種類 <span className="text-[var(--shu)]">*</span>
               </label>
               <select
-                value={formData.roomId}
-                onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
+                value={formData.amenityType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    amenityType: e.target.value as AmenityType,
+                  })
+                }
                 className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                required
               >
-                {roomIds.map((roomId) => (
-                  <option key={roomId} value={roomId}>
-                    {getRoomName(roomId)}
+                {Object.entries(AMENITY_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
                   </option>
                 ))}
               </select>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm text-[var(--nezumi)] mb-1">現在の残量</label>
+                <select
+                  value={formData.stockLevel}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      stockLevel: e.target.value as StockLevel,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                >
+                  {Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-[var(--nezumi)] mb-1">補充閾値</label>
+                <select
+                  value={formData.threshold}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      threshold: e.target.value as StockLevel,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                >
+                  {Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
+        )}
 
-          {/* Amenity Options */}
-          {itemType === "amenity" && (
-            <div className="shoji-panel p-4 space-y-3">
-              <div className="flex items-center gap-2 mb-2">
-                <AmenityIcon size={18} className="text-[var(--ai)]" />
-                <span className="font-display font-semibold text-[var(--sumi)]">
-                  アメニティ詳細
-                </span>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  種類 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <select
-                  value={formData.amenityType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      amenityType: e.target.value as AmenityType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  {Object.entries(AMENITY_TYPE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm text-[var(--nezumi)] mb-1">現在の残量</label>
-                  <select
-                    value={formData.stockLevel}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        stockLevel: e.target.value as StockLevel,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  >
-                    {Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-[var(--nezumi)] mb-1">補充閾値</label>
-                  <select
-                    value={formData.threshold}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        threshold: e.target.value as StockLevel,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  >
-                    {Object.entries(STOCK_LEVEL_LABELS).map(([key, label]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+        {/* Equipment Options */}
+        {itemType === "equipment" && (
+          <div className="shoji-panel p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <EquipmentIcon size={18} className="text-[var(--ai)]" />
+              <span className="font-display font-semibold text-[var(--sumi)]">設備詳細</span>
             </div>
-          )}
-
-          {/* Equipment Options */}
-          {itemType === "equipment" && (
-            <div className="shoji-panel p-4 space-y-3">
-              <div className="flex items-center gap-2 mb-2">
-                <EquipmentIcon size={18} className="text-[var(--ai)]" />
-                <span className="font-display font-semibold text-[var(--sumi)]">設備詳細</span>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  種類 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <select
-                  value={formData.equipmentType}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      equipmentType: e.target.value as EquipmentType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  {Object.entries(EQUIPMENT_TYPE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">状態</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: e.target.value as EquipmentStatusType,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  {Object.entries(EQUIPMENT_STATUS_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {formData.status !== "working" && (
-                <div>
-                  <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="状態の詳細を入力..."
-                    className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
-                    rows={2}
-                  />
-                </div>
-              )}
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                種類 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <select
+                value={formData.equipmentType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    equipmentType: e.target.value as EquipmentType,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                {Object.entries(EQUIPMENT_TYPE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">状態</label>
+              <select
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    status: e.target.value as EquipmentStatusType,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                {Object.entries(EQUIPMENT_STATUS_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {formData.status !== "working" && (
+              <div>
+                <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="状態の詳細を入力..."
+                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+                  rows={2}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
-          >
-            追加
-          </button>
-        </form>
-      </div>
-    </div>
+        {/* Submit button */}
+        <button
+          type="submit"
+          className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+        >
+          追加
+        </button>
+      </form>
+    </Modal>
   );
 };
 

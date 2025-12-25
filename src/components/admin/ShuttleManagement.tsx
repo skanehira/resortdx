@@ -17,12 +17,12 @@ import {
   ClockIcon,
   AlertIcon,
   CheckIcon,
-  CloseIcon,
   ArrowRightIcon,
   WrenchIcon,
   UserIcon,
   PlusIcon,
 } from "../ui/Icons";
+import { Modal } from "../ui/Modal";
 import { EditableTimeDisplay } from "./shared/TimeEditForm";
 import { StaffSelector } from "../shared/StaffSelector";
 
@@ -392,109 +392,13 @@ const AssignmentModal = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">割当変更</h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
-          >
-            <CloseIcon size={20} />
-          </button>
-        </div>
-
-        <div className="p-4">
-          {/* Task info */}
-          <div className="shoji-panel p-3 mb-4">
-            <div className="text-sm text-[var(--nezumi)] mb-1">{task.scheduledTime}</div>
-            <div className="font-display font-medium text-[var(--sumi)]">
-              {task.guestName}様 {task.numberOfGuests}名
-            </div>
-            <div className="text-sm text-[var(--nezumi)] flex items-center gap-1 mt-1">
-              <LocationIcon size={12} />
-              {task.pickupLocation} → {task.dropoffLocation}
-            </div>
-          </div>
-
-          {/* Vehicle selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-[var(--sumi)] mb-2">車両</label>
-            <div className="space-y-2">
-              {availableVehicles.map((vehicle) => (
-                <label
-                  key={vehicle.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    selectedVehicle === vehicle.id
-                      ? "border-[var(--ai)] bg-[var(--ai)]/5"
-                      : "border-[var(--shironeri-warm)] hover:bg-[var(--shironeri-warm)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="vehicle"
-                    value={vehicle.id}
-                    checked={selectedVehicle === vehicle.id}
-                    onChange={(e) => setSelectedVehicle(e.target.value)}
-                    className="sr-only"
-                  />
-                  <CarIcon size={16} />
-                  <div className="flex-1">
-                    <div className="font-medium">{vehicle.name}</div>
-                    <div className="text-xs text-[var(--nezumi)]">定員{vehicle.capacity}名</div>
-                  </div>
-                  {selectedVehicle === vehicle.id && (
-                    <CheckIcon size={16} className="text-[var(--ai)]" />
-                  )}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Driver selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-[var(--sumi)] mb-2">ドライバー</label>
-            <div className="space-y-2">
-              {availableDrivers.map((driver) => (
-                <label
-                  key={driver.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                    selectedDriver === driver.id
-                      ? "border-[var(--ai)] bg-[var(--ai)]/5"
-                      : "border-[var(--shironeri-warm)] hover:bg-[var(--shironeri-warm)]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="driver"
-                    value={driver.id}
-                    checked={selectedDriver === driver.id}
-                    onChange={(e) => setSelectedDriver(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
-                    style={{ backgroundColor: driver.avatarColor }}
-                  >
-                    {driver.name.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{driver.name}</div>
-                    <div className="text-xs text-[var(--nezumi)]">
-                      {driver.shiftStart} - {driver.shiftEnd}
-                    </div>
-                  </div>
-                  {selectedDriver === driver.id && (
-                    <CheckIcon size={16} className="text-[var(--ai)]" />
-                  )}
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="sticky bottom-0 bg-white border-t border-[var(--shironeri-warm)] p-4 flex gap-3">
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="割当変更"
+      size="md"
+      footer={
+        <div className="flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 py-3 border border-[var(--nezumi)] text-[var(--nezumi)] rounded-lg font-display hover:bg-[var(--shironeri-warm)] transition-colors"
@@ -509,8 +413,93 @@ const AssignmentModal = ({
             割当を保存
           </button>
         </div>
+      }
+    >
+      {/* Task info */}
+      <div className="shoji-panel p-3 mb-4">
+        <div className="text-sm text-[var(--nezumi)] mb-1">{task.scheduledTime}</div>
+        <div className="font-display font-medium text-[var(--sumi)]">
+          {task.guestName}様 {task.numberOfGuests}名
+        </div>
+        <div className="text-sm text-[var(--nezumi)] flex items-center gap-1 mt-1">
+          <LocationIcon size={12} />
+          {task.pickupLocation} → {task.dropoffLocation}
+        </div>
       </div>
-    </div>
+
+      {/* Vehicle selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-[var(--sumi)] mb-2">車両</label>
+        <div className="space-y-2">
+          {availableVehicles.map((vehicle) => (
+            <label
+              key={vehicle.id}
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                selectedVehicle === vehicle.id
+                  ? "border-[var(--ai)] bg-[var(--ai)]/5"
+                  : "border-[var(--shironeri-warm)] hover:bg-[var(--shironeri-warm)]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="vehicle"
+                value={vehicle.id}
+                checked={selectedVehicle === vehicle.id}
+                onChange={(e) => setSelectedVehicle(e.target.value)}
+                className="sr-only"
+              />
+              <CarIcon size={16} />
+              <div className="flex-1">
+                <div className="font-medium">{vehicle.name}</div>
+                <div className="text-xs text-[var(--nezumi)]">定員{vehicle.capacity}名</div>
+              </div>
+              {selectedVehicle === vehicle.id && (
+                <CheckIcon size={16} className="text-[var(--ai)]" />
+              )}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Driver selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-[var(--sumi)] mb-2">ドライバー</label>
+        <div className="space-y-2">
+          {availableDrivers.map((driver) => (
+            <label
+              key={driver.id}
+              className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                selectedDriver === driver.id
+                  ? "border-[var(--ai)] bg-[var(--ai)]/5"
+                  : "border-[var(--shironeri-warm)] hover:bg-[var(--shironeri-warm)]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="driver"
+                value={driver.id}
+                checked={selectedDriver === driver.id}
+                onChange={(e) => setSelectedDriver(e.target.value)}
+                className="sr-only"
+              />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                style={{ backgroundColor: driver.avatarColor }}
+              >
+                {driver.name.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">{driver.name}</div>
+                <div className="text-xs text-[var(--nezumi)]">
+                  {driver.shiftStart} - {driver.shiftEnd}
+                </div>
+              </div>
+              {selectedDriver === driver.id && <CheckIcon size={16} className="text-[var(--ai)]" />}
+            </label>
+          ))}
+        </div>
+      </div>
+    </Modal>
   );
 };
 
@@ -554,137 +543,126 @@ const TaskDetailModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">送迎詳細</h3>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="送迎詳細"
+      size="lg"
+      footer={
+        nextStatus ? (
           <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
+            onClick={() => onStatusChange(task.id, nextStatus)}
+            className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
           >
-            <CloseIcon size={20} />
+            {statusButtonLabels[task.shuttleStatus]}にする
           </button>
+        ) : undefined
+      }
+    >
+      <div className="space-y-4">
+        {/* Status and progress */}
+        <div className="text-center">
+          <ShuttleStatusBadge status={task.shuttleStatus} />
+          <div className="mt-3">
+            <ShuttleProgressIndicator status={task.shuttleStatus} />
+          </div>
         </div>
 
-        <div className="p-4 space-y-4">
-          {/* Status and progress */}
-          <div className="text-center">
-            <ShuttleStatusBadge status={task.shuttleStatus} />
-            <div className="mt-3">
-              <ShuttleProgressIndicator status={task.shuttleStatus} />
-            </div>
+        {/* Guest info */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <PassengerIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
           </div>
-
-          {/* Guest info */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <PassengerIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
-            </div>
-            <div className="text-lg font-display font-medium text-[var(--sumi)]">
-              {task.guestName}様
-            </div>
-            <div className="text-sm text-[var(--nezumi)]">
-              {task.guestNameKana} / {task.numberOfGuests}名
-            </div>
-            {task.guestArrivalNotified && (
-              <div className="mt-2 px-3 py-2 bg-[var(--kincha)]/10 rounded-lg text-sm text-[var(--kincha)]">
-                到着通知: {task.guestNotifiedAt}
-              </div>
-            )}
+          <div className="text-lg font-display font-medium text-[var(--sumi)]">
+            {task.guestName}様
           </div>
-
-          {/* Route info */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <LocationIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">送迎ルート</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-center">
-                <div className="text-sm text-[var(--nezumi)]">出発</div>
-                <div className="font-medium text-[var(--sumi)]">{task.pickupLocation}</div>
-              </div>
-              <ArrowRightIcon size={20} className="text-[var(--nezumi)]" />
-              <div className="text-center">
-                <div className="text-sm text-[var(--nezumi)]">到着</div>
-                <div className="font-medium text-[var(--sumi)]">{task.dropoffLocation}</div>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-[var(--nezumi)]">
-              所要時間: 約{task.estimatedDuration}分
-            </div>
+          <div className="text-sm text-[var(--nezumi)]">
+            {task.guestNameKana} / {task.numberOfGuests}名
           </div>
-
-          {/* Schedule */}
-          <div className="shoji-panel p-4">
-            <EditableTimeDisplay
-              value={task.scheduledTime}
-              onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
-              label="出発予定時刻"
-              size="lg"
-              accentColor="ai"
-            />
-          </div>
-
-          {/* Assignment info */}
-          <div className="shoji-panel p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <CarIcon size={18} className="text-[var(--ai)]" />
-                <span className="font-display font-semibold text-[var(--sumi)]">割当</span>
-              </div>
-              <button
-                onClick={onOpenAssignment}
-                className="text-sm text-[var(--ai)] hover:underline"
-              >
-                変更
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[var(--nezumi)] w-16">車両:</span>
-                {vehicle ? (
-                  <span className="font-medium text-[var(--sumi)]">
-                    {vehicle.name} ({vehicle.licensePlate})
-                  </span>
-                ) : (
-                  <span className="text-[var(--shu)]">未割当</span>
-                )}
-              </div>
-              <div>
-                <span className="text-sm text-[var(--nezumi)] block mb-1">ドライバー:</span>
-                <StaffSelector
-                  value={task.assignedDriverId}
-                  onChange={(driverId) => onDriverChange(task.id, driverId)}
-                  showUnassigned
-                  ariaLabel="ドライバーを選択"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Notes */}
-          {task.notes && (
-            <div className="shoji-panel p-4">
-              <div className="text-sm text-[var(--nezumi)] mb-1">備考</div>
-              <div className="text-[var(--sumi)]">{task.notes}</div>
+          {task.guestArrivalNotified && (
+            <div className="mt-2 px-3 py-2 bg-[var(--kincha)]/10 rounded-lg text-sm text-[var(--kincha)]">
+              到着通知: {task.guestNotifiedAt}
             </div>
           )}
+        </div>
 
-          {/* Status update button */}
-          {nextStatus && (
-            <button
-              onClick={() => onStatusChange(task.id, nextStatus)}
-              className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
-            >
-              {statusButtonLabels[task.shuttleStatus]}にする
+        {/* Route info */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <LocationIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">送迎ルート</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              <div className="text-sm text-[var(--nezumi)]">出発</div>
+              <div className="font-medium text-[var(--sumi)]">{task.pickupLocation}</div>
+            </div>
+            <ArrowRightIcon size={20} className="text-[var(--nezumi)]" />
+            <div className="text-center">
+              <div className="text-sm text-[var(--nezumi)]">到着</div>
+              <div className="font-medium text-[var(--sumi)]">{task.dropoffLocation}</div>
+            </div>
+          </div>
+          <div className="mt-2 text-sm text-[var(--nezumi)]">
+            所要時間: 約{task.estimatedDuration}分
+          </div>
+        </div>
+
+        {/* Schedule */}
+        <div className="shoji-panel p-4">
+          <EditableTimeDisplay
+            value={task.scheduledTime}
+            onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
+            label="出発予定時刻"
+            size="lg"
+            accentColor="ai"
+          />
+        </div>
+
+        {/* Assignment info */}
+        <div className="shoji-panel p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <CarIcon size={18} className="text-[var(--ai)]" />
+              <span className="font-display font-semibold text-[var(--sumi)]">割当</span>
+            </div>
+            <button onClick={onOpenAssignment} className="text-sm text-[var(--ai)] hover:underline">
+              変更
             </button>
-          )}
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-[var(--nezumi)] w-16">車両:</span>
+              {vehicle ? (
+                <span className="font-medium text-[var(--sumi)]">
+                  {vehicle.name} ({vehicle.licensePlate})
+                </span>
+              ) : (
+                <span className="text-[var(--shu)]">未割当</span>
+              )}
+            </div>
+            <div>
+              <span className="text-sm text-[var(--nezumi)] block mb-1">ドライバー:</span>
+              <StaffSelector
+                value={task.assignedDriverId}
+                onChange={(driverId) => onDriverChange(task.id, driverId)}
+                showUnassigned
+                ariaLabel="ドライバーを選択"
+              />
+            </div>
+          </div>
         </div>
+
+        {/* Notes */}
+        {task.notes && (
+          <div className="shoji-panel p-4">
+            <div className="text-sm text-[var(--nezumi)] mb-1">備考</div>
+            <div className="text-[var(--sumi)]">{task.notes}</div>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 };
 
@@ -766,271 +744,258 @@ const CreateShuttleModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-[var(--shironeri-warm)] p-4 flex items-center justify-between">
-          <h3 className="font-display font-semibold text-lg text-[var(--sumi)]">送迎を追加</h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-[var(--shironeri-warm)] rounded-full transition-colors"
-          >
-            <CloseIcon size={20} />
-          </button>
+    <Modal isOpen={true} onClose={onClose} title="送迎を追加" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Direction */}
+        <div className="shoji-panel p-4">
+          <label className="block text-sm text-[var(--nezumi)] mb-2">
+            送迎種別 <span className="text-[var(--shu)]">*</span>
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleDirectionChange("pickup")}
+              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+                formData.direction === "pickup"
+                  ? "bg-[var(--ai)] text-white"
+                  : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+              }`}
+            >
+              迎車（お迎え）
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDirectionChange("dropoff")}
+              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
+                formData.direction === "dropoff"
+                  ? "bg-[var(--ai)] text-white"
+                  : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
+              }`}
+            >
+              送車（お送り）
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Direction */}
-          <div className="shoji-panel p-4">
-            <label className="block text-sm text-[var(--nezumi)] mb-2">
-              送迎種別 <span className="text-[var(--shu)]">*</span>
-            </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleDirectionChange("pickup")}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                  formData.direction === "pickup"
-                    ? "bg-[var(--ai)] text-white"
-                    : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
-                }`}
-              >
-                迎車（お迎え）
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDirectionChange("dropoff")}
-                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-                  formData.direction === "dropoff"
-                    ? "bg-[var(--ai)] text-white"
-                    : "bg-[var(--shironeri-warm)] text-[var(--sumi)]"
-                }`}
-              >
-                送車（お送り）
-              </button>
-            </div>
+        {/* Guest Info */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <PassengerIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
           </div>
-
-          {/* Guest Info */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <PassengerIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">ゲスト情報</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  お名前 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.guestName}
-                  onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
-                  placeholder="例: 山田"
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  人数 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={formData.numberOfGuests}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      numberOfGuests: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-[var(--nezumi)] mb-1">フリガナ</label>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                お名前 <span className="text-[var(--shu)]">*</span>
+              </label>
               <input
                 type="text"
-                value={formData.guestNameKana}
-                onChange={(e) => setFormData({ ...formData, guestNameKana: e.target.value })}
-                placeholder="例: ヤマダ"
+                value={formData.guestName}
+                onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
+                placeholder="例: 山田"
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                人数 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={formData.numberOfGuests}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    numberOfGuests: parseInt(e.target.value) || 1,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--nezumi)] mb-1">フリガナ</label>
+            <input
+              type="text"
+              value={formData.guestNameKana}
+              onChange={(e) => setFormData({ ...formData, guestNameKana: e.target.value })}
+              placeholder="例: ヤマダ"
+              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+            />
+          </div>
+        </div>
+
+        {/* Route */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <LocationIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">ルート</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                出発地 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.pickupLocation}
+                onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
+                placeholder={formData.direction === "pickup" ? "例: 鳥羽駅" : "旅館"}
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                目的地 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.dropoffLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    dropoffLocation: e.target.value,
+                  })
+                }
+                placeholder={formData.direction === "pickup" ? "旅館" : "例: 鳥羽駅"}
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Schedule */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <ClockIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">スケジュール</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">
+                出発時刻 <span className="text-[var(--shu)]">*</span>
+              </label>
+              <input
+                type="time"
+                value={formData.scheduledTime}
+                onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">所要時間（分）</label>
+              <input
+                type="number"
+                min="5"
+                max="120"
+                value={formData.estimatedDuration}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    estimatedDuration: parseInt(e.target.value) || 15,
+                  })
+                }
                 className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
               />
             </div>
           </div>
+        </div>
 
-          {/* Route */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <LocationIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">ルート</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  出発地 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.pickupLocation}
-                  onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
-                  placeholder={formData.direction === "pickup" ? "例: 鳥羽駅" : "旅館"}
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  目的地 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.dropoffLocation}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      dropoffLocation: e.target.value,
-                    })
-                  }
-                  placeholder={formData.direction === "pickup" ? "旅館" : "例: 鳥羽駅"}
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-            </div>
+        {/* Assignment */}
+        <div className="shoji-panel p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <CarIcon size={18} className="text-[var(--ai)]" />
+            <span className="font-display font-semibold text-[var(--sumi)]">割当</span>
           </div>
-
-          {/* Schedule */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <ClockIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">スケジュール</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">
-                  出発時刻 <span className="text-[var(--shu)]">*</span>
-                </label>
-                <input
-                  type="time"
-                  value={formData.scheduledTime}
-                  onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">所要時間（分）</label>
-                <input
-                  type="number"
-                  min="5"
-                  max="120"
-                  value={formData.estimatedDuration}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      estimatedDuration: parseInt(e.target.value) || 15,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Assignment */}
-          <div className="shoji-panel p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <CarIcon size={18} className="text-[var(--ai)]" />
-              <span className="font-display font-semibold text-[var(--sumi)]">割当</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">車両</label>
-                <select
-                  value={formData.assignedVehicleId}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      assignedVehicleId: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  <option value="">未割当</option>
-                  {availableVehicles.map((vehicle) => (
-                    <option key={vehicle.id} value={vehicle.id}>
-                      {vehicle.name} (定員{vehicle.capacity}名)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm text-[var(--nezumi)] mb-1">ドライバー</label>
-                <select
-                  value={formData.assignedDriverId}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      assignedDriverId: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
-                >
-                  <option value="">未割当</option>
-                  {availableDrivers.map((driver) => (
-                    <option key={driver.id} value={driver.id}>
-                      {driver.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-[var(--nezumi)] mb-1">優先度</label>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">車両</label>
               <select
-                value={formData.priority}
+                value={formData.assignedVehicleId}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    priority: e.target.value as "normal" | "high" | "urgent",
+                    assignedVehicleId: e.target.value,
                   })
                 }
                 className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
               >
-                <option value="normal">通常</option>
-                <option value="high">優先</option>
-                <option value="urgent">緊急</option>
+                <option value="">未割当</option>
+                {availableVehicles.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.id}>
+                    {vehicle.name} (定員{vehicle.capacity}名)
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-[var(--nezumi)] mb-1">ドライバー</label>
+              <select
+                value={formData.assignedDriverId}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assignedDriverId: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+              >
+                <option value="">未割当</option>
+                {availableDrivers.map((driver) => (
+                  <option key={driver.id} value={driver.id}>
+                    {driver.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
-
-          {/* Notes */}
           <div>
-            <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="特記事項があれば入力..."
-              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
-              rows={3}
-            />
+            <label className="block text-sm text-[var(--nezumi)] mb-1">優先度</label>
+            <select
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  priority: e.target.value as "normal" | "high" | "urgent",
+                })
+              }
+              className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30"
+            >
+              <option value="normal">通常</option>
+              <option value="high">優先</option>
+              <option value="urgent">緊急</option>
+            </select>
           </div>
+        </div>
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
-          >
-            送迎を追加
-          </button>
-        </form>
-      </div>
-    </div>
+        {/* Notes */}
+        <div>
+          <label className="block text-sm text-[var(--nezumi)] mb-1">備考</label>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder="特記事項があれば入力..."
+            className="w-full px-3 py-2 border border-[var(--shironeri-warm)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--ai)]/30 resize-none"
+            rows={3}
+          />
+        </div>
+
+        {/* Submit button */}
+        <button
+          type="submit"
+          className="w-full py-3 bg-[var(--ai)] text-white rounded-lg font-display font-medium hover:bg-[var(--ai-deep)] transition-colors"
+        >
+          送迎を追加
+        </button>
+      </form>
+    </Modal>
   );
 };
 
