@@ -1221,13 +1221,18 @@ export const ShuttleManagement = () => {
                 <WrenchIcon size={16} />
                 <span className="font-display font-semibold">メンテナンス中</span>
               </div>
-              {vehicles
-                .filter((v) => v.status === "maintenance")
-                .map((v) => (
-                  <div key={v.id} className="text-sm text-[var(--sumi)]">
-                    {v.name}: {v.notes || "メンテナンス作業中"}
-                  </div>
-                ))}
+              <div className="space-y-2">
+                {vehicles
+                  .filter((v) => v.status === "maintenance")
+                  .map((v) => (
+                    <div key={v.id} className="text-sm text-[var(--sumi)] flex items-start gap-2">
+                      <span className="font-medium text-[var(--kincha)] shrink-0">{v.name}</span>
+                      <span className="text-[var(--nezumi)] text-xs flex-1 min-w-0">
+                        {v.notes || "メンテナンス作業中"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             </div>
           )}
         </div>

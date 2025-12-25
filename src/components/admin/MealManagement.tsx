@@ -227,18 +227,16 @@ const OrderNotificationCard = ({
     }`}
   >
     <div className="flex items-start justify-between gap-2 mb-1">
-      <div className="flex items-center gap-2">
-        <span className="px-2 py-0.5 text-xs font-medium bg-[var(--ai)]/10 text-[var(--ai)] rounded-full">
-          {ORDER_TYPE_LABELS[notification.orderType]}
-        </span>
-        <span className="text-sm font-medium text-[var(--sumi)]">
-          {getRoomName(notification.roomId)}
-        </span>
-      </div>
+      <span className="px-2 py-0.5 text-xs font-medium bg-[var(--ai)]/10 text-[var(--ai)] rounded-full whitespace-nowrap shrink-0">
+        {ORDER_TYPE_LABELS[notification.orderType]}
+      </span>
+      <span className="text-sm font-medium text-[var(--sumi)] flex-1 min-w-0 text-right">
+        {getRoomName(notification.roomId)}
+      </span>
       {!notification.isRead && (
         <button
           onClick={() => onMarkRead(notification.id)}
-          className="text-xs text-[var(--ai)] hover:underline"
+          className="text-xs text-[var(--ai)] hover:underline whitespace-nowrap shrink-0"
         >
           既読
         </button>
@@ -1136,13 +1134,21 @@ export const MealManagement = () => {
                 <CelebrationIcon size={16} />
                 <span className="font-display font-semibold">記念日対応</span>
               </div>
-              {mealTasks
-                .filter((t) => t.isAnniversaryRelated && t.mealStatus !== "completed")
-                .map((t) => (
-                  <div key={t.id} className="text-sm text-[var(--sumi)] py-1">
-                    {t.scheduledTime} {getRoomName(t.roomId)} {t.guestName}様
-                  </div>
-                ))}
+              <div className="space-y-2">
+                {mealTasks
+                  .filter((t) => t.isAnniversaryRelated && t.mealStatus !== "completed")
+                  .map((t) => (
+                    <div key={t.id} className="text-sm text-[var(--sumi)] flex items-start gap-2">
+                      <span className="font-medium text-[var(--kincha)] shrink-0 w-12">
+                        {t.scheduledTime}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="block">{getRoomName(t.roomId)}</span>
+                        <span className="text-[var(--nezumi)] text-xs">{t.guestName}様</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           )}
         </div>

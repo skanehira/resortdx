@@ -1014,21 +1014,24 @@ export const CelebrationManagement = () => {
                 <CelebrationIcon size={16} />
                 <span className="font-display font-semibold">本日のお祝い予定</span>
               </div>
-              {celebrationTasks
-                .filter((t) => t.status !== "completed")
-                .sort((a, b) => a.executionTime.localeCompare(b.executionTime))
-                .map((t) => (
-                  <div
-                    key={t.id}
-                    className="text-sm text-[var(--sumi)] py-1 flex items-center gap-2"
-                  >
-                    <span className="font-medium text-[var(--kincha)]">{t.executionTime}</span>
-                    <span>{getRoomName(t.roomId)}</span>
-                    <span className="text-[var(--nezumi)]">
-                      {CELEBRATION_TYPE_LABELS[t.celebrationType]}
-                    </span>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                {celebrationTasks
+                  .filter((t) => t.status !== "completed")
+                  .sort((a, b) => a.executionTime.localeCompare(b.executionTime))
+                  .map((t) => (
+                    <div key={t.id} className="text-sm text-[var(--sumi)] flex items-start gap-2">
+                      <span className="font-medium text-[var(--kincha)] shrink-0 w-12">
+                        {t.executionTime}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="block">{getRoomName(t.roomId)}</span>
+                        <span className="text-[var(--nezumi)] text-xs">
+                          {CELEBRATION_TYPE_LABELS[t.celebrationType]}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           )}
         </div>
