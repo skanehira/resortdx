@@ -26,7 +26,7 @@ import { TaskTemplates } from "./TaskTemplates";
 import { StaffMonitor } from "./StaffMonitor";
 
 // Tab types
-type SettingsTab = "templates" | "staff" | "rooms" | "amenities" | "equipment" | "dev";
+type SettingsTab = "templates" | "staff" | "rooms" | "amenities" | "equipment";
 
 // === Room Management Section ===
 interface RoomModalProps {
@@ -333,7 +333,7 @@ const EquipmentTypeModal = ({
 };
 
 // Valid tab keys for URL parameter validation
-const VALID_TABS: SettingsTab[] = ["templates", "staff", "rooms", "amenities", "equipment", "dev"];
+const VALID_TABS: SettingsTab[] = ["templates", "staff", "rooms", "amenities", "equipment"];
 
 const isValidTab = (tab: string | null): tab is SettingsTab => {
   return tab !== null && VALID_TABS.includes(tab as SettingsTab);
@@ -457,11 +457,6 @@ export const Settings = () => {
       key: "equipment",
       label: "設備種類",
       icon: <EquipmentIcon size={18} />,
-    },
-    {
-      key: "dev",
-      label: "開発ツール",
-      icon: <SettingsIcon size={18} />,
     },
   ];
 
@@ -752,63 +747,6 @@ export const Settings = () => {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-        )}
-
-        {/* Dev Tools Tab */}
-        {activeTab === "dev" && (
-          <div className="p-6">
-            <h2 className="font-display font-medium text-[var(--sumi)] mb-4">画面プレビュー</h2>
-            <p className="text-sm text-[var(--nezumi)] mb-6">
-              開発・テスト用に各ユーザー画面を確認できます
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Guest Portal */}
-              <a
-                href="#/guest/portal"
-                className="block p-4 border border-[rgba(45,41,38,0.1)] rounded-lg hover:border-[var(--ai)] hover:bg-[rgba(27,73,101,0.02)] transition-all"
-              >
-                <div className="text-2xl mb-2">📱</div>
-                <h3 className="font-display font-medium text-[var(--sumi)]">ゲストポータル</h3>
-                <p className="text-xs text-[var(--nezumi)] mt-1">
-                  QRコードからアクセスするゲスト用画面
-                </p>
-                <span className="inline-block mt-3 text-xs text-[var(--ai)]">/#/guest/portal</span>
-              </a>
-
-              {/* Guest Shuttle */}
-              <a
-                href="#/guest/shuttle"
-                className="block p-4 border border-[rgba(45,41,38,0.1)] rounded-lg hover:border-[var(--ai)] hover:bg-[rgba(27,73,101,0.02)] transition-all"
-              >
-                <div className="text-2xl mb-2">🚐</div>
-                <h3 className="font-display font-medium text-[var(--sumi)]">送迎ステータス</h3>
-                <p className="text-xs text-[var(--nezumi)] mt-1">ゲスト向け送迎状況確認画面</p>
-                <span className="inline-block mt-3 text-xs text-[var(--ai)]">/#/guest/shuttle</span>
-              </a>
-
-              {/* Guest Meal */}
-              <a
-                href="#/guest/meal"
-                className="block p-4 border border-[rgba(45,41,38,0.1)] rounded-lg hover:border-[var(--ai)] hover:bg-[rgba(27,73,101,0.02)] transition-all"
-              >
-                <div className="text-2xl mb-2">🍽️</div>
-                <h3 className="font-display font-medium text-[var(--sumi)]">お食事ステータス</h3>
-                <p className="text-xs text-[var(--nezumi)] mt-1">ゲスト向け配膳状況確認画面</p>
-                <span className="inline-block mt-3 text-xs text-[var(--ai)]">/#/guest/meal</span>
-              </a>
-
-              {/* Staff View */}
-              <a
-                href="#/staff/tasks"
-                className="block p-4 border border-[rgba(45,41,38,0.1)] rounded-lg hover:border-[var(--ai)] hover:bg-[rgba(27,73,101,0.02)] transition-all"
-              >
-                <div className="text-2xl mb-2">👷</div>
-                <h3 className="font-display font-medium text-[var(--sumi)]">スタッフ画面</h3>
-                <p className="text-xs text-[var(--nezumi)] mt-1">スタッフ用タスク管理画面</p>
-                <span className="inline-block mt-3 text-xs text-[var(--ai)]">/#/staff/tasks</span>
-              </a>
             </div>
           </div>
         )}

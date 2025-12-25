@@ -18,7 +18,15 @@ import {
   type AssignedArea,
   type TaskCategory,
 } from "../../types";
-import { StaffIcon, CheckIcon, PhoneIcon, EditIcon, CloseIcon, SearchIcon } from "../ui/Icons";
+import {
+  StaffIcon,
+  CheckIcon,
+  PhoneIcon,
+  EditIcon,
+  CloseIcon,
+  SearchIcon,
+  PlusIcon,
+} from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 
 // Status color map
@@ -84,28 +92,56 @@ const StaffAvatar = ({
   );
 };
 
+// Default staff template for creating new staff
+const createEmptyStaff = (): Staff => ({
+  id: `STF${Date.now()}`,
+  name: "",
+  nameKana: "",
+  role: "cleaning",
+  employmentType: "full_time",
+  status: "on_duty",
+  shiftStart: "09:00",
+  shiftEnd: "18:00",
+  skills: [],
+  certifications: [],
+  languages: ["japanese"],
+  hireDate: new Date().toISOString().split("T")[0],
+  phoneNumber: "",
+  assignedArea: "east_wing",
+  avatarColor: `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, "0")}`,
+  currentTaskId: null,
+});
+
 // Staff Edit Modal Component
 interface StaffEditModalProps {
   staff: Staff | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (staff: Staff) => void;
+  onSave: (staff: Staff, isNew: boolean) => void;
   t: (key: string) => string;
+  mode: "edit" | "create";
 }
 
-const StaffEditModal = ({ staff, isOpen, onClose, onSave, t }: StaffEditModalProps) => {
+const StaffEditModal = ({ staff, isOpen, onClose, onSave, t, mode }: StaffEditModalProps) => {
   const [formData, setFormData] = useState<Staff | null>(null);
+  const isCreating = mode === "create";
 
   useEffect(() => {
-    if (staff) {
-      setFormData({ ...staff });
+    if (isOpen) {
+      if (isCreating) {
+        setFormData(createEmptyStaff());
+      } else if (staff) {
+        setFormData({ ...staff });
+      }
     }
-  }, [staff]);
+  }, [staff, isOpen, isCreating]);
 
   if (!formData) return null;
 
   const handleSave = () => {
-    onSave(formData);
+    onSave(formData, isCreating);
     onClose();
   };
 
@@ -164,7 +200,12 @@ const StaffEditModal = ({ staff, isOpen, onClose, onSave, t }: StaffEditModalPro
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("staffManagement.editStaff")} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isCreating ? t("staffManagement.addStaff") : t("staffManagement.editStaff")}
+      size="lg"
+    >
       <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
         {/* Basic Info Section */}
         <div>
@@ -517,9 +558,16 @@ interface StaffCardProps {
 
 const StaffCard = ({ staff, isSelected, onSelect, onStatusChange }: StaffCardProps) => {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={`w-full text-left shoji-panel p-4 cursor-pointer transition-all ${
         isSelected ? "ring-2 ring-[var(--ai)] bg-[rgba(27,73,101,0.02)]" : "hover:shadow-md"
       }`}
@@ -527,7 +575,7 @@ const StaffCard = ({ staff, isSelected, onSelect, onStatusChange }: StaffCardPro
       <div className="flex items-center gap-3">
         <StaffAvatar staff={staff} size="md" />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="font-display font-medium text-[var(--sumi)] truncate">{staff.name}</h3>
             <StatusBadge
               status={staff.status}
@@ -545,7 +593,7 @@ const StaffCard = ({ staff, isSelected, onSelect, onStatusChange }: StaffCardPro
           </p>
         </div>
       </div>
-    </button>
+    </div>
   );
 };
 
@@ -783,6 +831,7 @@ export const StaffMonitor = () => {
   // Modal state
   const [statusChangeStaff, setStatusChangeStaff] = useState<Staff | null>(null);
   const [editStaff, setEditStaff] = useState<Staff | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Filter staff
   const filteredStaff = staffList.filter((staff) => {
@@ -812,8 +861,12 @@ export const StaffMonitor = () => {
     setStaffList((prev) => prev.map((s) => (s.id === staffId ? { ...s, status: newStatus } : s)));
   };
 
-  const handleSaveStaff = (updatedStaff: Staff) => {
-    setStaffList((prev) => prev.map((s) => (s.id === updatedStaff.id ? updatedStaff : s)));
+  const handleSaveStaff = (updatedStaff: Staff, isNew: boolean) => {
+    if (isNew) {
+      setStaffList((prev) => [...prev, updatedStaff]);
+    } else {
+      setStaffList((prev) => prev.map((s) => (s.id === updatedStaff.id ? updatedStaff : s)));
+    }
   };
 
   return (
@@ -826,6 +879,14 @@ export const StaffMonitor = () => {
           </h1>
           <p className="text-sm text-[var(--nezumi)] mt-2">{t("staffManagement.description")}</p>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="btn btn-primary"
+        >
+          <PlusIcon size={18} />
+          新規作成
+        </button>
       </div>
 
       {/* Summary Stats */}
@@ -926,6 +987,17 @@ export const StaffMonitor = () => {
         onClose={() => setEditStaff(null)}
         onSave={handleSaveStaff}
         t={t}
+        mode="edit"
+      />
+
+      {/* Staff Create Modal */}
+      <StaffEditModal
+        staff={null}
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveStaff}
+        t={t}
+        mode="create"
       />
     </div>
   );
