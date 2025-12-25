@@ -46,8 +46,8 @@ describe("Modal", () => {
     });
   });
 
-  describe("レスポンシブ対応（max-h-[90vh]とスクロール）", () => {
-    it("モーダルコンテナにmax-h-[90vh]が適用される", () => {
+  describe("レスポンシブ対応（max-heightとスクロール）", () => {
+    it("モーダルコンテナにmax-h-[calc(100dvh-6rem)]が適用される", () => {
       render(
         <Modal isOpen={true} onClose={vi.fn()} title="テスト">
           コンテンツ
@@ -55,7 +55,7 @@ describe("Modal", () => {
       );
 
       const dialog = screen.getByRole("dialog");
-      expect(dialog).toHaveClass("max-h-[90vh]");
+      expect(dialog).toHaveClass("max-h-[calc(100dvh-6rem)]");
     });
 
     it("モーダルコンテナにflex flex-colが適用される", () => {

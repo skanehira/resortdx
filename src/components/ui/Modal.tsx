@@ -64,10 +64,10 @@ export const Modal = ({
 
   const modalClasses = fullscreen
     ? "relative w-full h-full m-0 rounded-none bg-white shadow-xl animate-slide-up flex flex-col"
-    : `relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-lg shadow-xl animate-slide-up max-h-[90vh] flex flex-col`;
+    : `relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-lg shadow-xl animate-slide-up max-h-[calc(100dvh-6rem)] flex flex-col`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center pb-20">
       {/* Overlay */}
       <div
         data-testid="modal-overlay"

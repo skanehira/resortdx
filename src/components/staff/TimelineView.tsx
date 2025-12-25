@@ -262,7 +262,6 @@ export const TimelineView = ({
           {/* タイムスロット */}
           <div className="space-y-0">
             {timeSlots.map((slot, index) => {
-              const isPast = slot.hour < currentHour;
               const isCurrent = slot.hour === currentHour;
               const timeOfDay = getTimeOfDay(slot.hour);
               const prevTimeOfDay = index > 0 ? getTimeOfDay(timeSlots[index - 1].hour) : "";
@@ -282,7 +281,7 @@ export const TimelineView = ({
 
                   {/* 時間スロット */}
                   <div
-                    className={`flex items-stretch ${isPast ? "opacity-50" : ""} ${
+                    className={`flex items-stretch ${
                       isCurrent ? "bg-[var(--ai)]/5 rounded-lg" : ""
                     }`}
                   >

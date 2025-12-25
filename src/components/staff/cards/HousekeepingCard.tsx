@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   UnifiedTask,
@@ -50,8 +50,8 @@ const CleaningTaskFlow = ({ status, allChecked }: CleaningTaskFlowProps) => {
   return (
     <div className="flex items-center p-3 bg-[var(--shironeri-warm)] rounded-lg mb-4">
       {steps.map((step, index) => (
-        <>
-          <div key={step.key} className="flex flex-col items-center">
+        <Fragment key={step.key}>
+          <div className="flex flex-col items-center">
             <div className={`task-step ${getStepClass(index)}`}>
               {index + 1 < currentStep ? <CheckIcon size={14} /> : index + 1}
             </div>
@@ -70,7 +70,7 @@ const CleaningTaskFlow = ({ status, allChecked }: CleaningTaskFlowProps) => {
               }`}
             />
           )}
-        </>
+        </Fragment>
       ))}
     </div>
   );
@@ -93,8 +93,8 @@ const InspectionFlow = ({ status }: InspectionFlowProps) => {
   return (
     <div className="flex items-center p-3 bg-[var(--shironeri-warm)] rounded-lg mb-3">
       {steps.map((step, index) => (
-        <>
-          <div key={step.key} className="flex flex-col items-center">
+        <Fragment key={step.key}>
+          <div className="flex flex-col items-center">
             <div
               className={`task-step ${
                 index < currentIndex
@@ -119,7 +119,7 @@ const InspectionFlow = ({ status }: InspectionFlowProps) => {
               className={`task-step-line ${index < currentIndex ? "task-step-line--active" : ""}`}
             />
           )}
-        </>
+        </Fragment>
       ))}
     </div>
   );
@@ -395,7 +395,7 @@ export const HousekeepingCard = ({
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full animate-shimmer" />
                 <EquipmentIcon size={24} />
-                <span className="text-lg">設備・アメニティ報告</span>
+                <span className="text-lg whitespace-nowrap">設備・アメニティ報告</span>
                 <ChevronRightIcon size={20} />
               </button>
 
