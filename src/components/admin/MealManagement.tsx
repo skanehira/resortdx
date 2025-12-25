@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import type {
   MealTask,
-  MealStatus,
+  MealProgressStatus,
+  MealDisplayStatus,
   MealOrderNotification,
   MealType,
   CourseType,
@@ -42,8 +43,8 @@ import { EditableTimeDisplay } from "./shared/TimeEditForm";
 type FilterType = "all" | "breakfast" | "dinner" | "room_service" | "needs_check";
 
 // Meal status badge component
-const MealStatusBadge = ({ status }: { status: MealStatus }) => {
-  const colorMap: Record<MealStatus, string> = {
+const MealStatusBadge = ({ status }: { status: MealDisplayStatus }) => {
+  const colorMap: Record<MealDisplayStatus, string> = {
     preparing: "bg-[var(--nezumi)] text-white",
     serving: "bg-[var(--ai)] text-white",
     completed: "bg-[var(--aotake)]/20 text-[var(--aotake)]",
@@ -83,11 +84,11 @@ const MealProgressIndicator = ({
   status,
   needsCheck,
 }: {
-  status: MealStatus;
+  status: MealProgressStatus;
   needsCheck: boolean;
 }) => {
-  const stages: MealStatus[] = ["preparing", "serving", "completed"];
-  const currentIndex = stages.indexOf(status === "needs_check" ? "serving" : status);
+  const stages: MealProgressStatus[] = ["preparing", "serving", "completed"];
+  const currentIndex = stages.indexOf(status);
 
   return (
     <div className="flex items-center gap-1">
@@ -367,29 +368,27 @@ const TaskDetailModal = ({
 }: {
   task: MealTask;
   onClose: () => void;
-  onStatusChange: (taskId: string, newStatus: MealStatus) => void;
+  onStatusChange: (taskId: string, newStatus: MealProgressStatus) => void;
   onToggleNeedsCheck: (taskId: string) => void;
   onTimeChange: (taskId: string, newTime: string) => void;
 }) => {
   const staff = task.assignedStaffId ? getStaffById(task.assignedStaffId) : null;
 
-  const getNextStatus = (current: MealStatus): MealStatus | null => {
-    const flow: Record<MealStatus, MealStatus | null> = {
+  const getNextStatus = (current: MealProgressStatus): MealProgressStatus | null => {
+    const flow: Record<MealProgressStatus, MealProgressStatus | null> = {
       preparing: "serving",
       serving: "completed",
       completed: null,
-      needs_check: "serving",
     };
     return flow[current];
   };
 
   const nextStatus = getNextStatus(task.mealStatus);
 
-  const statusButtonLabels: Record<MealStatus, string> = {
+  const statusButtonLabels: Record<MealProgressStatus, string> = {
     preparing: "配膳開始",
     serving: "完了",
     completed: "",
-    needs_check: "解消",
   };
 
   return (
@@ -953,30 +952,50 @@ export const MealManagement = () => {
   }, [mealTasks]);
 
   // Handlers
-  const handleStatusChange = (taskId: string, newStatus: MealStatus) => {
+  const handleStatusChange = (taskId: string, newStatus: MealProgressStatus) => {
     setMealTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              mealStatus: newStatus,
-              needsCheck: newStatus === "completed" ? false : t.needsCheck,
-              completedAt:
-                newStatus === "completed"
-                  ? new Date().toLocaleTimeString("ja-JP", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : t.completedAt,
-            }
-          : t,
-      ),
+      prev.map((t): MealTask => {
+        if (t.id !== taskId) return t;
+
+        // 完了状態への遷移: needsCheckは必ずfalse
+        if (newStatus === "completed") {
+          return {
+            ...t,
+            mealStatus: "completed" as const,
+            needsCheck: false as const,
+            completedAt: new Date().toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+        }
+
+        // 進行中状態への遷移: needsCheckを維持
+        return {
+          ...t,
+          mealStatus: newStatus,
+          needsCheck: t.needsCheck,
+        };
+      }),
     );
   };
 
   const handleToggleNeedsCheck = (taskId: string) => {
     setMealTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, needsCheck: !t.needsCheck } : t)),
+      prev.map((t): MealTask => {
+        if (t.id !== taskId) return t;
+
+        // 完了状態のタスクはneedsCheckを変更できない
+        if (t.mealStatus === "completed") {
+          return t;
+        }
+
+        // 進行中タスクのneedsCheckをトグル
+        return {
+          ...t,
+          needsCheck: !t.needsCheck,
+        };
+      }),
     );
   };
 

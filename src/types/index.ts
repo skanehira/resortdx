@@ -526,10 +526,17 @@ export interface ShuttleTask {
 
 // === Meal Service Types ===
 
-// 配膳ステータス（4段階）
-export type MealStatus = "preparing" | "serving" | "completed" | "needs_check";
+// 配膳ワークフローステータス（進行状態のみ）
+export type MealProgressStatus = "preparing" | "serving" | "completed";
 
-export const MEAL_STATUS_LABELS: Record<MealStatus, string> = {
+// 配膳表示ステータス（UI表示用、再確認要を含む）
+export type MealDisplayStatus = MealProgressStatus | "needs_check";
+
+// 後方互換性のためのエイリアス（非推奨、将来削除予定）
+/** @deprecated Use MealProgressStatus or MealDisplayStatus instead */
+export type MealStatus = MealDisplayStatus;
+
+export const MEAL_STATUS_LABELS: Record<MealDisplayStatus, string> = {
   preparing: "準備中",
   serving: "配膳中",
   completed: "完了",
@@ -579,8 +586,8 @@ export const DIETARY_RESTRICTION_LABELS: Record<DietaryRestriction, string> = {
   other: "その他",
 };
 
-// 配膳タスクインターフェース
-export interface MealTask {
+// 配膳タスクの共通フィールド
+interface MealTaskBase {
   id: string;
   reservationId: string;
   guestName: string;
@@ -592,8 +599,6 @@ export interface MealTask {
   guestCount: number;
   dietaryRestrictions: DietaryRestriction[];
   dietaryNotes: string | null;
-  mealStatus: MealStatus;
-  needsCheck: boolean; // 再確認要フラグ
   assignedStaffId: string | null;
   priority: "normal" | "high" | "urgent";
   isAnniversaryRelated: boolean;
@@ -601,6 +606,22 @@ export interface MealTask {
   completedAt: string | null;
   createdAt: string;
 }
+
+// 配膳タスクの状態（型安全な状態遷移）
+// - 進行中（preparing/serving）: needsCheckを設定可能
+// - 完了（completed）: needsCheckは必ずfalse（再確認不要）
+type MealTaskInProgress = MealTaskBase & {
+  mealStatus: "preparing" | "serving";
+  needsCheck: boolean;
+};
+
+type MealTaskCompleted = MealTaskBase & {
+  mealStatus: "completed";
+  needsCheck: false;
+};
+
+// 配膳タスクインターフェース（discriminated union）
+export type MealTask = MealTaskInProgress | MealTaskCompleted;
 
 // QR注文通知タイプ
 export type OrderType = "drink" | "menu_change" | "timing_change" | "other";

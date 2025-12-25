@@ -156,7 +156,7 @@ export const mockMealTasks: MealTask[] = [
     dietaryRestrictions: [],
     dietaryNotes: null,
     mealStatus: "completed",
-    needsCheck: true,
+    needsCheck: false,
     assignedStaffId: "STF006",
     priority: "normal",
     isAnniversaryRelated: false,
