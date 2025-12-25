@@ -5,23 +5,11 @@ import {
   mockTasks,
   mockDailyStats,
   getStaffById,
-  getReservationById,
   getRoomName,
 } from "../../data/mock";
-import { ROOM_TYPE_LABELS, TASK_CATEGORY_LABELS, type Task, type Reservation } from "../../types";
-import {
-  ReservationIcon,
-  TaskIcon,
-  GuestIcon,
-  CelebrationIcon,
-  TimelineIcon,
-  AlertIcon,
-  RoomIcon,
-  ClockIcon,
-} from "../ui/Icons";
-import { Modal } from "../ui/Modal";
-import { InlineTimeEdit } from "./shared/TimeEditForm";
-import { StaffSelector } from "../shared/StaffSelector";
+import { TASK_CATEGORY_LABELS, type Task, type Reservation } from "../../types";
+import { ReservationIcon, TaskIcon, GuestIcon, CelebrationIcon, AlertIcon } from "../ui/Icons";
+import { TaskDetailModal } from "../shared/TaskDetailModal";
 
 // Status Badge Component
 const StatusBadge = ({ status, t }: { status: Task["status"]; t: (key: string) => string }) => {
@@ -139,127 +127,6 @@ const ReservationRow = ({
   );
 };
 
-// Task Detail Modal Component
-const TaskDetailModal = ({
-  task,
-  isOpen,
-  onClose,
-  t,
-  onTimeChange,
-  onAssigneeChange,
-}: {
-  task: Task | null;
-  isOpen: boolean;
-  onClose: () => void;
-  t: (key: string) => string;
-  onTimeChange?: (taskId: string, newTime: string) => void;
-  onAssigneeChange?: (taskId: string, staffId: string | null) => void;
-}) => {
-  if (!task) return null;
-
-  const reservation = getReservationById(task.reservationId);
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("taskDetail.title")} size="md">
-      <div className="space-y-4">
-        {/* Task Title and Status */}
-        <div>
-          <h3 className="text-lg font-display font-semibold text-[var(--sumi)]">{task.title}</h3>
-          <div className="flex items-center gap-2 mt-2">
-            <StatusBadge status={task.status} t={t} />
-            <PriorityBadge priority={task.priority} t={t} />
-            {task.isAnniversaryRelated && (
-              <span className="badge badge-anniversary">
-                <CelebrationIcon size={12} />
-                {t("taskDetail.anniversaryRelated")}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Task Info */}
-        <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[rgba(45,41,38,0.06)]">
-          <div className="flex items-center gap-2 text-sm">
-            <ClockIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">{t("taskDetail.scheduledTime")}:</span>
-            {onTimeChange ? (
-              <InlineTimeEdit
-                value={task.scheduledTime}
-                onTimeChange={(newTime) => onTimeChange(task.id, newTime)}
-              />
-            ) : (
-              <span className="font-medium">{task.scheduledTime}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <RoomIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">{t("taskDetail.room")}:</span>
-            <span className="font-medium">{getRoomName(task.roomId)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <TaskIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">{t("taskDetail.category")}:</span>
-            <span className="font-medium">{TASK_CATEGORY_LABELS[task.category]}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <TimelineIcon size={16} className="text-[var(--nezumi)]" />
-            <span className="text-[var(--nezumi)]">{t("taskDetail.duration")}:</span>
-            <span className="font-medium">
-              {task.estimatedDuration}
-              {t("taskDetail.minutes")}
-            </span>
-          </div>
-        </div>
-
-        {/* Description */}
-        {task.description && (
-          <div>
-            <p className="text-xs text-[var(--nezumi)] mb-1">{t("taskDetail.description")}</p>
-            <p className="text-sm text-[var(--sumi-light)]">{task.description}</p>
-          </div>
-        )}
-
-        {/* Assigned Staff */}
-        <div>
-          <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.assignee")}</p>
-          <StaffSelector
-            value={task.assignedStaffId}
-            onChange={(staffId) => onAssigneeChange?.(task.id, staffId)}
-            showUnassigned
-            ariaLabel="担当者を選択"
-          />
-        </div>
-
-        {/* Guest Info */}
-        {reservation && (
-          <div>
-            <p className="text-xs text-[var(--nezumi)] mb-2">{t("taskDetail.guestInfo")}</p>
-            <div className="p-3 bg-[var(--shironeri-warm)] rounded">
-              <p className="font-medium">{reservation.guestName}</p>
-              <p className="text-sm text-[var(--nezumi)]">
-                {reservation.numberOfGuests}
-                {t("dashboard.guestCount")} ・ {ROOM_TYPE_LABELS[reservation.roomType]}
-              </p>
-              {reservation.anniversary && (
-                <div className="mt-2 p-2 bg-[rgba(184,134,11,0.1)] rounded">
-                  <p className="text-sm text-[var(--kincha)] font-medium">
-                    {reservation.anniversary.type === "birthday"
-                      ? t("anniversary.birthday")
-                      : t("anniversary.weddingAnniversary")}
-                  </p>
-                  <p className="text-xs text-[var(--sumi-light)]">
-                    {reservation.anniversary.description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
-};
-
 // Task Row Component
 interface TaskRowProps {
   task: Task;
@@ -337,16 +204,23 @@ export const Dashboard = () => {
     setIsDetailModalOpen(true);
   };
 
-  const handleTimeChange = (taskId: string, newTime: string) => {
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, scheduledTime: newTime } : t)));
-    // Also update the selected task if it's the one being edited
-    setSelectedTask((prev) => (prev?.id === taskId ? { ...prev, scheduledTime: newTime } : prev));
+  const handleTaskUpdate = (
+    taskId: string,
+    updates: { scheduledTime: string; assignedStaffId: string | null },
+  ) => {
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, ...updates } : task)));
+    // Update selectedTask to reflect changes
+    if (selectedTask?.id === taskId) {
+      setSelectedTask({ ...selectedTask, ...updates });
+    }
   };
 
-  const handleAssigneeChange = (taskId: string, staffId: string | null) => {
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, assignedStaffId: staffId } : t)));
-    // Also update the selected task if it's the one being edited
-    setSelectedTask((prev) => (prev?.id === taskId ? { ...prev, assignedStaffId: staffId } : prev));
+  const handleNotesChange = (taskId: string, notes: string) => {
+    setTasks((prev) => prev.map((task) => (task.id === taskId ? { ...task, notes } : task)));
+    // Update selectedTask to reflect changes
+    if (selectedTask?.id === taskId) {
+      setSelectedTask({ ...selectedTask, notes });
+    }
   };
 
   const todayReservations = mockReservations.filter(
@@ -507,9 +381,9 @@ export const Dashboard = () => {
         task={selectedTask}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+        onSave={handleTaskUpdate}
+        onNotesChange={handleNotesChange}
         t={t}
-        onTimeChange={handleTimeChange}
-        onAssigneeChange={handleAssigneeChange}
       />
     </div>
   );
