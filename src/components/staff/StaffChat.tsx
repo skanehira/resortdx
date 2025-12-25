@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { Staff, ChatRoom, ChatMessage } from "../../types";
-import {
-  mockChatMessages,
-  getChatRoomsByStaff,
-  getMessagesByChatRoom,
-  getUnreadCountByRoom,
-  getLastMessageByRoom,
-  getDMPartnerId,
-  mockStaff,
-} from "../../data/mock";
+import { mockChatMessages, getChatRoomsByStaff, getDMPartnerId, mockStaff } from "../../data/mock";
 import { MessageIcon, PlusIcon, SendIcon, ArrowLeftIcon, UserIcon, CheckIcon } from "../ui/Icons";
 import { Modal } from "../ui/Modal";
 
@@ -22,12 +14,18 @@ interface ChatRoomItemProps {
   currentStaffId: string;
   isSelected: boolean;
   onClick: () => void;
+  lastMessage: ChatMessage | undefined;
+  unreadCount: number;
 }
 
-const ChatRoomItem = ({ room, currentStaffId, isSelected, onClick }: ChatRoomItemProps) => {
-  const lastMessage = getLastMessageByRoom(room.id);
-  const unreadCount = getUnreadCountByRoom(room.id, currentStaffId);
-
+const ChatRoomItem = ({
+  room,
+  currentStaffId,
+  isSelected,
+  onClick,
+  lastMessage,
+  unreadCount,
+}: ChatRoomItemProps) => {
   // DM相手の名前を取得
   const getDisplayName = (): string => {
     if (room.type === "group") return room.name || "グループ";
@@ -297,8 +295,40 @@ export const StaffChat = ({ currentStaff }: StaffChatProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selectedRoomId]);
 
+  // チャットを開いたら未読をクリア
+  useEffect(() => {
+    if (!selectedRoomId) return;
+
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.chatRoomId === selectedRoomId && !msg.readBy.includes(currentStaff.id)) {
+          return { ...msg, readBy: [...msg.readBy, currentStaff.id] };
+        }
+        return msg;
+      }),
+    );
+  }, [selectedRoomId, currentStaff.id]);
+
+  // ルームの未読数を取得
+  const getUnreadCount = (roomId: string): number => {
+    return messages.filter(
+      (msg) => msg.chatRoomId === roomId && !msg.readBy.includes(currentStaff.id),
+    ).length;
+  };
+
+  // ルームの最後のメッセージを取得
+  const getLastMessage = (roomId: string): ChatMessage | undefined => {
+    const roomMsgs = messages.filter((msg) => msg.chatRoomId === roomId);
+    if (roomMsgs.length === 0) return undefined;
+    return roomMsgs.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime())[0];
+  };
+
   const selectedRoom = selectedRoomId ? chatRooms.find((r) => r.id === selectedRoomId) : null;
-  const roomMessages = selectedRoomId ? getMessagesByChatRoom(selectedRoomId) : [];
+  const roomMessages = selectedRoomId
+    ? messages
+        .filter((msg) => msg.chatRoomId === selectedRoomId)
+        .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
+    : [];
 
   // メッセージ送信
   const handleSendMessage = () => {
@@ -523,6 +553,8 @@ export const StaffChat = ({ currentStaff }: StaffChatProps) => {
                 currentStaffId={currentStaff.id}
                 isSelected={selectedRoomId === room.id}
                 onClick={() => setSelectedRoomId(room.id)}
+                lastMessage={getLastMessage(room.id)}
+                unreadCount={getUnreadCount(room.id)}
               />
             ))}
           </div>
@@ -532,7 +564,7 @@ export const StaffChat = ({ currentStaff }: StaffChatProps) => {
   );
 
   return (
-    <div className="h-[calc(100vh-4rem)] bg-white">
+    <div className="h-full pb-20 bg-white">
       {selectedRoomId ? renderChatView() : renderRoomList()}
 
       {/* New Chat Modal */}
