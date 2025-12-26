@@ -326,6 +326,7 @@ export type AdminPage =
   | "celebration"
   | "task_history"
   | "staff_messages"
+  | "guest_messages"
   | "settings";
 
 export interface FilterState {
@@ -882,6 +883,49 @@ export interface StaffMessage {
     repliedAt: string;
     repliedBy: string;
   } | null;
+}
+
+// === Guest Request Types (ゲストリクエスト) ===
+
+export type GuestRequestType =
+  | "checkout"
+  | "no_cleaning"
+  | "amenity"
+  | "towel"
+  | "meal"
+  | "celebration"
+  | "other";
+
+export const GUEST_REQUEST_TYPE_LABELS: Record<GuestRequestType, string> = {
+  checkout: "チェックアウト時間変更",
+  no_cleaning: "清掃不要",
+  amenity: "アメニティ追加",
+  towel: "タオル追加",
+  meal: "お食事リクエスト",
+  celebration: "お祝い追加要望",
+  other: "その他ご要望",
+};
+
+export type GuestRequestStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+export interface GuestRequest {
+  id: string;
+  roomId: string;
+  guestName: string;
+  requestType: GuestRequestType;
+  content: string;
+  status: GuestRequestStatus;
+  createdAt: string;
+  readAt?: string | null;
+  // スタッフからの返信
+  reply?: {
+    content: string;
+    repliedAt: string;
+    repliedBy: string;
+  } | null;
+  // 対応完了情報
+  completedAt?: string | null;
+  completedBy?: string | null;
 }
 
 // === Shuttle Message Types (送迎メッセージング) ===

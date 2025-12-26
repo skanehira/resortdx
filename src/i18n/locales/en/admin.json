@@ -8,6 +8,8 @@
     "meal": "Meal Service",
     "celebration": "Celebrations",
     "taskHistory": "Task Management",
+    "staffMessages": "Staff Messages",
+    "guestMessages": "Guest Messages",
     "settings": "Settings",
     "toStaff": "Staff View",
     "toAdmin": "Admin View"
@@ -224,5 +226,13 @@
     "pickup": "Pickup",
     "celebration": "Celebration",
     "turndown": "Turndown"
+  },
+  "staffMessages": {
+    "title": "Staff Messages",
+    "description": "View messages and help requests from staff"
+  },
+  "guestMessages": {
+    "title": "Guest Messages",
+    "description": "View requests and inquiries from guests"
   }
 }

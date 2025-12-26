@@ -6,6 +6,8 @@ import type {
   UnifiedTask,
   UnifiedTaskStatus,
   StaffMessage,
+  GuestRequest,
+  GuestRequestStatus,
   MealStatus,
   ShuttleStatus,
   CelebrationItemCheck,
@@ -24,6 +26,7 @@ import { CelebrationManagement } from "./components/admin/CelebrationManagement"
 import { TaskHistory } from "./components/admin/TaskHistory";
 import { Settings } from "./components/admin/Settings";
 import { StaffMessagesAdmin } from "./components/admin/StaffMessagesAdmin";
+import { GuestMessagesAdmin } from "./components/admin/GuestMessagesAdmin";
 import { LoginPage } from "./components/auth/LoginPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UnifiedTaskList } from "./components/staff/UnifiedTaskList";
@@ -40,6 +43,7 @@ import {
   mockStaff,
   mockUnifiedTasks,
   mockStaffMessages,
+  mockGuestRequests,
   roomAmenitiesMap,
   roomEquipmentMap,
   mockStaffNotes,
@@ -61,6 +65,7 @@ import {
   HelpIcon,
   TimelineIcon,
   NoteIcon,
+  UserIcon,
 } from "./components/ui/Icons";
 import { HelpRequestModal } from "./components/staff/modals/HelpRequestModal";
 import { UserMenu } from "./components/ui/UserMenu";
@@ -90,7 +95,16 @@ const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) =
     { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
     { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
     { page: "celebration", labelKey: "nav.celebration", icon: <CakeIcon /> },
-    { page: "staff_messages", labelKey: "nav.staffMessages", icon: <MessageIcon /> },
+    {
+      page: "staff_messages",
+      labelKey: "nav.staffMessages",
+      icon: <MessageIcon />,
+    },
+    {
+      page: "guest_messages",
+      labelKey: "nav.guestMessages",
+      icon: <UserIcon />,
+    },
     { page: "settings", labelKey: "nav.settings", icon: <SettingsIcon /> },
   ];
 
@@ -253,6 +267,7 @@ const AdminPages = () => {
   // 管理者用の状態管理
   const [messages, setMessages] = useState<StaffMessage[]>(mockStaffMessages);
   const [unifiedTasks] = useState<UnifiedTask[]>(mockUnifiedTasks);
+  const [guestRequests, setGuestRequests] = useState<GuestRequest[]>(mockGuestRequests);
 
   const getCurrentPage = (): AdminPage => {
     const path = location.pathname;
@@ -262,6 +277,7 @@ const AdminPages = () => {
     if (path.includes("celebration")) return "celebration";
     if (path.includes("task_history")) return "task_history";
     if (path.includes("staff_messages")) return "staff_messages";
+    if (path.includes("guest_messages")) return "guest_messages";
     if (path.includes("settings")) return "settings";
     return "dashboard";
   };
@@ -301,6 +317,56 @@ const AdminPages = () => {
     );
   }, []);
 
+  // ゲストリクエストに返信
+  const handleReplyGuestRequest = useCallback(
+    (requestId: string, reply: string) => {
+      setGuestRequests((prev) =>
+        prev.map((req) =>
+          req.id === requestId
+            ? {
+                ...req,
+                readAt: req.readAt || new Date().toISOString(),
+                reply: {
+                  content: reply,
+                  repliedAt: new Date().toISOString(),
+                  repliedBy: currentUser?.name || "管理者",
+                },
+              }
+            : req,
+        ),
+      );
+    },
+    [currentUser?.name],
+  );
+
+  // ゲストリクエストを既読にする
+  const handleMarkGuestRequestAsRead = useCallback((requestId: string) => {
+    setGuestRequests((prev) =>
+      prev.map((req) =>
+        req.id === requestId ? { ...req, readAt: new Date().toISOString() } : req,
+      ),
+    );
+  }, []);
+
+  // ゲストリクエストのステータスを更新
+  const handleUpdateGuestRequestStatus = useCallback(
+    (requestId: string, status: GuestRequestStatus) => {
+      setGuestRequests((prev) =>
+        prev.map((req) =>
+          req.id === requestId
+            ? {
+                ...req,
+                status,
+                completedAt: status === "completed" ? new Date().toISOString() : null,
+                completedBy: status === "completed" ? currentUser?.id : null,
+              }
+            : req,
+        ),
+      );
+    },
+    [currentUser?.id],
+  );
+
   return (
     <AdminLayout currentPage={getCurrentPage()} onPageChange={handlePageChange}>
       <Routes>
@@ -318,6 +384,17 @@ const AdminPages = () => {
               tasks={unifiedTasks}
               onReplyMessage={handleReplyMessage}
               onMarkAsRead={handleMarkAsRead}
+            />
+          }
+        />
+        <Route
+          path="guest_messages"
+          element={
+            <GuestMessagesAdmin
+              requests={guestRequests}
+              onReplyRequest={handleReplyGuestRequest}
+              onMarkAsRead={handleMarkGuestRequestAsRead}
+              onUpdateStatus={handleUpdateGuestRequestStatus}
             />
           }
         />

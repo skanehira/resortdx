@@ -90,6 +90,14 @@ export type { RoomCleaningInfo } from "./unifiedTasks";
 // === Staff Messages ===
 export { mockStaffMessages, getMessagesByStaff, getUnreadMessages } from "./messages";
 
+// === Guest Requests ===
+export {
+  mockGuestRequests,
+  getGuestRequestsByRoom,
+  getUnreadGuestRequests,
+  getPendingGuestRequests,
+} from "./messages";
+
 // === Statistics ===
 export { mockDailyStats } from "./stats";
 
