@@ -23,6 +23,7 @@ import { MealManagement } from "./components/admin/MealManagement";
 import { CelebrationManagement } from "./components/admin/CelebrationManagement";
 import { TaskHistory } from "./components/admin/TaskHistory";
 import { Settings } from "./components/admin/Settings";
+import { StaffMessagesAdmin } from "./components/admin/StaffMessagesAdmin";
 import { LoginPage } from "./components/auth/LoginPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { UnifiedTaskList } from "./components/staff/UnifiedTaskList";
@@ -89,6 +90,7 @@ const Sidebar = ({ currentPage, onPageChange, isOpen, onClose }: SidebarProps) =
     { page: "shuttle", labelKey: "nav.shuttle", icon: <ShuttleIcon /> },
     { page: "meal", labelKey: "nav.meal", icon: <DiningIcon /> },
     { page: "celebration", labelKey: "nav.celebration", icon: <CakeIcon /> },
+    { page: "staff_messages", labelKey: "nav.staffMessages", icon: <MessageIcon /> },
     { page: "settings", labelKey: "nav.settings", icon: <SettingsIcon /> },
   ];
 
@@ -246,6 +248,11 @@ const AdminLayout = ({ children, currentPage, onPageChange }: AdminLayoutProps) 
 const AdminPages = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser } = useAuth();
+
+  // 管理者用の状態管理
+  const [messages, setMessages] = useState<StaffMessage[]>(mockStaffMessages);
+  const [unifiedTasks] = useState<UnifiedTask[]>(mockUnifiedTasks);
 
   const getCurrentPage = (): AdminPage => {
     const path = location.pathname;
@@ -254,6 +261,7 @@ const AdminPages = () => {
     if (path.includes("meal")) return "meal";
     if (path.includes("celebration")) return "celebration";
     if (path.includes("task_history")) return "task_history";
+    if (path.includes("staff_messages")) return "staff_messages";
     if (path.includes("settings")) return "settings";
     return "dashboard";
   };
@@ -261,6 +269,37 @@ const AdminPages = () => {
   const handlePageChange = (page: AdminPage) => {
     navigate(`/admin/${page}`);
   };
+
+  // メッセージに返信
+  const handleReplyMessage = useCallback(
+    (messageId: string, reply: string) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                readAt: msg.readAt || new Date().toISOString(),
+                reply: {
+                  content: reply,
+                  repliedAt: new Date().toISOString(),
+                  repliedBy: currentUser?.name || "管理者",
+                },
+              }
+            : msg,
+        ),
+      );
+    },
+    [currentUser?.name],
+  );
+
+  // メッセージを既読にする
+  const handleMarkAsRead = useCallback((messageId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, readAt: new Date().toISOString() } : msg,
+      ),
+    );
+  }, []);
 
   return (
     <AdminLayout currentPage={getCurrentPage()} onPageChange={handlePageChange}>
@@ -271,6 +310,17 @@ const AdminPages = () => {
         <Route path="meal" element={<MealManagement />} />
         <Route path="celebration" element={<CelebrationManagement />} />
         <Route path="task_history" element={<TaskHistory />} />
+        <Route
+          path="staff_messages"
+          element={
+            <StaffMessagesAdmin
+              messages={messages}
+              tasks={unifiedTasks}
+              onReplyMessage={handleReplyMessage}
+              onMarkAsRead={handleMarkAsRead}
+            />
+          }
+        />
         <Route path="settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="dashboard" replace />} />
       </Routes>

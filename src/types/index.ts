@@ -325,6 +325,7 @@ export type AdminPage =
   | "meal"
   | "celebration"
   | "task_history"
+  | "staff_messages"
   | "settings";
 
 export interface FilterState {

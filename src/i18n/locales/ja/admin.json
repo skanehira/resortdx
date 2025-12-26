@@ -8,6 +8,7 @@
     "meal": "配膳管理",
     "celebration": "記念日管理",
     "taskHistory": "タスク管理",
+    "staffMessages": "スタッフ連絡",
     "settings": "設定",
     "toStaff": "スタッフ画面へ",
     "toAdmin": "管理画面へ"
@@ -224,5 +225,9 @@
     "pickup": "送迎",
     "celebration": "記念日",
     "turndown": "ターンダウン"
+  },
+  "staffMessages": {
+    "title": "スタッフ連絡",
+    "description": "スタッフからのメッセージ・ヘルプリクエストを確認できます"
   }
 }
